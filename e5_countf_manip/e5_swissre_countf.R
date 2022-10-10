@@ -1,7 +1,7 @@
 ## clear workspace
 rm(list = ls()) 
 
-source("process.R")
+source("../process.R")
 
 options(download.file.method="libcurl")
 
@@ -34,7 +34,7 @@ pacman::p_load('ggplot2',         # plotting
 ## read in data: 
 # if importing from Qualtrics: (i) export data as numeric values, and (ii) delete rows 2 and 3 of the .csv file.
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path)) #set working directory to current directory
-d <- read.csv('e1_data.csv')
+d <- read.csv('e6_data.csv')
 
 ## explore dataframe: 
 dim <- dim(d) # will provide dimensions of the dataframe by row [1] and column [2]
@@ -46,133 +46,51 @@ summary(d)
 d <- subset(d, (d$att1 == 2 & d$att2 == 2))
 dim(d) # number of participants should decrease after attention exclusions
 
-## split up dataframes between AV and HDV conditions
-## this is necessary before comprehension exclusions
-d_AV <- subset(d, (d$FL_4_DO == "FL_39"))
-d_HDV <- subset(d, (d$FL_4_DO == "FL_40"))
-
 ## get number of participants BEFORE exclusions: 
 n_original <- dim(d)[1] # extracting number of rows only, not columns
-n_original_AV <- dim(d_AV)[1]
-n_original_HDV <- dim(d_HDV)[1]
 
 ## perform comprehension exclusions separately for AV and HDV: 
 # this will remove responses from the dataframe that failed comprehension checks (i.e., "2")
-d_AV <- subset(d_AV, (d_AV$comp1 == 1 & d_AV$comp_accident == 1))
-d_HDV <- subset(d_HDV, (d_HDV$comp1 == "" & d_HDV$comp_accident == 1))
-dim(d_AV) # number of participants should decrease after comprehension exclusions
-dim(d_HDV)
+d <- subset(d, (d$comp1 == 1 & d$comp_accident == 1 & d$countf_cat != 0))
+dim(d) # number of participants should decrease after comprehension exclusions
 
 ## get number of participants AFTER exclusions: 
-n_final_AV <- dim(d_AV)[1] # extracting number of rows only, not columns
-n_final_HDV <- dim(d_HDV)[1]
-n_final <- n_final_AV + n_final_HDV
+n_final <- dim(d)[1] # extracting number of rows only, not columns
 percent_excluded <- (n_original - n_final)/n_original
-percent_excluded_AV <- (n_original_AV - n_final_AV)/n_original_AV 
-percent_excluded_HDV <- (n_original_HDV - n_final_HDV)/n_original_HDV
 
 ## remove unused columns according to condition
-d_AV <- d_AV[-c(21:28,36:50)]
-d_HDV <- d_HDV[-c(21:35,36:43)]
 
 ## get mean age and gender:
 # mean(d$age, na.rm = TRUE) # removing NAs from the dataframe before computing mean 
 mean_age = mean(as.numeric(d$age), na.rm = TRUE)
 table(d$gender)[1]/sum(table(d$gender))
 
+d <- d[,19:48]
 
-
-## ================================================================================================================
-##                                                    SUBSETTING                 
-## ================================================================================================================
-
-## define new data frame to extract pre-processed data into:
-d_subset <- array(dim=c(n_final, 12))
-colnames(d_subset) <- c('cond', 'vA_sue', 'vB_sue', 'defective', 'negligence', 'counterfactual', 
-                        'capability', 'fault', 'superhuman', 'comp1', 'comp2', 'familiarity')
-d_subset <- as.data.frame(d_subset, stringsAsFactors=FALSE) 
-
-## extract good data from the middle part of raw data in AV:
-for(i in 1:n_final_AV) {
-  curr <- d_AV[i,21:31][!is.na(d_AV[i,21:31])] # for a given row, get only the non-NA values
-  d_subset[i,2:12] <- as.numeric(curr[curr!= ""]) # and only the non-empty values
-  d_subset[i,1] <- d_AV[i,37][!is.na(d_AV[i,37])]
-}
-
-## extract good data from the middle part of raw data in HDV:
-for(i in 1:n_final_HDV) {
-  j = i+n_final_AV
-  curr <- d_HDV[i,21:31][!is.na(d_HDV[i,21:31])] # for a given row, get only the non-NA values
-  d_subset[j,2:12] <- as.numeric(curr) # and only the non-empty values
-  d_subset[j,1] <- d_HDV[i,37][!is.na(d_HDV[i,37])]
-}
-
-## just to keep the df names straight for next section
-d_merged <- d_subset
-
-## merge good data with first and last halves of raw data:
-# this is the new dataframe to work with.
-
-# d_merged <- cbind(d_subset, d[,44:49])
-# d_merged$ss <- 1:dim(d_merged)[1]     
-# 
-# intention_mat <- array(0,dim=c(dim(d_merged)[1],2)) #get cronbach's alpha, then average items
-# intention_mat[,1] <- d_merged$intention1
-# intention_mat[,2] <- d_merged$intention2
-# cronbach.alpha(intention_mat) 
-# 
-# d_merged$intention <- rowMeans(intention_mat) 
-
-names(d_merged)[names(d_merged) == 'defective'] <- 'defec'
-names(d_merged)[names(d_merged) == 'negligence'] <- 'negl'
-names(d_merged)[names(d_merged) == 'counterfactual'] <- 'countf'
-names(d_merged)[names(d_merged) == 'capability'] <- 'capab'
-names(d_merged)[names(d_merged) == 'superhuman'] <- 'superh'
-
-d_merged$countf2 <- d_merged$countf
-
-d_merged$cond_name <- ifelse(d_merged$cond=="FL_39", "av", "human")
-d_merged$cond_n <- ifelse(d_merged$cond_name=="av", 1, 2)
 
 ## ================================================================================================================
 ##                                             DATA ANALYSIS - T-TESTS               
 ## ================================================================================================================
 
 ## run t-tests to compare friendship, partnership, and willingness to pay measures between conditions:
-table(d_merged$con) #give us table of number of people in each condition - want to have equal number of people in each condition
+table(d$countf_cat)[1]/sum(table(d$countf_cat))
+table(d$countf_cat)[2]/sum(table(d$countf_cat))
+table(d$countf_cat)[3]/sum(table(d$countf_cat))
+tapply(d$vB_sue_AV_1, d$countf_cat, mean)
+
+d <- subset(d, d$countf_cat != 3)
 
 ## (1) SUE VEHICLE A DRIVER
-vA_sue_T <- t.test(vA_sue ~ cond_name, data = d_merged, paired = FALSE) 
-print("VA_SUE:")
-print(paste("statistic: ", vA_sue_T$statistic))
-print(paste("p-value: ", vA_sue_T$p.value))
-print(paste("AV mean: ", mean(d_merged[d_merged$cond_name == "av",]$vA_sue)))
-print(paste("Human mean: ", mean(d_merged[d_merged$cond_name == "human",]$vA_sue)))
-print(paste("AV std: ", sd(d_merged[d_merged$cond_name == "av",]$vA_sue)))
-print(paste("Human std: ", sd(d_merged[d_merged$cond_name == "human",]$vA_sue)))
-print("")
+vA_sue_T <- t.test(vA_sue_AV_1 ~ countf_cat, data = d, paired = FALSE) 
+vA_sue_T
 
 ## (2) SUE VEHICLE B MANUFACTURER
-vB_sue_T <- t.test(vB_sue ~ cond_name, data = d_merged, paired = FALSE) 
-print("VB_SUE:")
-print(paste("statistic: ", vB_sue_T$statistic))
-print(paste("p-value: ", vB_sue_T$p.value))
-print(paste("AV mean: ", mean(d_merged[d_merged$cond_name == "av",]$vB_sue)))
-print(paste("Human mean: ", mean(d_merged[d_merged$cond_name == "human",]$vB_sue)))
-print(paste("AV std: ", sd(d_merged[d_merged$cond_name == "av",]$vB_sue)))
-print(paste("Human std: ", sd(d_merged[d_merged$cond_name == "human",]$vB_sue)))
-print("")
+vB_sue_T <- t.test(vB_sue_AV_1 ~ countf_cat, data = d, paired = FALSE) 
+vB_sue_T
 
 ## (3) VEHICLE B DEFECTIVE
-defective_T <- t.test(defec ~ cond_name, data = d_merged, paired = FALSE) 
-print("DEFECTIVE:")
-print(paste("statistic: ", defective_T$statistic))
-print(paste("p-value: ", defective_T$p.value))
-print(paste("AV mean: ", mean(d_merged[d_merged$cond_name == "av",]$defec)))
-print(paste("Human mean: ", mean(d_merged[d_merged$cond_name == "human",]$defec)))
-print(paste("AV std: ", sd(d_merged[d_merged$cond_name == "av",]$defec)))
-print(paste("Human std: ", sd(d_merged[d_merged$cond_name == "human",]$defec)))
-print("")
+defective_T <- t.test(defective_AV_1 ~ countf_cat, data = d, paired = FALSE) 
+defective_T
 
 ## (4) VEHICLE B NEGLIGENT
 negligent_T <- t.test(negl ~ cond_name, data = d_merged, paired = FALSE) 
@@ -247,11 +165,17 @@ summary(mod)
 ##                                             MEDIATION ANALYSIS              
 ## ================================================================================================================
 
+# SINGLE MEDIATION
+process(data = d, y = "vB_sue_AV_1", x = "countf_cat",
+        m ="defective_AV_1", model = 4, effsize =1, total =1, stand =1,
+        contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
+
 d_merged$cond_n <- ifelse(d_merged$cond=="FL_39", 1, 2)
+
 
 # MODERATED SERIAL MEDIATION
 # 87 = B path, 83 = A path, 91 = center path
-process(data = d_merged, y = "vB_sue", x = "cond_n", 
+process(data = d_merged, y = "vB_sue_AV_1", x = "cond_n", 
         m =c("countf", "defec"), w = "superh", model = 83, effsize =1, total =1, stand =1, 
         contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
 
@@ -260,24 +184,18 @@ process(data = d_merged, y = "vB_sue", x = "cond_n",
         m =c("countf", "capab"), model = 6, effsize =1, total =1, stand =1, 
         contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
 
-# SINGLE MEDIATION
-process(data = d_merged, y = "capab", x = "cond_n",
-        m ="countf", model = 4, effsize =1, total =1, stand =1,
-        contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
-
-
 ## ================================================================================================================
 ##                                              PLOTTING MAIN FIGURES                 
 ## ================================================================================================================
 
 ## plotting all measures
 ## FL39 --> AV condition; FL40 --> HDV condition
-t_names <- c("AV", "HDV")
+t_names <- c("Yes", "No")
 
 ## (1) Sue VA driver
-p1_1 <- ggplot(d_merged,aes(x=factor(cond_name),y=vA_sue)) +  
+p1_1 <- ggplot(d,aes(x=factor(countf_cat),y=vA_sue_AV_1)) +  
   theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
-  geom_signif(comparisons = list(c("av", "human")), annotation="NS", textsize = 3)
+  geom_signif(comparisons = list(c(1, 2)), annotation="***", textsize = 5.5)
 
 p1_1 <- p1_1 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
   scale_x_discrete(labels=t_names) +
@@ -299,9 +217,9 @@ p1_1 <- p1_1 + theme(text = element_text(size=16),panel.grid.major = element_bla
 p1_1
 
 ## (2) Sue VB manufacturer
-p1_2 <- ggplot(d_merged,aes(x=factor(cond_name),y=vB_sue)) +  
+p1_2 <- ggplot(d,aes(x=factor(countf_cat),y=vB_sue_AV_1)) +  
   theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
-  geom_signif(comparisons = list(c("av", "human")), annotation="^", textsize = 5.5)
+  geom_signif(comparisons = list(c(1, 2)), annotation="***", textsize = 5.5)
 
 p1_2 <- p1_2 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
   scale_x_discrete(labels=t_names) +
@@ -323,9 +241,9 @@ p1_2 <- p1_2 + theme(text = element_text(size=16),panel.grid.major = element_bla
 p1_2
 
 ## (3) VB Defective
-p1_3 <- ggplot(d_merged,aes(x=factor(cond_name),y=defec)) +  
+p1_3 <- ggplot(d,aes(x=factor(countf_cat),y=defective_AV_1)) +  
   theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
-  geom_signif(comparisons = list(c("av", "human")), annotation="***", textsize = 5.5)
+  geom_signif(comparisons = list(c(1, 2)), annotation="***", textsize = 5.5)
 
 p1_3 <- p1_3 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
   scale_x_discrete(labels=t_names) +
@@ -349,7 +267,7 @@ p1_3
 ## (4) VB Negligence
 p1_4 <- ggplot(d_merged,aes(x=factor(cond_name),y=negl)) +  
   theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
-  geom_signif(comparisons = list(c("av", "human")), annotation="***", textsize = 5.5)
+  geom_signif(comparisons = list(c(1, 2)), annotation="***", textsize = 5.5)
 
 p1_4 <- p1_4 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
   scale_x_discrete(labels=t_names) +
@@ -373,7 +291,7 @@ p1_4
 ## (5) Counterfactual
 p1_5 <- ggplot(d_merged,aes(x=factor(cond_name),y=countf)) +  
   theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
-  geom_signif(comparisons = list(c("av", "human")), annotation="***", textsize = 5.5)
+  geom_signif(comparisons = list(c(1, 2)), annotation="***", textsize = 5.5)
 
 p1_5 <- p1_5 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
   scale_x_discrete(labels=t_names) +
@@ -468,9 +386,15 @@ p1_8
 
 ## PLOT SERIES 1
 dev.new(width=13,height=6,noRStudioGD = TRUE)
-figure1 <- ggarrange(p1_1, p1_2, p1_3, p1_4, p1_5, p1_6, p1_7, p1_8, nrow=2,ncol=4,common.legend = TRUE, legend="top", vjust = 1.0, hjust=0.5) 
+figure1 <- ggarrange(p1_1, p1_3, p1_3, p1_4, p1_5, p1_6, p1_7, p1_8, nrow=2,ncol=4,common.legend = TRUE, legend="top", vjust = 1.0, hjust=0.5) 
 annotate_figure(figure1,left = text_grob("Mean Rating", color="black", face ="plain",size=16, rot=90),
                 bottom = text_grob("Scenario Condition", color="black", face ="plain",size=16)) 
+
+dev.new(width=13,height=6,noRStudioGD = TRUE)
+figure1 <- ggarrange(p1_1, p1_2, p1_3, nrow=1,ncol=3,common.legend = TRUE, legend="top", vjust = 1.0, hjust=0.5) 
+annotate_figure(figure1,left = text_grob("Mean Rating", color="black", face ="plain",size=16, rot=90),
+                bottom = text_grob("Simulated Superior Human Driver", color="black", face ="plain",size=16)) 
+
 
 #figure1 <- ggarrange(p1_2, p1_3, p1_5, nrow=1,ncol=3,common.legend = TRUE, legend="top", vjust = 1.0, hjust=0.5) 
 #annotate_figure(figure1,left = text_grob("Mean Rating", color="black", face ="plain",size=16, rot=90),
@@ -479,6 +403,74 @@ annotate_figure(figure1,left = text_grob("Mean Rating", color="black", face ="pl
 plot(figure1)
 
 write.csv(d_merged, 'd_spss.csv')
+
+## ================================================================================================================
+##                                                  Comparing E6 to E1-3                
+## ================================================================================================================
+
+#1=AV, 2=HDV
+
+d$exp <- 6
+names(d)[names(d)=="countf_cat"] <- "cond_n"
+names(d)[names(d)=="vB_sue_AV_1"] <- "vB_sue"
+
+d1 <- read.csv('e1_processed.csv')
+d1$exp <- 1
+d2 <- read.csv('e2_processed.csv')
+d2$exp <- 2
+d3 <- read.csv('e3_processed.csv')
+d3$exp <- 3
+
+colnames(d[,c(12,14)])
+colnames(d1[,c(16,4)])
+colnames(d2[,c(17,4)])
+colnames(d3[,c(17,4)])
+
+d_final <- rbind(d[,c(12,14,31)], d1[,c(16,4,17)], d2[,c(17,4,19)], d3[,c(17,4,18)])
+
+d_f_s <- subset(d_final, d_final$cond_n == 1)
+
+mod_6_1 <- t.test(d_f_s$vB_sue[d_f_s$exp==6], d_f_s$vB_sue[d_f_s$exp==1], paired = FALSE)  
+mod_6_1
+
+mod_6_2 <- t.test(d_f_s$vB_sue[d_f_s$exp==6], d_f_s$vB_sue[d_f_s$exp==2], paired = FALSE)  
+mod_6_2
+
+mod_6_3 <- t.test(d_f_s$vB_sue[d_f_s$exp==6], d_f_s$vB_sue[d_f_s$exp==3], paired = FALSE)  
+mod_6_3
+
+t_names <- c("Exp1", "Exp2", "Exp3", "Exp4")
+
+p1_2_1 <- ggplot(d_f_s,aes(x=factor(exp),y=vB_sue)) +  
+  theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
+  geom_signif(y_position = c(99,99), comparisons = list(c(1, 4)), annotation="***", textsize = 6)+
+  geom_signif(y_position = c(106,106), comparisons = list(c(2, 4)), annotation="***", textsize = 6)+
+  geom_signif(y_position = c(116,116), comparisons = list(c(3, 4)), annotation="***", textsize = 6)+
+  coord_cartesian(ylim=c(1,125)) 
+
+p1_2_1 <- p1_2_1 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
+  scale_x_discrete(labels=t_names) +
+  ggtitle("Sue Veh. B Manufacturer") +
+  
+  xlab ("Experiment") + ylab ("Mean Rating") +
+  theme_classic() +
+  theme(axis.text.x = element_text(size=15)) +
+  theme(axis.title = element_text(size=18)) +
+  theme(axis.text.y = element_text(size=14)) +
+  theme(plot.title = element_text(size=20, hjust=0.5)) +
+  geom_violin(width=0.9, alpha=0.38, size=0.75) +  
+  geom_sina(alpha=0.6, size=0.95, color = "#999999") +
+  stat_summary(fun.data = "mean_se", color = "black", 
+               size=0.4, fun.args = list(mult = 1), 
+               position = position_dodge(width = 0.9)) +
+  stat_summary(fun.data = "mean_se", color = "black", 
+               fun.args = list(mult = 1), 
+               position = position_dodge(width = 0.9),
+               geom="errorbar", width = 0.2)
+p1_2_1
+
+dev.new(width=11,height=6,noRStudioGD = TRUE)
+p1_2_1
 
 ## ================================================================================================================
 ##                                                  END OF ANALYSIS                 
