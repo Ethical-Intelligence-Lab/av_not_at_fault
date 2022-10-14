@@ -168,7 +168,7 @@ print(paste("AV std: ", sd(d_merged[d_merged$cond_name == "av",]$vA_sue)))
 print(paste("Human std: ", sd(d_merged[d_merged$cond_name == "human",]$vA_sue)))
 print("")
 
-## (2) SUE VEHICLE B MANUFACTURER
+## (2) SUE VEHICLE B MANUFACTURER VS SUE HDV MANUFACTURER
 vB_sue_T <- t.test(vB_sue ~ cond_name, data = d_merged, paired = FALSE) 
 print("VB_SUE:")
 print(paste("statistic: ", vB_sue_T$statistic))
@@ -335,11 +335,11 @@ p1_1
 ## (2) Sue VB manufacturer
 p1_2 <- ggplot(d_merged,aes(x=factor(cond_name),y=vB_sue)) +  
   theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
-  geom_signif(comparisons = list(c("av", "human")), annotation="**", textsize = 5.5)
+  geom_signif(comparisons = list(c("av", "human")), annotation="***", textsize = 5.5)
 
 p1_2 <- p1_2 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
   scale_x_discrete(labels=t_names) +
-  ggtitle("Sue Veh. B Manufacturer") +
+  ggtitle("Sue AV Manufacturer vs HDV Driver") +
   xlab ("") + ylab ("") +
   theme_classic() +
   theme(axis.text.x = element_text(size=12)) +
