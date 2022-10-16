@@ -294,7 +294,7 @@ fit <- process(data = d_merged, y = "vB_sue", x = "cond",
 ## ================================================================================================================
 
 ## plotting all measures
-t_names <- c("AV", "Human")
+t_names <- c("AV", "HDV")
 title_size <- 16
 axis_size <- 16
 

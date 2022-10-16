@@ -34,7 +34,7 @@ pacman::p_load('ggplot2',         # plotting
 ## read in data: 
 # if importing from Qualtrics: (i) export data as numeric values, and (ii) delete rows 2 and 3 of the .csv file.
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path)) #set working directory to current directory
-d <- read.csv('e6_data.csv')
+d <- read.csv('e5_data.csv')
 
 ## explore dataframe: 
 dim <- dim(d) # will provide dimensions of the dataframe by row [1] and column [2]
@@ -92,63 +92,6 @@ vB_sue_T
 defective_T <- t.test(defective_AV_1 ~ countf_cat, data = d, paired = FALSE) 
 defective_T
 
-## (4) VEHICLE B NEGLIGENT
-negligent_T <- t.test(negl ~ cond_name, data = d_merged, paired = FALSE) 
-print("NEGLIGENT:")
-print(paste("statistic: ", negligent_T$statistic))
-print(paste("p-value: ", negligent_T$p.value))
-print(paste("AV mean: ", mean(d_merged[d_merged$cond_name == "av",]$negl)))
-print(paste("Human mean: ", mean(d_merged[d_merged$cond_name == "human",]$negl)))
-print(paste("AV std: ", sd(d_merged[d_merged$cond_name == "av",]$negl)))
-print(paste("Human std: ", sd(d_merged[d_merged$cond_name == "human",]$negl)))
-print("")
-
-## (5) COUNTERFACTUAL
-counterfactual_T <- t.test(countf ~ cond_name, data = d_merged, paired = FALSE) 
-print("COUNTERFACTUAL:")
-print(paste("statistic: ", counterfactual_T$statistic))
-print(paste("p-value: ", counterfactual_T$p.value))
-print(paste("AV mean: ", mean(d_merged[d_merged$cond_name == "av",]$countf)))
-print(paste("Human mean: ", mean(d_merged[d_merged$cond_name == "human",]$countf)))
-print(paste("AV std: ", sd(d_merged[d_merged$cond_name == "av",]$countf)))
-print(paste("Human std: ", sd(d_merged[d_merged$cond_name == "human",]$countf)))
-print("")
-
-## (6) CAPABILITY
-capability_T <- t.test(capab ~ cond_name, data = d_merged, paired = FALSE)
-print("CAPABILITY:")
-print(paste("statistic: ", capability_T$statistic))
-print(paste("p-value: ", capability_T$p.value))
-print(paste("AV mean: ", mean(d_merged[d_merged$cond_name == "av",]$capab)))
-print(paste("Human mean: ", mean(d_merged[d_merged$cond_name == "human",]$capab)))
-print(paste("AV std: ", sd(d_merged[d_merged$cond_name == "av",]$capab)))
-print(paste("Human std: ", sd(d_merged[d_merged$cond_name == "human",]$capab)))
-print("")
-
-## (7) FAULT
-fault_T <- t.test(fault ~ cond_name, data = d_merged, paired = FALSE) 
-print("FAULT:")
-print(paste("statistic: ", fault_T$statistic))
-print(paste("p-value: ", fault_T$p.value))
-print(paste("AV mean: ", mean(d_merged[d_merged$cond_name == "av",]$fault)))
-print(paste("Human mean: ", mean(d_merged[d_merged$cond_name == "human",]$fault)))
-print(paste("AV std: ", sd(d_merged[d_merged$cond_name == "av",]$fault)))
-print(paste("Human std: ", sd(d_merged[d_merged$cond_name == "human",]$fault)))
-print("")
-
-## (8) SUPERHUMAN
-superhuman_T <- t.test(superh ~ cond_name, data = d_merged, paired = FALSE) 
-print("SUPERHUMAN:")
-print(paste("statistic: ", superhuman_T$statistic))
-print(paste("p-value: ", superhuman_T$p.value))
-print(paste("AV mean: ", mean(d_merged[d_merged$cond_name == "av",]$superh)))
-print(paste("Human mean: ", mean(d_merged[d_merged$cond_name == "human",]$superh)))
-print(paste("AV std: ", sd(d_merged[d_merged$cond_name == "av",]$superh)))
-print(paste("Human std: ", sd(d_merged[d_merged$cond_name == "human",]$superh)))
-print("")
-
-superhuman_T
-
 cor(d_merged[,2:9])
 
 mod <- lm(countf ~ cond_name*superh, data = d_merged)
@@ -202,9 +145,9 @@ p1_1 <- p1_1 + theme(text = element_text(size=16),panel.grid.major = element_bla
   ggtitle("Sue Veh. A Driver") +
   xlab ("") + ylab ("") +
   theme_classic() +
-  theme(axis.text.x = element_text(size=12)) +
-  theme(axis.text.y = element_text(size=10)) +
-  theme(plot.title = element_text(size=12, hjust=0.5)) +
+  theme(axis.text.x = element_text(size=15)) +
+  theme(axis.text.y = element_text(size=14)) +
+  theme(plot.title = element_text(size=16, hjust=0.5)) +
   geom_violin(width=0.9, alpha=0.38, size=0.75) +  
   geom_sina(alpha=0.6, size=0.95, color = "#999999") +
   stat_summary(fun.data = "mean_se", color = "black", 
@@ -226,9 +169,9 @@ p1_2 <- p1_2 + theme(text = element_text(size=16),panel.grid.major = element_bla
   ggtitle("Sue Veh. B Manufacturer") +
   xlab ("") + ylab ("") +
   theme_classic() +
-  theme(axis.text.x = element_text(size=12)) +
-  theme(axis.text.y = element_text(size=10)) +
-  theme(plot.title = element_text(size=12, hjust=0.5)) +
+  theme(axis.text.x = element_text(size=15)) +
+  theme(axis.text.y = element_text(size=14)) +
+  theme(plot.title = element_text(size=16, hjust=0.5)) +
   geom_violin(width=0.9, alpha=0.38, size=0.75) +  
   geom_sina(alpha=0.6, size=0.95, color = "#999999") +
   stat_summary(fun.data = "mean_se", color = "black", 
@@ -250,9 +193,9 @@ p1_3 <- p1_3 + theme(text = element_text(size=16),panel.grid.major = element_bla
   ggtitle("Veh. B Defective") +
   xlab ("") + ylab ("") +
   theme_classic() +
-  theme(axis.text.x = element_text(size=12)) +
-  theme(axis.text.y = element_text(size=10)) +
-  theme(plot.title = element_text(size=12, hjust=0.5)) +
+  theme(axis.text.x = element_text(size=15)) +
+  theme(axis.text.y = element_text(size=14)) +
+  theme(plot.title = element_text(size=16, hjust=0.5)) +
   geom_violin(width=0.9, alpha=0.38, size=0.75) +  
   geom_sina(alpha=0.6, size=0.95, color = "#999999") +
   stat_summary(fun.data = "mean_se", color = "black", 
@@ -264,125 +207,6 @@ p1_3 <- p1_3 + theme(text = element_text(size=16),panel.grid.major = element_bla
                geom="errorbar", width = 0.2)
 p1_3
 
-## (4) VB Negligence
-p1_4 <- ggplot(d_merged,aes(x=factor(cond_name),y=negl)) +  
-  theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
-  geom_signif(comparisons = list(c(1, 2)), annotation="***", textsize = 5.5)
-
-p1_4 <- p1_4 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
-  scale_x_discrete(labels=t_names) +
-  ggtitle("Veh. B Negligence") +
-  xlab ("") + ylab ("") +
-  theme_classic() +
-  theme(axis.text.x = element_text(size=12)) +
-  theme(axis.text.y = element_text(size=10)) +
-  theme(plot.title = element_text(size=12, hjust=0.5)) +
-  geom_violin(width=0.9, alpha=0.38, size=0.75) +  
-  geom_sina(alpha=0.6, size=0.95, color = "#999999") +
-  stat_summary(fun.data = "mean_se", color = "black", 
-               size=0.4, fun.args = list(mult = 1), 
-               position = position_dodge(width = 0.9)) +
-  stat_summary(fun.data = "mean_se", color = "black", 
-               fun.args = list(mult = 1), 
-               position = position_dodge(width = 0.9),
-               geom="errorbar", width = 0.2)
-p1_4
-
-## (5) Counterfactual
-p1_5 <- ggplot(d_merged,aes(x=factor(cond_name),y=countf)) +  
-  theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
-  geom_signif(comparisons = list(c(1, 2)), annotation="***", textsize = 5.5)
-
-p1_5 <- p1_5 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
-  scale_x_discrete(labels=t_names) +
-  ggtitle("Counterfactual") +
-  xlab ("") + ylab ("") +
-  theme_classic() +
-  theme(axis.text.x = element_text(size=12)) +
-  theme(axis.text.y = element_text(size=10)) +
-  theme(plot.title = element_text(size=12, hjust=0.5)) +
-  geom_violin(width=0.9, alpha=0.38, size=0.75) +  
-  geom_sina(alpha=0.6, size=0.95, color = "#999999") +
-  stat_summary(fun.data = "mean_se", color = "black", 
-               size=0.4, fun.args = list(mult = 1), 
-               position = position_dodge(width = 0.9)) +
-  stat_summary(fun.data = "mean_se", color = "black", 
-               fun.args = list(mult = 1), 
-               position = position_dodge(width = 0.9),
-               geom="errorbar", width = 0.2)
-p1_5
-
-## (6) Capability to Avoid
-p1_6 <- ggplot(d_merged,aes(x=factor(cond_name),y=capab)) +  
-  theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
-  geom_signif(comparisons = list(c("av", "human")), annotation="***", textsize = 5.5)
-
-p1_6 <- p1_6 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
-  scale_x_discrete(labels=t_names) +
-  ggtitle("Capability to Avoid") +
-  xlab ("") + ylab ("") +
-  theme_classic() +
-  theme(axis.text.x = element_text(size=12)) +
-  theme(axis.text.y = element_text(size=10)) +
-  theme(plot.title = element_text(size=12, hjust=0.5)) +
-  geom_violin(width=0.9, alpha=0.38, size=0.75) +  
-  geom_sina(alpha=0.6, size=0.95, color = "#999999") +
-  stat_summary(fun.data = "mean_se", color = "black", 
-               size=0.4, fun.args = list(mult = 1), 
-               position = position_dodge(width = 0.9)) +
-  stat_summary(fun.data = "mean_se", color = "black", 
-               fun.args = list(mult = 1), 
-               position = position_dodge(width = 0.9),
-               geom="errorbar", width = 0.2)
-p1_6
-
-## (7) Avoid when not at fault
-p1_7 <- ggplot(d_merged,aes(x=factor(cond_name),y=fault)) +  
-  theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
-  geom_signif(comparisons = list(c("av", "human")), annotation="***", textsize = 5.5)
-
-p1_7 <- p1_7 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
-  scale_x_discrete(labels=t_names) +
-  ggtitle("Avoid when not at fault") +
-  xlab ("") + ylab ("") +
-  theme_classic() +
-  theme(axis.text.x = element_text(size=12)) +
-  theme(axis.text.y = element_text(size=10)) +
-  theme(plot.title = element_text(size=12, hjust=0.5)) +
-  geom_violin(width=0.9, alpha=0.38, size=0.75) +  
-  geom_sina(alpha=0.6, size=0.95, color = "#999999") +
-  stat_summary(fun.data = "mean_se", color = "black", 
-               size=0.4, fun.args = list(mult = 1), 
-               position = position_dodge(width = 0.9)) +
-  stat_summary(fun.data = "mean_se", color = "black", 
-               fun.args = list(mult = 1), 
-               position = position_dodge(width = 0.9),
-               geom="errorbar", width = 0.2)
-p1_7
-
-## (8) Superhuman
-p1_8 <- ggplot(d_merged,aes(x=factor(cond_name),y=superh)) +  
-  theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
-  geom_signif(comparisons = list(c("av", "human")), annotation="*", textsize = 5.5)
-
-p1_8 <- p1_8 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
-  scale_x_discrete(labels=t_names) +
-  ggtitle("Superhuman") +
-  xlab ("") + ylab ("") +
-  theme_classic() +
-  theme(axis.text.x = element_text(size=12)) +
-  theme(axis.text.y = element_text(size=10)) +
-  theme(plot.title = element_text(size=12, hjust=0.5)) +
-  geom_violin(width=0.9, alpha=0.38, size=0.75) +  
-  geom_sina(alpha=0.6, size=0.95, color = "#999999") +
-  stat_summary(fun.data = "mean_se", color = "black", 
-               size=0.4, fun.args = list(mult = 1), 
-               position = position_dodge(width = 0.9)) +
-  stat_summary(fun.data = "mean_se", color = "black", 
-               fun.args = list(mult = 1), 
-               position = position_dodge(width = 0.9),
-               geom="errorbar", width = 0.2)
-p1_8
 
 ## PLOT SERIES 1
 dev.new(width=13,height=6,noRStudioGD = TRUE)
@@ -392,8 +216,8 @@ annotate_figure(figure1,left = text_grob("Mean Rating", color="black", face ="pl
 
 dev.new(width=13,height=6,noRStudioGD = TRUE)
 figure1 <- ggarrange(p1_1, p1_2, p1_3, nrow=1,ncol=3,common.legend = TRUE, legend="top", vjust = 1.0, hjust=0.5) 
-annotate_figure(figure1,left = text_grob("Mean Rating", color="black", face ="plain",size=16, rot=90),
-                bottom = text_grob("Simulated Superior Human Driver", color="black", face ="plain",size=16)) 
+annotate_figure(figure1,left = text_grob("Mean Rating", color="black", face ="plain",size=20, rot=90),
+                bottom = text_grob("Counterfactual is Superior Human Driver", color="black", face ="plain",size=20)) 
 
 
 #figure1 <- ggarrange(p1_2, p1_3, p1_5, nrow=1,ncol=3,common.legend = TRUE, legend="top", vjust = 1.0, hjust=0.5) 

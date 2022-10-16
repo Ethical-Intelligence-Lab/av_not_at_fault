@@ -509,10 +509,12 @@ figure1 <- ggarrange(p1_1, p1_2, p1_3, p1_4, p1_5, p1_6, p1_7, p1_8, nrow=2,ncol
 annotate_figure(figure1,left = text_grob("Mean Rating", color="black", face ="plain",size=16, rot=90),
                 bottom = text_grob("Scenario Condition", color="black", face ="plain",size=16)) 
 
-dev.new(width=13,height=6,noRStudioGD = TRUE)
-figure1 <- ggarrange(p1_1, p1_2, p1_5, p1_3, nrow=2,ncol=2,common.legend = TRUE, legend="top", vjust = 1.0, hjust=0.5) 
-annotate_figure(figure1,left = text_grob("Mean Rating", color="black", face ="plain",size=20, rot=90),
+## PLOT SERIES 1
+dev.new(width=12,height=4,noRStudioGD = TRUE)
+figure1 <- ggarrange(p1_1, p1_2, p1_5, p1_3, nrow=1,ncol=4,common.legend = TRUE, legend="top", vjust = 1.0, hjust=0.5) 
+annotate_figure(figure1,left = text_grob("Mean Agreement", color="black", face ="plain",size=20, rot=90),
                 bottom = text_grob("Vehicle Type", color="black", face ="plain",size=20)) 
+
 
 dev.new(width=8,height=3,noRStudioGD = TRUE)
 figure1 <- ggarrange(p1_1, p1_2, nrow=1,ncol=2,common.legend = TRUE, legend="top", vjust = 1.0, hjust=0.5) 

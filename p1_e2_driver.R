@@ -284,6 +284,7 @@ process(data = d_merged, y = "capab", x = "cond_n",
 ## plotting all measures
 ## FL39 --> AV condition; FL40 --> HDV condition
 t_names <- c("AV", "HDV")
+title_size <- 20
 
 ## Make box plot
 ## create box-plot visual
@@ -332,6 +333,7 @@ p1_1 <- p1_1 + theme(text = element_text(size=16),panel.grid.major = element_bla
                geom="errorbar", width = 0.2)
 p1_1
 
+dev.new(width=8,height=3,noRStudioGD = TRUE)
 ## (2) Sue VB manufacturer
 p1_2 <- ggplot(d_merged,aes(x=factor(cond_name),y=vB_sue)) +  
   theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
@@ -342,9 +344,10 @@ p1_2 <- p1_2 + theme(text = element_text(size=16),panel.grid.major = element_bla
   ggtitle("Sue AV Manufacturer vs HDV Driver") +
   xlab ("") + ylab ("") +
   theme_classic() +
-  theme(axis.text.x = element_text(size=12)) +
-  theme(axis.text.y = element_text(size=10)) +
-  theme(plot.title = element_text(size=12, hjust=0.5)) +
+  theme(axis.text.x = element_text(size=15)) +
+  theme(axis.text.y = element_text(size=15)) +
+  theme(axis.title = element_text(size=18)) +
+  theme(plot.title = element_text(size=title_size, hjust=0.5)) +
   geom_violin(width=0.9, alpha=0.38, size=0.75) +  
   geom_sina(alpha=0.6, size=0.95, color = "#999999") +
   stat_summary(fun.data = "mean_se", color = "black", 
