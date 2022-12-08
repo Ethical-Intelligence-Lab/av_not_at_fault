@@ -110,19 +110,6 @@ for(i in 1:n_final_HDV) {
 ## just to keep the df names straight for next section
 d_merged <- d_subset
 
-## merge good data with first and last halves of raw data:
-# this is the new dataframe to work with.
-
-# d_merged <- cbind(d_subset, d[,44:49])
-# d_merged$ss <- 1:dim(d_merged)[1]     
-# 
-# intention_mat <- array(0,dim=c(dim(d_merged)[1],2)) #get cronbach's alpha, then average items
-# intention_mat[,1] <- d_merged$intention1
-# intention_mat[,2] <- d_merged$intention2
-# cronbach.alpha(intention_mat) 
-# 
-# d_merged$intention <- rowMeans(intention_mat) 
-
 names(d_merged)[names(d_merged) == 'defective'] <- 'defec'
 names(d_merged)[names(d_merged) == 'negligence'] <- 'negl'
 names(d_merged)[names(d_merged) == 'counterfactual'] <- 'countf'
@@ -130,7 +117,6 @@ names(d_merged)[names(d_merged) == 'capability'] <- 'capab'
 names(d_merged)[names(d_merged) == 'superhuman'] <- 'superh'
 
 d_merged$countf2 <- d_merged$countf
-
 d_merged$cond_name <- ifelse(d_merged$cond=="FL_39", "av", "human")
 d_merged$cond_n <- ifelse(d_merged$cond_name=="av", 1, 2)
 
@@ -471,14 +457,15 @@ p1_8
 ## PLOT SERIES 1
 dev.new(width=12,height=4,noRStudioGD = TRUE)
 figure1 <- ggarrange(p1_1, p1_2, p1_5, p1_3, nrow=1,ncol=4,common.legend = TRUE, legend="top", vjust = 1.0, hjust=0.5) 
-annotate_figure(figure1,left = text_grob("Mean Agreement", color="black", face ="plain",size=20, rot=90),
-                bottom = text_grob("Vehicle Type", color="black", face ="plain",size=20)) 
+figure1 <- annotate_figure(figure1,left = text_grob("Mean Agreement", color="black", face ="plain",size=16, rot=90),
+                bottom = text_grob("Vehicle Type", color="black", face ="plain",size=16)) 
 
 figure1 <- ggarrange(p1_2, p1_3, p1_5, nrow=1,ncol=3,common.legend = TRUE, legend="top", vjust = 1.0, hjust=0.5) 
 annotate_figure(figure1,left = text_grob("Mean Rating", color="black", face ="plain",size=16, rot=90),
                 bottom = text_grob("Scenario Condition", color="black", face ="plain",size=16)) 
 
 plot(figure1)
+figure1
 
 write.csv(d_merged, 'd_spss.csv')
 

@@ -211,14 +211,13 @@ p1_3
 ## PLOT SERIES 1
 dev.new(width=13,height=6,noRStudioGD = TRUE)
 figure1 <- ggarrange(p1_1, p1_3, p1_3, p1_4, p1_5, p1_6, p1_7, p1_8, nrow=2,ncol=4,common.legend = TRUE, legend="top", vjust = 1.0, hjust=0.5) 
-annotate_figure(figure1,left = text_grob("Mean Agreement", color="black", face ="plain",size=16, rot=90),
+annotate_figure(figure1,left = text_grob("Mean Rating", color="black", face ="plain",size=16, rot=90),
                 bottom = text_grob("Scenario Condition", color="black", face ="plain",size=16)) 
 
 dev.new(width=13,height=6,noRStudioGD = TRUE)
 figure1 <- ggarrange(p1_1, p1_2, p1_3, nrow=1,ncol=3,common.legend = TRUE, legend="top", vjust = 1.0, hjust=0.5) 
-figure1 <- annotate_figure(figure1,left = text_grob("Mean Agreement", color="black", face ="plain",size=16, rot=90),
-                bottom = text_grob("Counterfactual is Superior Human Driver", color="black", face ="plain",size=16))
-plot(figure1)
+annotate_figure(figure1,left = text_grob("Mean Rating", color="black", face ="plain",size=20, rot=90),
+                bottom = text_grob("Counterfactual is Superior Human Driver", color="black", face ="plain",size=20)) 
 
 
 #figure1 <- ggarrange(p1_2, p1_3, p1_5, nrow=1,ncol=3,common.legend = TRUE, legend="top", vjust = 1.0, hjust=0.5) 
@@ -277,7 +276,7 @@ p1_2_1 <- p1_2_1 + theme(text = element_text(size=16),panel.grid.major = element
   scale_x_discrete(labels=t_names) +
   ggtitle("Sue Veh. B Manufacturer") +
   
-  xlab ("Experiment") + ylab ("Mean Agreement") +
+  xlab ("Experiment") + ylab ("Mean Rating") +
   theme_classic() +
   theme(axis.text.x = element_text(size=15)) +
   theme(axis.title = element_text(size=18)) +

@@ -34,7 +34,7 @@ pacman::p_load('ggplot2',         # plotting
 ## read in data: 
 # if importing from Qualtrics: (i) export data as numeric values, and (ii) delete rows 2 and 3 of the .csv file.
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path)) #set working directory to current directory
-d <- read.csv('p1_e3_data.csv')
+d <- read.csv('p1_e2_data.csv')
 
 ## explore dataframe: 
 dim(d) # will provide dimensions of the dataframe by row [1] and column [2]
@@ -90,8 +90,8 @@ colnames(d_subset) <- c('cond', 'vA_sue', 'vB_sue', 'defective', 'negligence', '
 d_subset <- as.data.frame(d_subset, stringsAsFactors=FALSE) 
 
 ## assess moderator data from both AV and HDV
-moderator_mat = rbind(d_AV[31:45], d_HDV[31:45])
-# moderator_mat$av_trust_5_1 = 100 - as.numeric(moderator_mat$av_trust_5_1)
+moderator_mat = rbind(d_AV[31:35], d_HDV[31:35])
+moderator_mat$av_trust_5_1 = 100 - as.numeric(moderator_mat$av_trust_5_1)
 moderator_mat <- data.frame(sapply(moderator_mat, as.numeric))
 cb_alpha = cronbach.alpha(moderator_mat)
 
@@ -105,7 +105,7 @@ for(i in 1:n_final_AV) {
   curr <- d_AV[i,21:31][!is.na(d_AV[i,21:31])] # for a given row, get only the non-NA values
   d_subset[i,2:12] <- as.numeric(curr[curr!= ""]) # and only the non-empty values
   d_subset[i,13] <- moderator_mat$moderator[i]
-  d_subset[i,1] <- d_AV[i,53][!is.na(d_AV[i,53])]
+  d_subset[i,1] <- d_AV[i,43][!is.na(d_AV[i,43])]
 }
 
 ## extract good data from the middle part of raw data in HDV:
@@ -114,7 +114,7 @@ for(i in 1:n_final_HDV) {
   curr <- d_HDV[i,21:31][!is.na(d_HDV[i,21:31])] # for a given row, get only the non-NA values
   d_subset[j,2:12] <- as.numeric(curr) # and only the non-empty values
   d_subset[j,13] <- moderator_mat$moderator[j]
-  d_subset[j,1] <- d_HDV[i,53][!is.na(d_HDV[i,53])]
+  d_subset[j,1] <- d_HDV[i,43][!is.na(d_HDV[i,43])]
 }
 
 ## just to keep the df names straight for next section
@@ -136,7 +136,6 @@ d_merged$cond_n <- ifelse(d_merged$cond_name=="av", 1, 2)
 ## ================================================================================================================
 
 table(d_merged$con) #give us table of number of people in each condition - want to have equal number of people in each condition
-
 
 ## (1) SUE VEHICLE A DRIVER
 vA_sue_T <- t.test(vA_sue ~ cond_name, data = d_merged, paired = FALSE) 
@@ -226,14 +225,29 @@ print(paste("AV std: ", sd(d_merged[d_merged$cond_name == "av",]$superh)))
 print(paste("Human std: ", sd(d_merged[d_merged$cond_name == "human",]$superh)))
 print("")
 
-superhuman_T
-
 cor(d_merged[,2:9])
+
+#
+d_merged$trust_level <- ifelse(d_merged$mod>50, "High trust in AVs", "Low trust in AVs")
+d_merged$trust_level_n <- ifelse(d_merged$trust_level=="High trust in AVs",2,1)
+
 
 mod <- lm(countf ~ cond_name*superh, data = d_merged)
 summary(mod)
 
-write.csv(d_merged, 'e3_processed.csv')
+mod_med <- median(d_merged$mod)
+median(d_merged$mod)
+
+d_merged$cond_name <- as.factor(d_merged$cond_name)
+d_merged$trust_level <- as.factor(d_merged$trust_level)
+
+mod <- aov(countf ~ trust_level*cond_name, data=d_merged)
+summary(mod)
+
+t.test(d_merged$countf[d_merged$cond_name=="av" & d_merged$trust_level_n == 1], d_merged$countf[d_merged$cond_name=="av" & d_merged$trust_level_n == 2], paired=FALSE)
+t.test(d_merged$countf[d_merged$cond_name=="human" & d_merged$trust_level_n == 1], d_merged$countf[d_merged$cond_name=="human" & d_merged$trust_level_n == 2], paired=FALSE)
+
+write.csv(d_merged, 'e2_processed.csv')
 
 ## ================================================================================================================
 ##                                             MEDIATION ANALYSIS              
@@ -244,14 +258,14 @@ d_merged$cond_n <- ifelse(d_merged$cond=="FL_39", 1, 2)
 # MODERATED SERIAL MEDIATION
 # 87 = B path, 83 = A path, 91 = center path
 process(data = d_merged, y = "vB_sue", x = "cond_n", 
-        m =c("countf", "defec"), w = "superh", model = 83, effsize =1, total =1, stand =1, 
+        m =c("countf", "defec"), w = "mod", model = 83, effsize =1, total =1, stand =1, 
         contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
 
 # SERIAL MEDIATION
 process(data = d_merged, y = "vB_sue", x = "cond_n", 
         m =c("countf", "capab"), model = 6, effsize =1, total =1, stand =1, 
         contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
-
+ 
 # SINGLE MEDIATION
 process(data = d_merged, y = "capab", x = "cond_n",
         m ="countf", model = 4, effsize =1, total =1, stand =1,
@@ -265,12 +279,42 @@ process(data = d_merged, y = "capab", x = "cond_n",
 ## plotting all measures
 ## FL39 --> AV condition; FL40 --> HDV condition
 t_names <- c("AV", "HDV")
-title_size <- 
+title_size <- 16
+
+#plot trust v. counterfactual relationship
+dev.new(width=13,height=6,noRStudioGD = TRUE)
+
+p1_0 <- ggplot(d_merged,aes(x=factor(cond_name),y=countf, fill=trust_level)) +  
+  theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
+  geom_signif(y_position = 105.00, xmin = c(0.8,1.8), xmax = c(1.2,2.2), annotation = c("***","ns"), textsize=7.5)
+
+
+p1_0 <- p1_0 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
+  scale_x_discrete(labels=t_names) +
+  ggtitle("Agreement Wt. Counterfactual") +
+  xlab ("Vehicle Type") + ylab ("Mean Rating") +
+  theme_classic() +
+  theme(axis.text.x = element_text(size=15)) +
+  theme(axis.text.y = element_text(size=15)) +
+  theme(axis.title = element_text(size=18)) +
+  theme(plot.title = element_text(size=title_size, hjust=0.5)) +
+  theme(legend.text=element_text(size=14),legend.title=element_text(size=14), legend.position="top")+
+  labs(fill='')+
+  geom_violin(width=0.9, alpha=0.38, size=0.75) +  
+  geom_sina(alpha=0.6, size=0.95, color = "#999999") +
+  stat_summary(fun.data = "mean_se", color = "black", 
+               size=0.4, fun.args = list(mult = 1), 
+               position = position_dodge(width = 0.9)) +
+  stat_summary(fun.data = "mean_se", color = "black", 
+               fun.args = list(mult = 1), 
+               position = position_dodge(width = 0.9),
+               geom="errorbar", width = 0.2)
+p1_0
 
 ## (1) Sue VA driver
 p1_1 <- ggplot(d_merged,aes(x=factor(cond_name),y=vA_sue)) +  
   theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
-  geom_signif(comparisons = list(c("av", "human")), annotation="**", textsize = 5.5)
+  geom_signif(comparisons = list(c("av", "human")), annotation="^", textsize = 5.5)
 
 p1_1 <- p1_1 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
   scale_x_discrete(labels=t_names) +
@@ -279,7 +323,7 @@ p1_1 <- p1_1 + theme(text = element_text(size=16),panel.grid.major = element_bla
   theme_classic() +
   theme(axis.text.x = element_text(size=12)) +
   theme(axis.text.y = element_text(size=10)) +
-  theme(plot.title = element_text(size=12, hjust=0.5)) +
+  theme(plot.title = element_text(size=title_size, hjust=0.5)) +
   geom_violin(width=0.9, alpha=0.38, size=0.75) +  
   geom_sina(alpha=0.6, size=0.95, color = "#999999") +
   stat_summary(fun.data = "mean_se", color = "black", 
@@ -294,7 +338,7 @@ p1_1
 ## (2) Sue VB manufacturer
 p1_2 <- ggplot(d_merged,aes(x=factor(cond_name),y=vB_sue)) +  
   theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
-  geom_signif(comparisons = list(c("av", "human")), annotation="NS", textsize = 3)
+  geom_signif(comparisons = list(c("av", "human")), annotation="**", textsize = 5.5)
 
 p1_2 <- p1_2 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
   scale_x_discrete(labels=t_names) +
@@ -303,7 +347,7 @@ p1_2 <- p1_2 + theme(text = element_text(size=16),panel.grid.major = element_bla
   theme_classic() +
   theme(axis.text.x = element_text(size=12)) +
   theme(axis.text.y = element_text(size=10)) +
-  theme(plot.title = element_text(size=12, hjust=0.5)) +
+  theme(plot.title = element_text(size=title_size, hjust=0.5)) +
   geom_violin(width=0.9, alpha=0.38, size=0.75) +  
   geom_sina(alpha=0.6, size=0.95, color = "#999999") +
   stat_summary(fun.data = "mean_se", color = "black", 
@@ -327,7 +371,7 @@ p1_3 <- p1_3 + theme(text = element_text(size=16),panel.grid.major = element_bla
   theme_classic() +
   theme(axis.text.x = element_text(size=12)) +
   theme(axis.text.y = element_text(size=10)) +
-  theme(plot.title = element_text(size=12, hjust=0.5)) +
+  theme(plot.title = element_text(size=title_size, hjust=0.5)) +
   geom_violin(width=0.9, alpha=0.38, size=0.75) +  
   geom_sina(alpha=0.6, size=0.95, color = "#999999") +
   stat_summary(fun.data = "mean_se", color = "black", 
@@ -342,7 +386,7 @@ p1_3
 ## (4) VB Negligence
 p1_4 <- ggplot(d_merged,aes(x=factor(cond_name),y=negl)) +  
   theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
-  geom_signif(comparisons = list(c("av", "human")), annotation="***", textsize = 5.5)
+  geom_signif(comparisons = list(c("av", "human")), annotation="**", textsize = 5.5)
 
 p1_4 <- p1_4 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
   scale_x_discrete(labels=t_names) +
@@ -351,7 +395,7 @@ p1_4 <- p1_4 + theme(text = element_text(size=16),panel.grid.major = element_bla
   theme_classic() +
   theme(axis.text.x = element_text(size=12)) +
   theme(axis.text.y = element_text(size=10)) +
-  theme(plot.title = element_text(size=12, hjust=0.5)) +
+  theme(plot.title = element_text(size=title_size, hjust=0.5)) +
   geom_violin(width=0.9, alpha=0.38, size=0.75) +  
   geom_sina(alpha=0.6, size=0.95, color = "#999999") +
   stat_summary(fun.data = "mean_se", color = "black", 
@@ -375,7 +419,7 @@ p1_5 <- p1_5 + theme(text = element_text(size=16),panel.grid.major = element_bla
   theme_classic() +
   theme(axis.text.x = element_text(size=12)) +
   theme(axis.text.y = element_text(size=10)) +
-  theme(plot.title = element_text(size=12, hjust=0.5)) +
+  theme(plot.title = element_text(size=title_size, hjust=0.5)) +
   geom_violin(width=0.9, alpha=0.38, size=0.75) +  
   geom_sina(alpha=0.6, size=0.95, color = "#999999") +
   stat_summary(fun.data = "mean_se", color = "black", 
@@ -390,7 +434,7 @@ p1_5
 ## (6) Capability to Avoid
 p1_6 <- ggplot(d_merged,aes(x=factor(cond_name),y=capab)) +  
   theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
-  geom_signif(comparisons = list(c("av", "human")), annotation="***", textsize = 5.5)
+  geom_signif(comparisons = list(c("av", "human")), annotation="*", textsize = 5.5)
 
 p1_6 <- p1_6 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
   scale_x_discrete(labels=t_names) +
@@ -399,7 +443,7 @@ p1_6 <- p1_6 + theme(text = element_text(size=16),panel.grid.major = element_bla
   theme_classic() +
   theme(axis.text.x = element_text(size=12)) +
   theme(axis.text.y = element_text(size=10)) +
-  theme(plot.title = element_text(size=12, hjust=0.5)) +
+  theme(plot.title = element_text(size=title_size, hjust=0.5)) +
   geom_violin(width=0.9, alpha=0.38, size=0.75) +  
   geom_sina(alpha=0.6, size=0.95, color = "#999999") +
   stat_summary(fun.data = "mean_se", color = "black", 
@@ -414,7 +458,7 @@ p1_6
 ## (7) Avoid when not at fault
 p1_7 <- ggplot(d_merged,aes(x=factor(cond_name),y=fault)) +  
   theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
-  geom_signif(comparisons = list(c("av", "human")), annotation="*", textsize = 5.5)
+  geom_signif(comparisons = list(c("av", "human")), annotation="NS", textsize = 3)
 
 p1_7 <- p1_7 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
   scale_x_discrete(labels=t_names) +
@@ -423,7 +467,7 @@ p1_7 <- p1_7 + theme(text = element_text(size=16),panel.grid.major = element_bla
   theme_classic() +
   theme(axis.text.x = element_text(size=12)) +
   theme(axis.text.y = element_text(size=10)) +
-  theme(plot.title = element_text(size=12, hjust=0.5)) +
+  theme(plot.title = element_text(size=title_size, hjust=0.5)) +
   geom_violin(width=0.9, alpha=0.38, size=0.75) +  
   geom_sina(alpha=0.6, size=0.95, color = "#999999") +
   stat_summary(fun.data = "mean_se", color = "black", 
@@ -447,7 +491,7 @@ p1_8 <- p1_8 + theme(text = element_text(size=16),panel.grid.major = element_bla
   theme_classic() +
   theme(axis.text.x = element_text(size=12)) +
   theme(axis.text.y = element_text(size=10)) +
-  theme(plot.title = element_text(size=12, hjust=0.5)) +
+  theme(plot.title = element_text(size=title_size, hjust=0.5)) +
   geom_violin(width=0.9, alpha=0.38, size=0.75) +  
   geom_sina(alpha=0.6, size=0.95, color = "#999999") +
   stat_summary(fun.data = "mean_se", color = "black", 
@@ -465,12 +509,18 @@ figure1 <- ggarrange(p1_1, p1_2, p1_3, p1_4, p1_5, p1_6, p1_7, p1_8, nrow=2,ncol
 annotate_figure(figure1,left = text_grob("Mean Rating", color="black", face ="plain",size=16, rot=90),
                 bottom = text_grob("Scenario Condition", color="black", face ="plain",size=16)) 
 
+## PLOT SERIES 1
 dev.new(width=12,height=4,noRStudioGD = TRUE)
 figure1 <- ggarrange(p1_1, p1_2, p1_5, p1_3, nrow=1,ncol=4,common.legend = TRUE, legend="top", vjust = 1.0, hjust=0.5) 
-figure1 <- annotate_figure(figure1,left = text_grob("Mean Agreement", color="black", face ="plain",size=16, rot=90),
-                bottom = text_grob("Vehicle Type", color="black", face ="plain",size=16))
+annotate_figure(figure1,left = text_grob("Mean Agreement", color="black", face ="plain",size=20, rot=90),
+                bottom = text_grob("Vehicle Type", color="black", face ="plain",size=20)) 
 
-plot(figure1)
+
+dev.new(width=8,height=3,noRStudioGD = TRUE)
+figure1 <- ggarrange(p1_1, p1_2, nrow=1,ncol=2,common.legend = TRUE, legend="top", vjust = 1.0, hjust=0.5) 
+annotate_figure(figure1,left = text_grob("Mean Rating", color="black", face ="plain",size=20, rot=90),
+                bottom = text_grob("Vehicle Type", color="black", face ="plain",size=20)) 
+
 
 write.csv(d_merged, 'd_spss.csv')
 

@@ -34,10 +34,10 @@ pacman::p_load('ggplot2',         # plotting
 ## read in data: 
 # if importing from Qualtrics: (i) export data as numeric values, and (ii) delete rows 2 and 3 of the .csv file.
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path)) #set working directory to current directory
-d <- read.csv('p1_e3_data.csv')
+d <- read.csv('e1_data.csv')
 
 ## explore dataframe: 
-dim(d) # will provide dimensions of the dataframe by row [1] and column [2]
+dim <- dim(d) # will provide dimensions of the dataframe by row [1] and column [2]
 colnames(d) # will provide all column names
 summary(d)
 
@@ -76,36 +76,27 @@ d_AV <- d_AV[-c(21:28,36:50)]
 d_HDV <- d_HDV[-c(21:35,36:43)]
 
 ## get mean age and gender:
-mean_age = mean(as.numeric(d$age), na.rm = TRUE) # removing NAs from the dataframe before computing mean 
-gender = table(d$gender)[1]/sum(table(d$gender))
+# mean(d$age, na.rm = TRUE) # removing NAs from the dataframe before computing mean 
+mean_age = mean(as.numeric(d$age), na.rm = TRUE)
+table(d$gender)[1]/sum(table(d$gender))
+
+
 
 ## ================================================================================================================
 ##                                                    SUBSETTING                 
 ## ================================================================================================================
 
 ## define new data frame to extract pre-processed data into:
-d_subset <- array(dim=c(n_final, 13))
+d_subset <- array(dim=c(n_final, 12))
 colnames(d_subset) <- c('cond', 'vA_sue', 'vB_sue', 'defective', 'negligence', 'counterfactual', 
-                        'capability', 'fault', 'superhuman', 'comp1', 'comp2', 'familiarity', 'mod')
+                        'capability', 'fault', 'superhuman', 'comp1', 'comp2', 'familiarity')
 d_subset <- as.data.frame(d_subset, stringsAsFactors=FALSE) 
-
-## assess moderator data from both AV and HDV
-moderator_mat = rbind(d_AV[31:45], d_HDV[31:45])
-# moderator_mat$av_trust_5_1 = 100 - as.numeric(moderator_mat$av_trust_5_1)
-moderator_mat <- data.frame(sapply(moderator_mat, as.numeric))
-cb_alpha = cronbach.alpha(moderator_mat)
-
-#d_AV$moderator <- rowMeans(sapply(d_AV[31:35], as.numeric))
-#d_HDV$moderator <- rowMeans(d_HDV[31:35])
-
-moderator_mat$moderator <- rowMeans(moderator_mat)
 
 ## extract good data from the middle part of raw data in AV:
 for(i in 1:n_final_AV) {
   curr <- d_AV[i,21:31][!is.na(d_AV[i,21:31])] # for a given row, get only the non-NA values
   d_subset[i,2:12] <- as.numeric(curr[curr!= ""]) # and only the non-empty values
-  d_subset[i,13] <- moderator_mat$moderator[i]
-  d_subset[i,1] <- d_AV[i,53][!is.na(d_AV[i,53])]
+  d_subset[i,1] <- d_AV[i,37][!is.na(d_AV[i,37])]
 }
 
 ## extract good data from the middle part of raw data in HDV:
@@ -113,12 +104,24 @@ for(i in 1:n_final_HDV) {
   j = i+n_final_AV
   curr <- d_HDV[i,21:31][!is.na(d_HDV[i,21:31])] # for a given row, get only the non-NA values
   d_subset[j,2:12] <- as.numeric(curr) # and only the non-empty values
-  d_subset[j,13] <- moderator_mat$moderator[j]
-  d_subset[j,1] <- d_HDV[i,53][!is.na(d_HDV[i,53])]
+  d_subset[j,1] <- d_HDV[i,37][!is.na(d_HDV[i,37])]
 }
 
 ## just to keep the df names straight for next section
 d_merged <- d_subset
+
+## merge good data with first and last halves of raw data:
+# this is the new dataframe to work with.
+
+# d_merged <- cbind(d_subset, d[,44:49])
+# d_merged$ss <- 1:dim(d_merged)[1]     
+# 
+# intention_mat <- array(0,dim=c(dim(d_merged)[1],2)) #get cronbach's alpha, then average items
+# intention_mat[,1] <- d_merged$intention1
+# intention_mat[,2] <- d_merged$intention2
+# cronbach.alpha(intention_mat) 
+# 
+# d_merged$intention <- rowMeans(intention_mat) 
 
 names(d_merged)[names(d_merged) == 'defective'] <- 'defec'
 names(d_merged)[names(d_merged) == 'negligence'] <- 'negl'
@@ -135,8 +138,8 @@ d_merged$cond_n <- ifelse(d_merged$cond_name=="av", 1, 2)
 ##                                             DATA ANALYSIS - T-TESTS               
 ## ================================================================================================================
 
+## run t-tests to compare friendship, partnership, and willingness to pay measures between conditions:
 table(d_merged$con) #give us table of number of people in each condition - want to have equal number of people in each condition
-
 
 ## (1) SUE VEHICLE A DRIVER
 vA_sue_T <- t.test(vA_sue ~ cond_name, data = d_merged, paired = FALSE) 
@@ -233,7 +236,14 @@ cor(d_merged[,2:9])
 mod <- lm(countf ~ cond_name*superh, data = d_merged)
 summary(mod)
 
-write.csv(d_merged, 'e3_processed.csv')
+## cor.test(d_merged$firm_sue, d_merged$v2_sue)
+
+## cor.test(d_merged$moral, d_merged$moral, data = d_merged)
+## cor.test(d_merged$blame_av, d_merged$moral, data = d_merged)
+## cor.test(d_merged$blame_firm, d_merged$moral, data = d_merged)
+## cor.test(d_merged$blame_v2, d_merged$moral, data = d_merged)
+
+write.csv(d_merged, 'e1_processed.csv')
 
 ## ================================================================================================================
 ##                                             MEDIATION ANALYSIS              
@@ -265,12 +275,11 @@ process(data = d_merged, y = "capab", x = "cond_n",
 ## plotting all measures
 ## FL39 --> AV condition; FL40 --> HDV condition
 t_names <- c("AV", "HDV")
-title_size <- 
 
 ## (1) Sue VA driver
 p1_1 <- ggplot(d_merged,aes(x=factor(cond_name),y=vA_sue)) +  
   theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
-  geom_signif(comparisons = list(c("av", "human")), annotation="**", textsize = 5.5)
+  geom_signif(comparisons = list(c("av", "human")), annotation="NS", textsize = 3)
 
 p1_1 <- p1_1 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
   scale_x_discrete(labels=t_names) +
@@ -294,7 +303,7 @@ p1_1
 ## (2) Sue VB manufacturer
 p1_2 <- ggplot(d_merged,aes(x=factor(cond_name),y=vB_sue)) +  
   theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
-  geom_signif(comparisons = list(c("av", "human")), annotation="NS", textsize = 3)
+  geom_signif(comparisons = list(c("av", "human")), annotation="^", textsize = 5.5)
 
 p1_2 <- p1_2 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
   scale_x_discrete(labels=t_names) +
@@ -414,7 +423,7 @@ p1_6
 ## (7) Avoid when not at fault
 p1_7 <- ggplot(d_merged,aes(x=factor(cond_name),y=fault)) +  
   theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
-  geom_signif(comparisons = list(c("av", "human")), annotation="*", textsize = 5.5)
+  geom_signif(comparisons = list(c("av", "human")), annotation="***", textsize = 5.5)
 
 p1_7 <- p1_7 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
   scale_x_discrete(labels=t_names) +
@@ -460,15 +469,14 @@ p1_8 <- p1_8 + theme(text = element_text(size=16),panel.grid.major = element_bla
 p1_8
 
 ## PLOT SERIES 1
-dev.new(width=13,height=6,noRStudioGD = TRUE)
-figure1 <- ggarrange(p1_1, p1_2, p1_3, p1_4, p1_5, p1_6, p1_7, p1_8, nrow=2,ncol=4,common.legend = TRUE, legend="top", vjust = 1.0, hjust=0.5) 
-annotate_figure(figure1,left = text_grob("Mean Rating", color="black", face ="plain",size=16, rot=90),
-                bottom = text_grob("Scenario Condition", color="black", face ="plain",size=16)) 
-
 dev.new(width=12,height=4,noRStudioGD = TRUE)
 figure1 <- ggarrange(p1_1, p1_2, p1_5, p1_3, nrow=1,ncol=4,common.legend = TRUE, legend="top", vjust = 1.0, hjust=0.5) 
-figure1 <- annotate_figure(figure1,left = text_grob("Mean Agreement", color="black", face ="plain",size=16, rot=90),
-                bottom = text_grob("Vehicle Type", color="black", face ="plain",size=16))
+annotate_figure(figure1,left = text_grob("Mean Agreement", color="black", face ="plain",size=20, rot=90),
+                bottom = text_grob("Vehicle Type", color="black", face ="plain",size=20)) 
+
+figure1 <- ggarrange(p1_2, p1_3, p1_5, nrow=1,ncol=3,common.legend = TRUE, legend="top", vjust = 1.0, hjust=0.5) 
+annotate_figure(figure1,left = text_grob("Mean Rating", color="black", face ="plain",size=16, rot=90),
+                bottom = text_grob("Scenario Condition", color="black", face ="plain",size=16)) 
 
 plot(figure1)
 

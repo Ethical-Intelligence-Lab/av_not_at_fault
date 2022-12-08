@@ -279,7 +279,7 @@ process(data = d_merged, y = "capab", x = "cond_n",
 ## plotting all measures
 ## FL39 --> AV condition; FL40 --> HDV condition
 t_names <- c("AV", "HDV")
-title_size <- 16
+title_size <- 12
 
 #plot trust v. counterfactual relationship
 dev.new(width=13,height=6,noRStudioGD = TRUE)
@@ -292,12 +292,12 @@ p1_0 <- ggplot(d_merged,aes(x=factor(cond_name),y=countf, fill=trust_level)) +
 p1_0 <- p1_0 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
   scale_x_discrete(labels=t_names) +
   ggtitle("Agreement Wt. Counterfactual") +
-  xlab ("Vehicle Type") + ylab ("Mean Rating") +
+  xlab ("Vehicle Type") + ylab ("Mean Agreement") +
   theme_classic() +
   theme(axis.text.x = element_text(size=15)) +
   theme(axis.text.y = element_text(size=15)) +
   theme(axis.title = element_text(size=18)) +
-  theme(plot.title = element_text(size=title_size, hjust=0.5)) +
+  theme(plot.title = element_text(size=18, hjust=0.5)) +
   theme(legend.text=element_text(size=14),legend.title=element_text(size=14), legend.position="top")+
   labs(fill='')+
   geom_violin(width=0.9, alpha=0.38, size=0.75) +  
@@ -512,8 +512,8 @@ annotate_figure(figure1,left = text_grob("Mean Rating", color="black", face ="pl
 ## PLOT SERIES 1
 dev.new(width=12,height=4,noRStudioGD = TRUE)
 figure1 <- ggarrange(p1_1, p1_2, p1_5, p1_3, nrow=1,ncol=4,common.legend = TRUE, legend="top", vjust = 1.0, hjust=0.5) 
-annotate_figure(figure1,left = text_grob("Mean Agreement", color="black", face ="plain",size=20, rot=90),
-                bottom = text_grob("Vehicle Type", color="black", face ="plain",size=20)) 
+figure1 <- annotate_figure(figure1,left = text_grob("Mean Agreement", color="black", face ="plain",size=16, rot=90),
+                bottom = text_grob("Vehicle Type", color="black", face ="plain",size=16)) 
 
 
 dev.new(width=8,height=3,noRStudioGD = TRUE)
@@ -522,6 +522,7 @@ annotate_figure(figure1,left = text_grob("Mean Rating", color="black", face ="pl
                 bottom = text_grob("Vehicle Type", color="black", face ="plain",size=20)) 
 
 
+plot(figure1)
 write.csv(d_merged, 'd_spss.csv')
 
 ## ================================================================================================================

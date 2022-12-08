@@ -295,13 +295,13 @@ fit <- process(data = d_merged, y = "vB_sue", x = "cond",
 
 ## plotting all measures
 t_names <- c("AV", "HDV")
-title_size <- 12
+title_size <- 16
 axis_size <- 16
 
 ## (1) VA SUE
 p1 <- ggplot(d_merged,aes(x=factor(cond_name),y=vA_sue)) +  
   theme_bw() +coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+ 
-  geom_signif(comparisons = list(c("av", "human")), annotation="*", textsize = 5.5)
+  geom_signif(comparisons = list(c("av", "human")), annotation="**", textsize = 5.5)
 
 p1 <- p1 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
   scale_x_discrete(labels=t_names) +
@@ -469,12 +469,17 @@ p7 <- p7 + theme(text = element_text(size=16),panel.grid.major = element_blank()
 p7
 
 ## (4) ALL FIGURES
-dev.new(width=12,height=4,noRStudioGD = TRUE)
+dev.new(width=13,height=6,noRStudioGD = TRUE)
 
-figure <- ggarrange(p1, p2, p5, p3, nrow=1,ncol=4,common.legend = TRUE, legend="top", vjust = 1.0, hjust=0.5) 
-figure <- annotate_figure(figure,left = text_grob("Mean Agreement", color="black", face ="plain",size=16, rot=90),
-                bottom = text_grob("Vehicle Type", color="black", face ="plain",size=16)) 
-plot(figure)
+figure <- ggarrange(p1, p2, p3, p4, p5, p6, p7, nrow=2,ncol=4,common.legend = TRUE, legend="top", vjust = 1.0, hjust=0.5) 
+annotate_figure(figure,left = text_grob("Mean Rating", color="black", face ="plain",size=20, rot=90),
+                bottom = text_grob("Vehicle Type", color="black", face ="plain",size=20)) 
+
+dev.new(width=13,height=6,noRStudioGD = TRUE)
+
+figure <- ggarrange(p1, p2, p5, p3, nrow=2,ncol=2,common.legend = TRUE, legend="top", vjust = 1.0, hjust=0.5) 
+annotate_figure(figure,left = text_grob("Mean Rating", color="black", face ="plain",size=20, rot=90),
+                bottom = text_grob("Vehicle Type", color="black", face ="plain",size=20)) 
 
 ## ================================================================================================================
 ##                                                  END OF ANALYSIS                 
