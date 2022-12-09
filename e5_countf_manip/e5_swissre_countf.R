@@ -92,10 +92,10 @@ vB_sue_T
 defective_T <- t.test(defective_AV_1 ~ countf_cat, data = d, paired = FALSE) 
 defective_T
 
-cor(d_merged[,2:9])
+#cor(d_merged[,2:9])
 
-mod <- lm(countf ~ cond_name*superh, data = d_merged)
-summary(mod)
+#mod <- lm(countf ~ cond_name*superh, data = d_merged)
+#summary(mod)
 
 ## cor.test(d_merged$firm_sue, d_merged$v2_sue)
 
@@ -217,7 +217,7 @@ annotate_figure(figure1,left = text_grob("Mean Agreement", color="black", face =
 dev.new(width=13,height=6,noRStudioGD = TRUE)
 figure1 <- ggarrange(p1_1, p1_2, p1_3, nrow=1,ncol=3,common.legend = TRUE, legend="top", vjust = 1.0, hjust=0.5) 
 figure1 <- annotate_figure(figure1,left = text_grob("Mean Agreement", color="black", face ="plain",size=16, rot=90),
-                bottom = text_grob("Counterfactual is Superior Human Driver", color="black", face ="plain",size=16))
+                bottom = text_grob("Counterfactual Mentions Superior Human Driver", color="black", face ="plain",size=16))
 plot(figure1)
 
 
@@ -239,6 +239,7 @@ d$exp <- 6
 names(d)[names(d)=="countf_cat"] <- "cond_n"
 names(d)[names(d)=="vB_sue_AV_1"] <- "vB_sue"
 
+#read in data
 d1 <- read.csv('e1_processed.csv')
 d1$exp <- 1
 d2 <- read.csv('e2_processed.csv')
@@ -251,11 +252,12 @@ colnames(d1[,c(16,4)])
 colnames(d2[,c(17,4)])
 colnames(d3[,c(17,4)])
 
+#bind data
 d_final <- rbind(d[,c(12,14,31)], d1[,c(16,4,17)], d2[,c(17,4,19)], d3[,c(17,4,18)])
 
 d_f_s <- subset(d_final, d_final$cond_n == 1)
 
-mod_6_1 <- t.test(d_f_s$vB_sue[d_f_s$exp==6], d_f_s$vB_sue[d_f_s$exp==1], paired = FALSE)  
+mod_6_1 <- t.test(d_f_s$vB_sue[d_f_s$expopp==6], d_f_s$vB_sue[d_f_s$exp==1], paired = FALSE)  
 mod_6_1
 
 mod_6_2 <- t.test(d_f_s$vB_sue[d_f_s$exp==6], d_f_s$vB_sue[d_f_s$exp==2], paired = FALSE)  
@@ -269,8 +271,8 @@ t_names <- c("Exp1", "Exp2", "Exp3", "Exp4")
 p1_2_1 <- ggplot(d_f_s,aes(x=factor(exp),y=vB_sue)) +  
   theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
   geom_signif(y_position = c(99,99), comparisons = list(c(1, 4)), annotation="***", textsize = 6)+
-  geom_signif(y_position = c(106,106), comparisons = list(c(2, 4)), annotation="***", textsize = 6)+
-  geom_signif(y_position = c(116,116), comparisons = list(c(3, 4)), annotation="***", textsize = 6)+
+  geom_signif(y_position = c(108,106), comparisons = list(c(2, 4)), annotation="***", textsize = 6)+
+  geom_signif(y_position = c(119,116), comparisons = list(c(3, 4)), annotation="***", textsize = 6)+
   coord_cartesian(ylim=c(1,125)) 
 
 p1_2_1 <- p1_2_1 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +

@@ -135,9 +135,10 @@ p1_1 <- p1_1 + theme(text = element_text(size=20),panel.grid.major = element_bla
   ggtitle("Agreements with Statements") +
   xlab ("Comparative Statement") + ylab ("Mean Agreement") +
   theme_classic() +
-  theme(axis.text.x = element_text(size=10)) +
-  theme(axis.text.y = element_text(size=10)) +
-  theme(plot.title = element_text(size=16, hjust=0.5)) +
+  theme(axis.text.x = element_text(size=15)) +
+  theme(axis.title = element_text(size=18)) +
+  theme(axis.text.y = element_text(size=14)) +
+  theme(plot.title = element_text(size=20, hjust=0.5)) +
   geom_violin(width=0.9, alpha=0.38, size=0.75) +  
   geom_sina(alpha=0.6, size=0.95, color = "#999999") +
   stat_summary(fun.data = "mean_se", color = "black", 
@@ -150,6 +151,8 @@ p1_1 <- p1_1 + theme(text = element_text(size=20),panel.grid.major = element_bla
 p1_1
 plot(p1_1)
 
+dev.new(width=11,height=6,noRStudioGD = TRUE)
+p1_1
 
 ## ================================================================================================================
 ##                                                  END OF ANALYSIS                 
