@@ -266,7 +266,7 @@ mod_6_2
 mod_6_3 <- t.test(d_f_s$vB_sue[d_f_s$exp==6], d_f_s$vB_sue[d_f_s$exp==3], paired = FALSE)  
 mod_6_3
 
-t_names <- c("Exp1", "Exp2", "Exp3", "Exp4")
+t_names <- c("Study 1", "Study 2", "Study 3", "Study 5")
 
 p1_2_1 <- ggplot(d_f_s,aes(x=factor(exp),y=vB_sue)) +  
   theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
