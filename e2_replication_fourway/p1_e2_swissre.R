@@ -1,7 +1,7 @@
 ## clear workspace
 rm(list = ls()) 
 
-source("process.R")
+source("../process.R")
 
 options(download.file.method="libcurl")
 
@@ -24,7 +24,8 @@ pacman::p_load('ggplot2',         # plotting
                'effsize',         # another effect size package
                'pwr',             # package for power calculation
                'nlme',            # get p values for mixed effect model
-               'DescTools'        # get Cramer's V
+               'DescTools',       # get Cramer's V
+               'Hmisc'
 )
 
 ## ================================================================================================================
@@ -77,7 +78,7 @@ d_HDV <- d_HDV[-c(21:35,36:43)]
 
 ## get mean age and gender:
 mean_age = mean(as.numeric(d$age), na.rm = TRUE) # removing NAs from the dataframe before computing mean 
-gender = table(d$gender)[1]/sum(table(d$gender))
+gender = table(d$gender)[2]/sum(table(d$gender))
 
 ## ================================================================================================================
 ##                                                    SUBSETTING                 
@@ -91,6 +92,7 @@ d_subset <- as.data.frame(d_subset, stringsAsFactors=FALSE)
 
 ## assess moderator data from both AV and HDV
 moderator_mat = rbind(d_AV[31:35], d_HDV[31:35])
+# reverse code one moderator
 moderator_mat$av_trust_5_1 = 100 - as.numeric(moderator_mat$av_trust_5_1)
 moderator_mat <- data.frame(sapply(moderator_mat, as.numeric))
 cb_alpha = cronbach.alpha(moderator_mat)
@@ -139,91 +141,83 @@ table(d_merged$con) #give us table of number of people in each condition - want 
 
 ## (1) SUE VEHICLE A DRIVER
 vA_sue_T <- t.test(vA_sue ~ cond_name, data = d_merged, paired = FALSE) 
-print("VA_SUE:")
-print(paste("statistic: ", vA_sue_T$statistic))
-print(paste("p-value: ", vA_sue_T$p.value))
-print(paste("AV mean: ", mean(d_merged[d_merged$cond_name == "av",]$vA_sue)))
-print(paste("Human mean: ", mean(d_merged[d_merged$cond_name == "human",]$vA_sue)))
-print(paste("AV std: ", sd(d_merged[d_merged$cond_name == "av",]$vA_sue)))
-print(paste("Human std: ", sd(d_merged[d_merged$cond_name == "human",]$vA_sue)))
-print("")
+vA_sue_T$parameter
+vA_sue_T$statistic
+vA_sue_T$p.value
+mean(d_merged[d_merged$cond_name == "av",]$vA_sue)
+mean(d_merged[d_merged$cond_name == "human",]$vA_sue)
+sd(d_merged[d_merged$cond_name == "av",]$vA_sue)
+sd(d_merged[d_merged$cond_name == "human",]$vA_sue)
 
 ## (2) SUE VEHICLE B MANUFACTURER
 vB_sue_T <- t.test(vB_sue ~ cond_name, data = d_merged, paired = FALSE) 
-print("VB_SUE:")
-print(paste("statistic: ", vB_sue_T$statistic))
-print(paste("p-value: ", vB_sue_T$p.value))
-print(paste("AV mean: ", mean(d_merged[d_merged$cond_name == "av",]$vB_sue)))
-print(paste("Human mean: ", mean(d_merged[d_merged$cond_name == "human",]$vB_sue)))
-print(paste("AV std: ", sd(d_merged[d_merged$cond_name == "av",]$vB_sue)))
-print(paste("Human std: ", sd(d_merged[d_merged$cond_name == "human",]$vB_sue)))
-print("")
+vB_sue_T$parameter
+vB_sue_T$statistic
+vB_sue_T$p.value
+mean(d_merged[d_merged$cond_name == "av",]$vB_sue)
+mean(d_merged[d_merged$cond_name == "human",]$vB_sue)
+sd(d_merged[d_merged$cond_name == "av",]$vB_sue)
+sd(d_merged[d_merged$cond_name == "human",]$vB_sue)
 
 ## (3) VEHICLE B DEFECTIVE
 defective_T <- t.test(defec ~ cond_name, data = d_merged, paired = FALSE) 
-print("DEFECTIVE:")
-print(paste("statistic: ", defective_T$statistic))
-print(paste("p-value: ", defective_T$p.value))
-print(paste("AV mean: ", mean(d_merged[d_merged$cond_name == "av",]$defec)))
-print(paste("Human mean: ", mean(d_merged[d_merged$cond_name == "human",]$defec)))
-print(paste("AV std: ", sd(d_merged[d_merged$cond_name == "av",]$defec)))
-print(paste("Human std: ", sd(d_merged[d_merged$cond_name == "human",]$defec)))
-print("")
+defective_T$parameter
+defective_T$statistic
+defective_T$p.value
+mean(d_merged[d_merged$cond_name == "av",]$defec)
+mean(d_merged[d_merged$cond_name == "human",]$defec)
+sd(d_merged[d_merged$cond_name == "av",]$defec)
+sd(d_merged[d_merged$cond_name == "human",]$defec)
 
 ## (4) VEHICLE B NEGLIGENT
 negligent_T <- t.test(negl ~ cond_name, data = d_merged, paired = FALSE) 
-print("NEGLIGENT:")
-print(paste("statistic: ", negligent_T$statistic))
-print(paste("p-value: ", negligent_T$p.value))
-print(paste("AV mean: ", mean(d_merged[d_merged$cond_name == "av",]$negl)))
-print(paste("Human mean: ", mean(d_merged[d_merged$cond_name == "human",]$negl)))
-print(paste("AV std: ", sd(d_merged[d_merged$cond_name == "av",]$negl)))
-print(paste("Human std: ", sd(d_merged[d_merged$cond_name == "human",]$negl)))
-print("")
+negligent_T$parameter
+negligent_T$statistic
+negligent_T$p.value
+mean(d_merged[d_merged$cond_name == "av",]$negl)
+mean(d_merged[d_merged$cond_name == "human",]$negl)
+sd(d_merged[d_merged$cond_name == "av",]$negl)
+sd(d_merged[d_merged$cond_name == "human",]$negl)
 
 ## (5) COUNTERFACTUAL
 counterfactual_T <- t.test(countf ~ cond_name, data = d_merged, paired = FALSE) 
-print("COUNTERFACTUAL:")
-print(paste("statistic: ", counterfactual_T$statistic))
-print(paste("p-value: ", counterfactual_T$p.value))
-print(paste("AV mean: ", mean(d_merged[d_merged$cond_name == "av",]$countf)))
-print(paste("Human mean: ", mean(d_merged[d_merged$cond_name == "human",]$countf)))
-print(paste("AV std: ", sd(d_merged[d_merged$cond_name == "av",]$countf)))
-print(paste("Human std: ", sd(d_merged[d_merged$cond_name == "human",]$countf)))
-print("")
+counterfactual_T$parameter
+counterfactual_T$statistic
+counterfactual_T$p.value
+mean(d_merged[d_merged$cond_name == "av",]$countf)
+mean(d_merged[d_merged$cond_name == "human",]$countf)
+sd(d_merged[d_merged$cond_name == "av",]$countf)
+sd(d_merged[d_merged$cond_name == "human",]$countf)
 
 ## (6) CAPABILITY
 capability_T <- t.test(capab ~ cond_name, data = d_merged, paired = FALSE)
-print("CAPABILITY:")
-print(paste("statistic: ", capability_T$statistic))
-print(paste("p-value: ", capability_T$p.value))
-print(paste("AV mean: ", mean(d_merged[d_merged$cond_name == "av",]$capab)))
-print(paste("Human mean: ", mean(d_merged[d_merged$cond_name == "human",]$capab)))
-print(paste("AV std: ", sd(d_merged[d_merged$cond_name == "av",]$capab)))
-print(paste("Human std: ", sd(d_merged[d_merged$cond_name == "human",]$capab)))
-print("")
+capability_T$parameter
+capability_T$statistic
+capability_T$p.value
+mean(d_merged[d_merged$cond_name == "av",]$capab)
+mean(d_merged[d_merged$cond_name == "human",]$capab)
+sd(d_merged[d_merged$cond_name == "av",]$capab)
+sd(d_merged[d_merged$cond_name == "human",]$capab)
 
 ## (7) FAULT
 fault_T <- t.test(fault ~ cond_name, data = d_merged, paired = FALSE) 
-print("FAULT:")
-print(paste("statistic: ", fault_T$statistic))
-print(paste("p-value: ", fault_T$p.value))
-print(paste("AV mean: ", mean(d_merged[d_merged$cond_name == "av",]$fault)))
-print(paste("Human mean: ", mean(d_merged[d_merged$cond_name == "human",]$fault)))
-print(paste("AV std: ", sd(d_merged[d_merged$cond_name == "av",]$fault)))
-print(paste("Human std: ", sd(d_merged[d_merged$cond_name == "human",]$fault)))
-print("")
+fault_T$parameter
+fault_T$statistic
+fault_T$p.value
+mean(d_merged[d_merged$cond_name == "av",]$fault)
+mean(d_merged[d_merged$cond_name == "human",]$fault)
+sd(d_merged[d_merged$cond_name == "av",]$fault)
+sd(d_merged[d_merged$cond_name == "human",]$fault)
 
 ## (8) SUPERHUMAN
 superhuman_T <- t.test(superh ~ cond_name, data = d_merged, paired = FALSE) 
-print("SUPERHUMAN:")
-print(paste("statistic: ", superhuman_T$statistic))
-print(paste("p-value: ", superhuman_T$p.value))
-print(paste("AV mean: ", mean(d_merged[d_merged$cond_name == "av",]$superh)))
-print(paste("Human mean: ", mean(d_merged[d_merged$cond_name == "human",]$superh)))
-print(paste("AV std: ", sd(d_merged[d_merged$cond_name == "av",]$superh)))
-print(paste("Human std: ", sd(d_merged[d_merged$cond_name == "human",]$superh)))
-print("")
+superhuman_T$parameter
+superhuman_T$statistic
+superhuman_T$p.value
+mean(d_merged[d_merged$cond_name == "av",]$superh)
+mean(d_merged[d_merged$cond_name == "human",]$superh)
+sd(d_merged[d_merged$cond_name == "av",]$superh)
+sd(d_merged[d_merged$cond_name == "human",]$superh)
 
 cor(d_merged[,2:9])
 
@@ -258,18 +252,14 @@ d_merged$cond_n <- ifelse(d_merged$cond=="FL_39", 1, 2)
 # MODERATED SERIAL MEDIATION
 # 87 = B path, 83 = A path, 91 = center path
 process(data = d_merged, y = "vB_sue", x = "cond_n", 
-        m =c("countf", "defec"), w = "mod", model = 83, effsize =1, total =1, stand =1, 
+        m =c("countf", "defec"), w = "mod", model = 91, effsize =1, total =1, stand =1, 
         contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
 
 # SERIAL MEDIATION
 process(data = d_merged, y = "vB_sue", x = "cond_n", 
-        m =c("countf", "capab"), model = 6, effsize =1, total =1, stand =1, 
+        m =c("countf", "defec"), model = 6, effsize =1, total =1, stand =1, 
         contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
- 
-# SINGLE MEDIATION
-process(data = d_merged, y = "capab", x = "cond_n",
-        m ="countf", model = 4, effsize =1, total =1, stand =1,
-        contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
+
 
 
 ## ================================================================================================================
@@ -302,11 +292,10 @@ p1_0 <- p1_0 + theme(text = element_text(size=16),panel.grid.major = element_bla
   labs(fill='')+
   geom_violin(width=0.9, alpha=0.38, size=0.75) +  
   geom_sina(alpha=0.6, size=0.95, color = "#999999") +
-  stat_summary(fun.data = "mean_se", color = "black", 
-               size=0.4, fun.args = list(mult = 1), 
+  stat_summary(fun.data = "mean_cl_boot", color = "black", 
+               size=0.4, 
                position = position_dodge(width = 0.9)) +
-  stat_summary(fun.data = "mean_se", color = "black", 
-               fun.args = list(mult = 1), 
+  stat_summary(fun.data = "mean_cl_boot", color = "black", 
                position = position_dodge(width = 0.9),
                geom="errorbar", width = 0.2)
 p1_0
@@ -326,11 +315,10 @@ p1_1 <- p1_1 + theme(text = element_text(size=16),panel.grid.major = element_bla
   theme(plot.title = element_text(size=title_size, hjust=0.5)) +
   geom_violin(width=0.9, alpha=0.38, size=0.75) +  
   geom_sina(alpha=0.6, size=0.95, color = "#999999") +
-  stat_summary(fun.data = "mean_se", color = "black", 
-               size=0.4, fun.args = list(mult = 1), 
+  stat_summary(fun.data = "mean_cl_boot", color = "black", 
+               size=0.4, 
                position = position_dodge(width = 0.9)) +
-  stat_summary(fun.data = "mean_se", color = "black", 
-               fun.args = list(mult = 1), 
+  stat_summary(fun.data = "mean_cl_boot", color = "black", 
                position = position_dodge(width = 0.9),
                geom="errorbar", width = 0.2)
 p1_1
@@ -350,11 +338,10 @@ p1_2 <- p1_2 + theme(text = element_text(size=16),panel.grid.major = element_bla
   theme(plot.title = element_text(size=title_size, hjust=0.5)) +
   geom_violin(width=0.9, alpha=0.38, size=0.75) +  
   geom_sina(alpha=0.6, size=0.95, color = "#999999") +
-  stat_summary(fun.data = "mean_se", color = "black", 
-               size=0.4, fun.args = list(mult = 1), 
+  stat_summary(fun.data = "mean_cl_boot", color = "black", 
+               size=0.4, 
                position = position_dodge(width = 0.9)) +
-  stat_summary(fun.data = "mean_se", color = "black", 
-               fun.args = list(mult = 1), 
+  stat_summary(fun.data = "mean_cl_boot", color = "black", 
                position = position_dodge(width = 0.9),
                geom="errorbar", width = 0.2)
 p1_2
@@ -374,11 +361,10 @@ p1_3 <- p1_3 + theme(text = element_text(size=16),panel.grid.major = element_bla
   theme(plot.title = element_text(size=title_size, hjust=0.5)) +
   geom_violin(width=0.9, alpha=0.38, size=0.75) +  
   geom_sina(alpha=0.6, size=0.95, color = "#999999") +
-  stat_summary(fun.data = "mean_se", color = "black", 
-               size=0.4, fun.args = list(mult = 1), 
+  stat_summary(fun.data = "mean_cl_boot", color = "black", 
+               size=0.4, 
                position = position_dodge(width = 0.9)) +
-  stat_summary(fun.data = "mean_se", color = "black", 
-               fun.args = list(mult = 1), 
+  stat_summary(fun.data = "mean_cl_boot", color = "black", 
                position = position_dodge(width = 0.9),
                geom="errorbar", width = 0.2)
 p1_3
@@ -398,11 +384,10 @@ p1_4 <- p1_4 + theme(text = element_text(size=16),panel.grid.major = element_bla
   theme(plot.title = element_text(size=title_size, hjust=0.5)) +
   geom_violin(width=0.9, alpha=0.38, size=0.75) +  
   geom_sina(alpha=0.6, size=0.95, color = "#999999") +
-  stat_summary(fun.data = "mean_se", color = "black", 
-               size=0.4, fun.args = list(mult = 1), 
+  stat_summary(fun.data = "mean_cl_boot", color = "black", 
+               size=0.4, 
                position = position_dodge(width = 0.9)) +
-  stat_summary(fun.data = "mean_se", color = "black", 
-               fun.args = list(mult = 1), 
+  stat_summary(fun.data = "mean_cl_boot", color = "black", 
                position = position_dodge(width = 0.9),
                geom="errorbar", width = 0.2)
 p1_4
@@ -422,11 +407,10 @@ p1_5 <- p1_5 + theme(text = element_text(size=16),panel.grid.major = element_bla
   theme(plot.title = element_text(size=title_size, hjust=0.5)) +
   geom_violin(width=0.9, alpha=0.38, size=0.75) +  
   geom_sina(alpha=0.6, size=0.95, color = "#999999") +
-  stat_summary(fun.data = "mean_se", color = "black", 
-               size=0.4, fun.args = list(mult = 1), 
+  stat_summary(fun.data = "mean_cl_boot", color = "black", 
+               size=0.4, 
                position = position_dodge(width = 0.9)) +
-  stat_summary(fun.data = "mean_se", color = "black", 
-               fun.args = list(mult = 1), 
+  stat_summary(fun.data = "mean_cl_boot", color = "black", 
                position = position_dodge(width = 0.9),
                geom="errorbar", width = 0.2)
 p1_5
@@ -446,11 +430,10 @@ p1_6 <- p1_6 + theme(text = element_text(size=16),panel.grid.major = element_bla
   theme(plot.title = element_text(size=title_size, hjust=0.5)) +
   geom_violin(width=0.9, alpha=0.38, size=0.75) +  
   geom_sina(alpha=0.6, size=0.95, color = "#999999") +
-  stat_summary(fun.data = "mean_se", color = "black", 
-               size=0.4, fun.args = list(mult = 1), 
+  stat_summary(fun.data = "mean_cl_boot", color = "black", 
+               size=0.4, 
                position = position_dodge(width = 0.9)) +
-  stat_summary(fun.data = "mean_se", color = "black", 
-               fun.args = list(mult = 1), 
+  stat_summary(fun.data = "mean_cl_boot", color = "black", 
                position = position_dodge(width = 0.9),
                geom="errorbar", width = 0.2)
 p1_6
@@ -470,11 +453,10 @@ p1_7 <- p1_7 + theme(text = element_text(size=16),panel.grid.major = element_bla
   theme(plot.title = element_text(size=title_size, hjust=0.5)) +
   geom_violin(width=0.9, alpha=0.38, size=0.75) +  
   geom_sina(alpha=0.6, size=0.95, color = "#999999") +
-  stat_summary(fun.data = "mean_se", color = "black", 
-               size=0.4, fun.args = list(mult = 1), 
+  stat_summary(fun.data = "mean_cl_boot", color = "black", 
+               size=0.4, 
                position = position_dodge(width = 0.9)) +
-  stat_summary(fun.data = "mean_se", color = "black", 
-               fun.args = list(mult = 1), 
+  stat_summary(fun.data = "mean_cl_boot", color = "black", 
                position = position_dodge(width = 0.9),
                geom="errorbar", width = 0.2)
 p1_7
@@ -494,11 +476,10 @@ p1_8 <- p1_8 + theme(text = element_text(size=16),panel.grid.major = element_bla
   theme(plot.title = element_text(size=title_size, hjust=0.5)) +
   geom_violin(width=0.9, alpha=0.38, size=0.75) +  
   geom_sina(alpha=0.6, size=0.95, color = "#999999") +
-  stat_summary(fun.data = "mean_se", color = "black", 
-               size=0.4, fun.args = list(mult = 1), 
+  stat_summary(fun.data = "mean_cl_boot", color = "black", 
+               size=0.4, 
                position = position_dodge(width = 0.9)) +
-  stat_summary(fun.data = "mean_se", color = "black", 
-               fun.args = list(mult = 1), 
+  stat_summary(fun.data = "mean_cl_boot", color = "black", 
                position = position_dodge(width = 0.9),
                geom="errorbar", width = 0.2)
 p1_8

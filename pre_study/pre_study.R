@@ -24,7 +24,8 @@ pacman::p_load('ggplot2',         # plotting
                'effsize',         # another effect size package
                'pwr',             # package for power calculation
                'nlme',            # get p values for mixed effect model
-               'DescTools'        # get Cramer's V
+               'DescTools',       # get Cramer's V
+               'Hmisc'
 )
 
 ## ================================================================================================================
@@ -52,7 +53,7 @@ d_cleaned <- d[c(21:24)]
 
 ## get mean age and gender:
 mean_age = mean(as.numeric(d$age), na.rm = TRUE) # removing NAs from the dataframe before computing mean 
-gender = table(d$gender)[1]/sum(table(d$gender))
+gender = table(d$gender)[2]/sum(table(d$gender))
 
 
 ## ================================================================================================================
@@ -141,17 +142,16 @@ p1_1 <- p1_1 + theme(text = element_text(size=20),panel.grid.major = element_bla
   theme(plot.title = element_text(size=20, hjust=0.5)) +
   geom_violin(width=0.9, alpha=0.38, size=0.75) +  
   geom_sina(alpha=0.6, size=0.95, color = "#999999") +
-  stat_summary(fun.data = "mean_se", color = "black", 
-               size=0.4, fun.args = list(mult = 1), 
+  stat_summary(fun.data = "mean_cl_boot", color = "black", 
+               size=0.4, 
                position = position_dodge(width = 0.9)) +
-  stat_summary(fun.data = "mean_se", color = "black", 
-               fun.args = list(mult = 1), 
+  stat_summary(fun.data = "mean_cl_boot", color = "black", 
                position = position_dodge(width = 0.9),
                geom="errorbar", width = 0.2)
 p1_1
 plot(p1_1)
 
-dev.new(width=11,height=6,noRStudioGD = TRUE)
+dev.new(width=13,height=6,noRStudioGD = TRUE)
 p1_1
 
 ## ================================================================================================================

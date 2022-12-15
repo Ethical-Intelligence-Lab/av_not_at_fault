@@ -30,7 +30,8 @@ pacman::p_load('ggplot2',         # plotting
                'effsize',         # another effect size package
                'pwr',             # package for power calculation
                'nlme',            # get p values for mixed effect model
-               'DescTools'        # get Cramer's V
+               'DescTools',       # get Cramer's V
+               'Hmisc'
 )
 
 library("lmerTest")
@@ -282,7 +283,7 @@ sd(as.numeric(d_subset$superhuman), na.rm = TRUE)
 ##                                              MEDIATION ANALYSIS                
 ## ================================================================================================================
 
-source("process.R")
+source("../process.R")
 
 fit <- process(data = d_merged, y = "vB_sue", x = "cond", 
         m =c("counterfactual", "defective"), model = 6, effsize =1, total =1, stand =1, 
@@ -313,11 +314,10 @@ p1 <- p1 + theme(text = element_text(size=16),panel.grid.major = element_blank()
   theme(plot.title = element_text(size=title_size, hjust=0.5)) +
   geom_violin(width=0.9, alpha=0.38, size=0.75) +
   geom_sina(alpha=0.6, size=0.95, color = "#999999") +
-  stat_summary(fun.data = "mean_se", color = "black", 
-               size=0.4, fun.args = list(mult = 1), 
+  stat_summary(fun.data = "mean_cl_boot", color = "black", 
+               size=0.4, 
                position = position_dodge(width = 0.9)) +
-  stat_summary(fun.data = "mean_se", color = "black", 
-               fun.args = list(mult = 1), 
+  stat_summary(fun.data = "mean_cl_boot", color = "black", 
                position = position_dodge(width = 0.9),
                geom="errorbar", width = 0.2)
 p1 
@@ -338,11 +338,10 @@ p2 <- p2 + theme(text = element_text(size=16),panel.grid.major = element_blank()
   theme(plot.title = element_text(size=title_size, hjust=0.5)) +
   geom_violin(width=0.9, alpha=0.38, size=0.75) +
   geom_sina(alpha=0.6, size=0.95, color = "#999999") +
-  stat_summary(fun.data = "mean_se", color = "black", 
-               size=0.4, fun.args = list(mult = 1), 
+  stat_summary(fun.data = "mean_cl_boot", color = "black", 
+               size=0.4, 
                position = position_dodge(width = 0.9)) +
-  stat_summary(fun.data = "mean_se", color = "black", 
-               fun.args = list(mult = 1), 
+  stat_summary(fun.data = "mean_cl_boot", color = "black", 
                position = position_dodge(width = 0.9),
                geom="errorbar", width = 0.2)
 p2 
@@ -363,11 +362,10 @@ p3 <- p3 + theme(text = element_text(size=16),panel.grid.major = element_blank()
   theme(plot.title = element_text(size=title_size, hjust=0.5)) +
   geom_violin(width=0.9, alpha=0.38, size=0.75)+  
   geom_sina(alpha=0.6, size=0.95, color = "#999999") +
-  stat_summary(fun.data = "mean_se", color = "black", 
-               size=0.4, fun.args = list(mult = 1), 
+  stat_summary(fun.data = "mean_cl_boot", color = "black", 
+               size=0.4, 
                position = position_dodge(width = 0.9)) +
-  stat_summary(fun.data = "mean_se", color = "black", 
-               fun.args = list(mult = 1), 
+  stat_summary(fun.data = "mean_cl_boot", color = "black", 
                position = position_dodge(width = 0.9),
                geom="errorbar", width = 0.2)
 p3
@@ -387,11 +385,10 @@ p4 <- p4 + theme(text = element_text(size=16),panel.grid.major = element_blank()
   theme(plot.title = element_text(size=title_size, hjust=0.5)) +
   geom_violin(width=0.9, alpha=0.38, size=0.75)+  
   geom_sina(alpha=0.6, size=0.95, color = "#999999") +
-  stat_summary(fun.data = "mean_se", color = "black", 
-               size=0.4, fun.args = list(mult = 1), 
+  stat_summary(fun.data = "mean_cl_boot", color = "black", 
+               size=0.4, 
                position = position_dodge(width = 0.9)) +
-  stat_summary(fun.data = "mean_se", color = "black", 
-               fun.args = list(mult = 1), 
+  stat_summary(fun.data = "mean_cl_boot", color = "black", 
                position = position_dodge(width = 0.9),
                geom="errorbar", width = 0.2)
 p4
@@ -411,11 +408,10 @@ p5 <- p5 + theme(text = element_text(size=16),panel.grid.major = element_blank()
   theme(plot.title = element_text(size=title_size, hjust=0.5)) +
   geom_violin(width=0.9, alpha=0.38, size=0.75)+  
   geom_sina(alpha=0.6, size=0.95, color = "#999999") +
-  stat_summary(fun.data = "mean_se", color = "black", 
-               size=0.4, fun.args = list(mult = 1), 
+  stat_summary(fun.data = "mean_cl_boot", color = "black", 
+               size=0.4, 
                position = position_dodge(width = 0.9)) +
-  stat_summary(fun.data = "mean_se", color = "black", 
-               fun.args = list(mult = 1), 
+  stat_summary(fun.data = "mean_cl_boot", color = "black", 
                position = position_dodge(width = 0.9),
                geom="errorbar", width = 0.2)
 p5
@@ -435,11 +431,10 @@ p6 <- p6 + theme(text = element_text(size=16),panel.grid.major = element_blank()
   theme(plot.title = element_text(size=title_size, hjust=0.5)) +
   geom_violin(width=0.9, alpha=0.38, size=0.75)+  
   geom_sina(alpha=0.6, size=0.95, color = "#999999") +
-  stat_summary(fun.data = "mean_se", color = "black", 
-               size=0.4, fun.args = list(mult = 1), 
+  stat_summary(fun.data = "mean_cl_boot", color = "black", 
+               size=0.4, 
                position = position_dodge(width = 0.9)) +
-  stat_summary(fun.data = "mean_se", color = "black", 
-               fun.args = list(mult = 1), 
+  stat_summary(fun.data = "mean_cl_boot", color = "black", 
                position = position_dodge(width = 0.9),
                geom="errorbar", width = 0.2)
 p6
@@ -459,11 +454,10 @@ p7 <- p7 + theme(text = element_text(size=16),panel.grid.major = element_blank()
   theme(plot.title = element_text(size=title_size, hjust=0.5)) +
   geom_violin(width=0.9, alpha=0.38, size=0.75)+  
   geom_sina(alpha=0.6, size=0.95, color = "#999999") +
-  stat_summary(fun.data = "mean_se", color = "black", 
-               size=0.4, fun.args = list(mult = 1), 
+  stat_summary(fun.data = "mean_cl_boot", color = "black", 
+               size=0.4, 
                position = position_dodge(width = 0.9)) +
-  stat_summary(fun.data = "mean_se", color = "black", 
-               fun.args = list(mult = 1), 
+  stat_summary(fun.data = "mean_cl_boot", color = "black", 
                position = position_dodge(width = 0.9),
                geom="errorbar", width = 0.2)
 p7

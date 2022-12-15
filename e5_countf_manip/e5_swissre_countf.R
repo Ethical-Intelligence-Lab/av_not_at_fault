@@ -24,7 +24,8 @@ pacman::p_load('ggplot2',         # plotting
                'effsize',         # another effect size package
                'pwr',             # package for power calculation
                'nlme',            # get p values for mixed effect model
-               'DescTools'        # get Cramer's V
+               'DescTools',       # get Cramer's V
+               'Hmisc'
 )
 
 ## ================================================================================================================
@@ -63,7 +64,7 @@ percent_excluded <- (n_original - n_final)/n_original
 ## get mean age and gender:
 # mean(d$age, na.rm = TRUE) # removing NAs from the dataframe before computing mean 
 mean_age = mean(as.numeric(d$age), na.rm = TRUE)
-table(d$gender)[1]/sum(table(d$gender))
+table(d$gender)[2]/sum(table(d$gender))
 
 d <- d[,19:48]
 
@@ -72,7 +73,7 @@ d <- d[,19:48]
 ##                                             DATA ANALYSIS - T-TESTS               
 ## ================================================================================================================
 
-## run t-tests to compare friendship, partnership, and willingness to pay measures between conditions:
+## run t-tests
 table(d$countf_cat)[1]/sum(table(d$countf_cat))
 table(d$countf_cat)[2]/sum(table(d$countf_cat))
 table(d$countf_cat)[3]/sum(table(d$countf_cat))
@@ -150,11 +151,10 @@ p1_1 <- p1_1 + theme(text = element_text(size=16),panel.grid.major = element_bla
   theme(plot.title = element_text(size=16, hjust=0.5)) +
   geom_violin(width=0.9, alpha=0.38, size=0.75) +  
   geom_sina(alpha=0.6, size=0.95, color = "#999999") +
-  stat_summary(fun.data = "mean_se", color = "black", 
-               size=0.4, fun.args = list(mult = 1), 
+  stat_summary(fun.data = "mean_cl_boot", color = "black", 
+               size=0.4, 
                position = position_dodge(width = 0.9)) +
-  stat_summary(fun.data = "mean_se", color = "black", 
-               fun.args = list(mult = 1), 
+  stat_summary(fun.data = "mean_cl_boot", color = "black", 
                position = position_dodge(width = 0.9),
                geom="errorbar", width = 0.2)
 p1_1
@@ -174,11 +174,10 @@ p1_2 <- p1_2 + theme(text = element_text(size=16),panel.grid.major = element_bla
   theme(plot.title = element_text(size=16, hjust=0.5)) +
   geom_violin(width=0.9, alpha=0.38, size=0.75) +  
   geom_sina(alpha=0.6, size=0.95, color = "#999999") +
-  stat_summary(fun.data = "mean_se", color = "black", 
-               size=0.4, fun.args = list(mult = 1), 
+  stat_summary(fun.data = "mean_cl_boot", color = "black", 
+               size=0.4, 
                position = position_dodge(width = 0.9)) +
-  stat_summary(fun.data = "mean_se", color = "black", 
-               fun.args = list(mult = 1), 
+  stat_summary(fun.data = "mean_cl_boot", color = "black", 
                position = position_dodge(width = 0.9),
                geom="errorbar", width = 0.2)
 p1_2
@@ -198,21 +197,16 @@ p1_3 <- p1_3 + theme(text = element_text(size=16),panel.grid.major = element_bla
   theme(plot.title = element_text(size=16, hjust=0.5)) +
   geom_violin(width=0.9, alpha=0.38, size=0.75) +  
   geom_sina(alpha=0.6, size=0.95, color = "#999999") +
-  stat_summary(fun.data = "mean_se", color = "black", 
-               size=0.4, fun.args = list(mult = 1), 
+  stat_summary(fun.data = "mean_cl_boot", color = "black", 
+               size=0.4, 
                position = position_dodge(width = 0.9)) +
-  stat_summary(fun.data = "mean_se", color = "black", 
-               fun.args = list(mult = 1), 
+  stat_summary(fun.data = "mean_cl_boot", color = "black", 
                position = position_dodge(width = 0.9),
                geom="errorbar", width = 0.2)
 p1_3
 
 
 ## PLOT SERIES 1
-dev.new(width=13,height=6,noRStudioGD = TRUE)
-figure1 <- ggarrange(p1_1, p1_3, p1_3, p1_4, p1_5, p1_6, p1_7, p1_8, nrow=2,ncol=4,common.legend = TRUE, legend="top", vjust = 1.0, hjust=0.5) 
-annotate_figure(figure1,left = text_grob("Mean Agreement", color="black", face ="plain",size=16, rot=90),
-                bottom = text_grob("Scenario Condition", color="black", face ="plain",size=16)) 
 
 dev.new(width=13,height=6,noRStudioGD = TRUE)
 figure1 <- ggarrange(p1_1, p1_2, p1_3, nrow=1,ncol=3,common.legend = TRUE, legend="top", vjust = 1.0, hjust=0.5) 
@@ -257,7 +251,7 @@ d_final <- rbind(d[,c(12,14,31)], d1[,c(16,4,17)], d2[,c(17,4,19)], d3[,c(17,4,1
 
 d_f_s <- subset(d_final, d_final$cond_n == 1)
 
-mod_6_1 <- t.test(d_f_s$vB_sue[d_f_s$expopp==6], d_f_s$vB_sue[d_f_s$exp==1], paired = FALSE)  
+mod_6_1 <- t.test(d_f_s$vB_sue[d_f_s$exp==6], d_f_s$vB_sue[d_f_s$exp==1], paired = FALSE)  
 mod_6_1
 
 mod_6_2 <- t.test(d_f_s$vB_sue[d_f_s$exp==6], d_f_s$vB_sue[d_f_s$exp==2], paired = FALSE)  
@@ -287,16 +281,15 @@ p1_2_1 <- p1_2_1 + theme(text = element_text(size=16),panel.grid.major = element
   theme(plot.title = element_text(size=20, hjust=0.5)) +
   geom_violin(width=0.9, alpha=0.38, size=0.75) +  
   geom_sina(alpha=0.6, size=0.95, color = "#999999") +
-  stat_summary(fun.data = "mean_se", color = "black", 
-               size=0.4, fun.args = list(mult = 1), 
+  stat_summary(fun.data = "mean_cl_boot", color = "black", 
+               size=0.4, 
                position = position_dodge(width = 0.9)) +
-  stat_summary(fun.data = "mean_se", color = "black", 
-               fun.args = list(mult = 1), 
+  stat_summary(fun.data = "mean_cl_boot", color = "black", 
                position = position_dodge(width = 0.9),
                geom="errorbar", width = 0.2)
 p1_2_1
 
-dev.new(width=11,height=6,noRStudioGD = TRUE)
+dev.new(width=13,height=6,noRStudioGD = TRUE)
 p1_2_1
 
 ## ================================================================================================================
