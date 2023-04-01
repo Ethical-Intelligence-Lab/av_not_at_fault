@@ -61,7 +61,7 @@ n_original_HDV <- dim(d_HDV)[1]
 ## perform comprehension exclusions separately for AV and HDV: 
 # this will remove responses from the dataframe that failed comprehension checks (i.e., "2")
 d_AV <- subset(d_AV, (d_AV$comp1 == 1 & d_AV$comp_accident == 1))
-d_HDV <- subset(d_HDV, (d_HDV$comp1 == 3 & d_HDV$comp_accident == 1))
+d_HDV <- subset(d_HDV, (d_HDV$comp1 == 2 & d_HDV$comp_accident == 1))
 dim(d_AV) # number of participants should decrease after comprehension exclusions
 dim(d_HDV)
 
