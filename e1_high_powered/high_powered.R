@@ -192,10 +192,10 @@ cor(d_merged[,2:7])
 # PARALLEL MEDIATION
 # investigate possible mediators
 process(data = d_merged, y = "vB_m_v_m_liable", x = "cond_n",
-        m =c("avoid"), model = 4, effsize =1, total =1, stand =1,
+        m =c("vB_cntrfctl"), model = 4, effsize =1, total =1, stand =1,
         contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
 process(data = d_merged, y = "vB_m_v_d_liable", x = "cond_n",
-        m =c("avoid"), model = 4, effsize =1, total =1, stand =1,
+        m =c("vB_cntrfctl"), model = 4, effsize =1, total =1, stand =1,
         contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
 
 # SERIAL MEDIATION
