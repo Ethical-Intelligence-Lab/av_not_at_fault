@@ -36,7 +36,7 @@ pacman::p_load('ggplot2',         # plotting
 ## read in data: 
 # if importing from Qualtrics: (i) export data as numeric values, and (ii) delete rows 2 and 3 of the .csv file.
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path)) #set working directory to current directory
-d <- read.csv('sample_data.csv')
+d <- read.csv('e2_high_powered_300.csv')
 
 ## explore dataframe: 
 dim(d) # will provide dimensions of the dataframe by row [1] and column [2]
@@ -200,6 +200,15 @@ sd(d_merged[d_merged$cond_name == "human",]$avoid)
 
 cor(d_merged[,2:7])
 
+## trust agreement with coutnerfactual
+countf_trust_AV_T <- t.test(d_merged$vB_cntrfctl[d_merged$cond_name=="av" & d_merged$trust_level_n == 1], 
+       d_merged$vB_cntrfctl[d_merged$cond_name=="av" & d_merged$trust_level_n == 2], paired=FALSE)
+countf_trust_AV_T$p.value
+countf_trust_HDV_T <- t.test(d_merged$vB_cntrfctl[d_merged$cond_name=="human" & d_merged$trust_level_n == 1], 
+       d_merged$vB_cntrfctl[d_merged$cond_name=="human" & d_merged$trust_level_n == 2], paired=FALSE)
+countf_trust_HDV_T$p.value
+
+
 ## ================================================================================================================
 ##                                             MEDIATION ANALYSIS              
 ## ================================================================================================================
@@ -256,10 +265,12 @@ get_annotation <- function(p_val) {
 
 # (0) Plot trust v. counterfactual relationship
 ### TODO -- make sure the annotation is correct
+av_anno <- get_annotation(countf_trust_AV_T$p.value)
+hdv_anno <- get_annotation(countf_trust_HDV_T$p.value)
 dev.new(width=13,height=6,noRStudioGD = TRUE)
 p1_0 <- ggplot(d_merged,aes(x=factor(cond_name),y=vB_cntrfctl, fill=trust_level)) +  
   theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
-  geom_signif(y_position = 105.00, xmin = c(0.8,1.8), xmax = c(1.2,2.2), annotation = c("***","ns"), textsize=7.5)
+  geom_signif(y_position = 105.00, xmin = c(0.8,1.8), xmax = c(1.2,2.2), annotation = c(unlist(av_anno[1]),unlist(hdv_anno[1])), textsize=7.5)
 p1_0 <- p1_0 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
   scale_x_discrete(labels=t_names) +
   ggtitle("Agreement Wt. Counterfactual") +
