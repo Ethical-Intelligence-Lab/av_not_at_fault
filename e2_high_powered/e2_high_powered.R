@@ -36,7 +36,7 @@ pacman::p_load('ggplot2',         # plotting
 ## read in data: 
 # if importing from Qualtrics: (i) export data as numeric values, and (ii) delete rows 2 and 3 of the .csv file.
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path)) #set working directory to current directory
-d <- read.csv('e2_high_powered_300.csv')
+d <- read.csv('e2_high_powered_900.csv')
 
 ## explore dataframe: 
 dim(d) # will provide dimensions of the dataframe by row [1] and column [2]
