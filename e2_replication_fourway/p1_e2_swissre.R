@@ -25,6 +25,8 @@ pacman::p_load('ggplot2',         # plotting
                'pwr',             # package for power calculation
                'nlme',            # get p values for mixed effect model
                'DescTools',       # get Cramer's V
+               'compute.es',      # effect size package
+               'effsize',         # another effect size package
                'Hmisc'
 )
 
@@ -158,6 +160,7 @@ mean(d_merged[d_merged$cond_name == "av",]$vB_sue)
 mean(d_merged[d_merged$cond_name == "human",]$vB_sue)
 sd(d_merged[d_merged$cond_name == "av",]$vB_sue)
 sd(d_merged[d_merged$cond_name == "human",]$vB_sue)
+d_merged %>% cohens_d(vB_sue ~ cond_name, paired = FALSE, var.equal = TRUE)
 
 ## (3) VEHICLE B DEFECTIVE
 defective_T <- t.test(defec ~ cond_name, data = d_merged, paired = FALSE) 

@@ -36,7 +36,7 @@ pacman::p_load('ggplot2',         # plotting
 ## read in data: 
 # if importing from Qualtrics: (i) export data as numeric values, and (ii) delete rows 2 and 3 of the .csv file.
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path)) #set working directory to current directory
-d <- read.csv('e3_high_powered_300.csv')
+d <- read.csv('e3_high_powered_900.csv')
 
 ## explore dataframe: 
 dim(d) # will provide dimensions of the dataframe by row [1] and column [2]
@@ -83,7 +83,7 @@ d_AV <- d_AV %>% relocate(vB_mnfctr_liable_AV_2, .after=vB_mnfctr_liable_AV_1)
 
 ## get mean age and gender:
 mean_age = mean(as.numeric(d$age), na.rm = TRUE) # removing NAs from the dataframe before computing mean 
-gender = table(d$gender)[1]/sum(table(d$gender))
+gender = table(d$gender)[1]/sum(table(d$gender)) # percent male
 
 ## ================================================================================================================
 ##                                                    SUBSETTING                 
@@ -135,6 +135,7 @@ mean(d_merged[d_merged$cond_name == "av",]$vA_liable)
 mean(d_merged[d_merged$cond_name == "human",]$vA_liable)
 sd(d_merged[d_merged$cond_name == "av",]$vA_liable)
 sd(d_merged[d_merged$cond_name == "human",]$vA_liable)
+cohen.d(d_merged$vA_liable, d_merged$cond_name)
 
 ## (2) LIABLE VEHICLE B MANUFACTURER VS LIABLE HDV DRIVER
 vB_m_v_d_liable_T <- t.test(vB_m_v_d_liable ~ cond_name, data = d_merged, paired = FALSE) 
@@ -145,6 +146,7 @@ mean(d_merged[d_merged$cond_name == "av",]$vB_m_v_d_liable)
 mean(d_merged[d_merged$cond_name == "human",]$vB_m_v_d_liable)
 sd(d_merged[d_merged$cond_name == "av",]$vB_m_v_d_liable)
 sd(d_merged[d_merged$cond_name == "human",]$vB_m_v_d_liable)
+cohen.d(d_merged$vB_m_v_d_liable, d_merged$cond_name)
 
 ## (3) LIABLE VEHICLE B MANUFACTURER VS LIABLE HDV MANUFACTURER
 vB_m_v_m_liable_T <- t.test(vB_m_v_m_liable ~ cond_name, data = d_merged, paired = FALSE) 
@@ -155,6 +157,7 @@ mean(d_merged[d_merged$cond_name == "av",]$vB_m_v_m_liable)
 mean(d_merged[d_merged$cond_name == "human",]$vB_m_v_m_liable)
 sd(d_merged[d_merged$cond_name == "av",]$vB_m_v_m_liable)
 sd(d_merged[d_merged$cond_name == "human",]$vB_m_v_m_liable)
+cohen.d(d_merged$vB_m_v_m_liable, d_merged$cond_name)
 
 ## (4) CONSIDER VEHICLE A COUNTERFACTUAL
 vA_cntrfctl_T <- t.test(vA_cntrfctl ~ cond_name, data = d_merged, paired = FALSE) 
@@ -165,6 +168,7 @@ mean(d_merged[d_merged$cond_name == "av",]$vA_cntrfctl)
 mean(d_merged[d_merged$cond_name == "human",]$vA_cntrfctl)
 sd(d_merged[d_merged$cond_name == "av",]$vA_cntrfctl)
 sd(d_merged[d_merged$cond_name == "human",]$vA_cntrfctl)
+cohen.d(d_merged$vA_cntrfctl, d_merged$cond_name)
 
 ## (5) CONSIDER VEHICLE B COUNTERFACTUAL
 vB_cntrfctl_T <- t.test(vB_cntrfctl ~ cond_name, data = d_merged, paired = FALSE) 
@@ -175,6 +179,7 @@ mean(d_merged[d_merged$cond_name == "av",]$vB_cntrfctl)
 mean(d_merged[d_merged$cond_name == "human",]$vB_cntrfctl)
 sd(d_merged[d_merged$cond_name == "av",]$vB_cntrfctl)
 sd(d_merged[d_merged$cond_name == "human",]$vB_cntrfctl)
+cohen.d(d_merged$vB_cntrfctl, d_merged$cond_name)
 
 ## (6) VEHICLE B CAN AVOID
 avoid_T <- t.test(avoid ~ cond_name, data = d_merged, paired = FALSE) 
@@ -185,6 +190,7 @@ mean(d_merged[d_merged$cond_name == "av",]$avoid)
 mean(d_merged[d_merged$cond_name == "human",]$avoid)
 sd(d_merged[d_merged$cond_name == "av",]$avoid)
 sd(d_merged[d_merged$cond_name == "human",]$avoid)
+cohen.d(d_merged$avoid, d_merged$cond_name)
 
 cor(d_merged[,2:7])
 
@@ -221,19 +227,19 @@ process(data = d_merged, y = "vB_m_v_d_liable", x = "cond_n",
 # MODERATED SERIAL MEDIATION (POLITICAL AFFILIATION)
 # 87 = B path, 83 = A path, 91 = center path
 process(data = d_merged, y = "vB_m_v_m_liable", x = "cond_n", 
-        m =c("vB_cntrfctl", "avoid"), w = "pol_affil", model = 87, effsize =1, total =1, stand =1, 
+        m =c("vB_cntrfctl", "avoid"), w = "pol_affil", model = 83, effsize =1, total =1, stand =1, 
         contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
 process(data = d_merged, y = "vB_m_v_d_liable", x = "cond_n", 
-        m =c("vB_cntrfctl", "avoid"), w = "pol_affil", model = 87, effsize =1, total =1, stand =1, 
+        m =c("vB_cntrfctl", "avoid"), w = "pol_affil", model = 83, effsize =1, total =1, stand =1, 
         contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
 
 # MODERATED SERIAL MEDIATION (DRIVING ABILITY)
 # 87 = B path, 83 = A path, 91 = center path
 process(data = d_merged, y = "vB_m_v_m_liable", x = "cond_n", 
-        m =c("vB_cntrfctl", "avoid"), w = "driving_abil", model = 87, effsize =1, total =1, stand =1, 
+        m =c("vB_cntrfctl", "avoid"), w = "driving_abil", model = 91, effsize =1, total =1, stand =1, 
         contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
 process(data = d_merged, y = "vB_m_v_d_liable", x = "cond_n", 
-        m =c("vB_cntrfctl", "avoid"), w = "driving_abil", model = 87, effsize =1, total =1, stand =1, 
+        m =c("vB_cntrfctl", "avoid"), w = "driving_abil", model = 91, effsize =1, total =1, stand =1, 
         contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
 
 ## ================================================================================================================
