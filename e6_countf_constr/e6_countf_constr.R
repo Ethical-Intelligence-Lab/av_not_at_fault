@@ -192,6 +192,11 @@ vA_liable_T_scen$parameter
 vA_liable_T_scen$statistic
 vA_liable_T_scen$p.value
 
+vA_liable_T_cnstr <- t.test(d_merged$vA_liable[d_merged$scen_name=="cnstr" & d_merged$agent_name == "av"], 
+                            d_merged$vA_liable[d_merged$scen_name=="cnstr" & d_merged$agent_name == "human"], paired=FALSE)
+vA_liable_T_uncnstr <- t.test(d_merged$vA_liable[d_merged$scen_name=="uncnstr" & d_merged$agent_name == "av"], 
+                              d_merged$vA_liable[d_merged$scen_name=="uncnstr" & d_merged$agent_name == "human"], paired=FALSE)
+
 ## (2) LIABLE VEHICLE B MANUFACTURER VS LIABLE HDV DRIVER
 vB_m_v_d_liable_T_agent <- t.test(vB_m_v_d_liable ~ agent_name, data = d_merged, paired = FALSE) 
 vB_m_v_d_liable_T_agent$parameter
@@ -202,6 +207,11 @@ vB_m_v_d_liable_T_scen <- t.test(vB_m_v_d_liable ~ scen_name, data = d_merged, p
 vB_m_v_d_liable_T_scen$parameter
 vB_m_v_d_liable_T_scen$statistic
 vB_m_v_d_liable_T_scen$p.value
+
+vB_m_v_d_liable_T_cnstr <- t.test(d_merged$vB_m_v_d_liable[d_merged$scen_name=="cnstr" & d_merged$agent_name == "av"], 
+                                  d_merged$vB_m_v_d_liable[d_merged$scen_name=="cnstr" & d_merged$agent_name == "human"], paired=FALSE)
+vB_m_v_d_liable_T_uncnstr <- t.test(d_merged$vB_m_v_d_liable[d_merged$scen_name=="uncnstr" & d_merged$agent_name == "av"], 
+                                    d_merged$vB_m_v_d_liable[d_merged$scen_name=="uncnstr" & d_merged$agent_name == "human"], paired=FALSE)
 
 ## (3) LIABLE VEHICLE B MANUFACTURER VS LIABLE HDV MANUFACTURER
 vB_m_v_m_liable_T_agent <- t.test(vB_m_v_m_liable ~ agent_name, data = d_merged, paired = FALSE) 
@@ -214,6 +224,11 @@ vB_m_v_m_liable_T_scen$parameter
 vB_m_v_m_liable_T_scen$statistic
 vB_m_v_m_liable_T_scen$p.value
 
+vB_m_v_m_liable_T_cnstr <- t.test(d_merged$vB_m_v_m_liable[d_merged$scen_name=="cnstr" & d_merged$agent_name == "av"], 
+                                  d_merged$vB_m_v_m_liable[d_merged$scen_name=="cnstr" & d_merged$agent_name == "human"], paired=FALSE)
+vB_m_v_m_liable_T_uncnstr <- t.test(d_merged$vB_m_v_m_liable[d_merged$scen_name=="uncnstr" & d_merged$agent_name == "av"], 
+                                    d_merged$vB_m_v_m_liable[d_merged$scen_name=="uncnstr" & d_merged$agent_name == "human"], paired=FALSE)
+
 ## (4) CONSIDER VEHICLE A COUNTERFACTUAL
 vA_cntrfctl_T_agent <- t.test(vA_cntrfctl ~ agent_name, data = d_merged, paired = FALSE) 
 vA_cntrfctl_T_agent$parameter
@@ -224,6 +239,11 @@ vA_cntrfctl_T_scen <- t.test(vA_cntrfctl ~ scen_name, data = d_merged, paired = 
 vA_cntrfctl_T_scen$parameter
 vA_cntrfctl_T_scen$statistic
 vA_cntrfctl_T_scen$p.value
+
+vA_cntrfctl_T_cnstr <- t.test(d_merged$vA_cntrfctl[d_merged$scen_name=="cnstr" & d_merged$agent_name == "av"], 
+                              d_merged$vA_cntrfctl[d_merged$scen_name=="cnstr" & d_merged$agent_name == "human"], paired=FALSE)
+vA_cntrfctl_T_uncnstr <- t.test(d_merged$vA_cntrfctl[d_merged$scen_name=="uncnstr" & d_merged$agent_name == "av"], 
+                                d_merged$vA_cntrfctl[d_merged$scen_name=="uncnstr" & d_merged$agent_name == "human"], paired=FALSE)
 
 ## (5) CONSIDER VEHICLE B COUNTERFACTUAL
 vB_cntrfctl_T_agent <- t.test(vB_cntrfctl ~ agent_name, data = d_merged, paired = FALSE) 
@@ -236,6 +256,11 @@ vB_cntrfctl_T_scen$parameter
 vB_cntrfctl_T_scen$statistic
 vB_cntrfctl_T_scen$p.value
 
+vB_cntrfctl_T_cnstr <- t.test(d_merged$vB_cntrfctl[d_merged$scen_name=="cnstr" & d_merged$agent_name == "av"], 
+                              d_merged$vB_cntrfctl[d_merged$scen_name=="cnstr" & d_merged$agent_name == "human"], paired=FALSE)
+vB_cntrfctl_T_uncnstr <- t.test(d_merged$vB_cntrfctl[d_merged$scen_name=="uncnstr" & d_merged$agent_name == "av"], 
+                                d_merged$vB_cntrfctl[d_merged$scen_name=="uncnstr" & d_merged$agent_name == "human"], paired=FALSE)
+
 ## (6) VEHICLE B CAN AVOID
 avoid_T_agent <- t.test(avoid ~ agent_name, data = d_merged, paired = FALSE) 
 avoid_T_agent$parameter
@@ -247,7 +272,12 @@ avoid_T_scen$parameter
 avoid_T_scen$statistic
 avoid_T_scen$p.value
 
-cor(d_merged[,2:7])
+avoid_T_cnstr <- t.test(d_merged$avoid[d_merged$scen_name=="cnstr" & d_merged$agent_name == "av"], 
+                        d_merged$avoid[d_merged$scen_name=="cnstr" & d_merged$agent_name == "human"], paired=FALSE)
+avoid_T_uncnstr <- t.test(d_merged$avoid[d_merged$scen_name=="uncnstr" & d_merged$agent_name == "av"], 
+                        d_merged$avoid[d_merged$scen_name=="uncnstr" & d_merged$agent_name == "human"], paired=FALSE)
+
+cor(d_merged[,3:8])
 
 ## ================================================================================================================
 ##                                             MEDIATION ANALYSIS              
@@ -447,6 +477,181 @@ figure1 <- annotate_figure(figure1,left = text_grob("Mean Agreement", color="bla
                 bottom = text_grob("Vehicle Type", color="black", face ="plain",size=16)) 
 
 plot(figure1)
+
+## ================================================================================================================
+##                                              PLOTTING MAIN FIGURES                 
+## ================================================================================================================
+
+## plotting all measures
+t_names <- c("Constrained", "Unconstrained")
+
+# (1) VA driver liable
+cnstr_anno <- get_annotation(vA_liable_T_cnstr$p.value)
+uncnstr_anno <- get_annotation(vA_liable_T_uncnstr$p.value)
+dev.new(width=13,height=6,noRStudioGD = TRUE)
+p3_1 <- ggplot(d_merged,aes(x=factor(scen_name),y=vA_liable, fill=agent_name)) +  
+  theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
+  geom_signif(y_position = 105.00, xmin = c(0.8,1.8), xmax = c(1.2,2.2), annotation = c(unlist(cnstr_anno[1]),unlist(uncnstr_anno[1])), textsize=7.5)
+p3_1 <- p3_1 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
+  scale_x_discrete(labels=t_names) +
+  ggtitle("Veh. A Driver Liability") +
+  xlab ("Scenario Type") + ylab ("Measure") +
+  theme_classic() +
+  theme(axis.text.x = element_text(size=15)) +
+  theme(axis.text.y = element_text(size=15)) +
+  theme(axis.title = element_text(size=18)) +
+  theme(plot.title = element_text(size=18, hjust=0.5)) +
+  theme(legend.text=element_text(size=14),legend.title=element_text(size=14), legend.position="top")+
+  labs(fill='')+
+  geom_violin(width=0.9, alpha=0.38, size=0.75) +  
+  geom_sina(alpha=0.6, size=0.95, color = "#999999") +
+  stat_summary(fun.data = "mean_cl_boot", color = "black", 
+               size=0.4, 
+               position = position_dodge(width = 0.9)) +
+  stat_summary(fun.data = "mean_cl_boot", color = "black", 
+               position = position_dodge(width = 0.9),
+               geom="errorbar", width = 0.2)
+p3_1
+
+## (2) VB manufacturer/driver liability
+cnstr_anno <- get_annotation(vB_m_v_d_liable_T_cnstr$p.value)
+uncnstr_anno <- get_annotation(vB_m_v_d_liable_T_uncnstr$p.value)
+dev.new(width=13,height=6,noRStudioGD = TRUE)
+p3_2 <- ggplot(d_merged,aes(x=factor(scen_name),y=vB_m_v_d_liable, fill=agent_name)) +  
+  theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
+  geom_signif(y_position = 105.00, xmin = c(0.8,1.8), xmax = c(1.2,2.2), annotation = c(unlist(cnstr_anno[1]),unlist(uncnstr_anno[1])), textsize=7.5)
+p3_2 <- p3_2 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
+  scale_x_discrete(labels=t_names) +
+  ggtitle("Veh. B Manufacturer\nor Driver Liability") +
+  xlab ("Scenario Type") + ylab ("Measure") +
+  theme_classic() +
+  theme(axis.text.x = element_text(size=15)) +
+  theme(axis.text.y = element_text(size=15)) +
+  theme(axis.title = element_text(size=18)) +
+  theme(plot.title = element_text(size=18, hjust=0.5)) +
+  theme(legend.text=element_text(size=14),legend.title=element_text(size=14), legend.position="top")+
+  labs(fill='')+
+  geom_violin(width=0.9, alpha=0.38, size=0.75) +  
+  geom_sina(alpha=0.6, size=0.95, color = "#999999") +
+  stat_summary(fun.data = "mean_cl_boot", color = "black", 
+               size=0.4, 
+               position = position_dodge(width = 0.9)) +
+  stat_summary(fun.data = "mean_cl_boot", color = "black", 
+               position = position_dodge(width = 0.9),
+               geom="errorbar", width = 0.2)
+p3_2
+
+## (3) VB manufacturer liability
+cnstr_anno <- get_annotation(vB_m_v_m_liable_T_cnstr$p.value)
+uncnstr_anno <- get_annotation(vB_m_v_m_liable_T_uncnstr$p.value)
+dev.new(width=13,height=6,noRStudioGD = TRUE)
+p3_3 <- ggplot(d_merged,aes(x=factor(scen_name),y=vB_m_v_m_liable, fill=agent_name)) +  
+  theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
+  geom_signif(y_position = 105.00, xmin = c(0.8,1.8), xmax = c(1.2,2.2), annotation = c(unlist(cnstr_anno[1]),unlist(uncnstr_anno[1])), textsize=7.5)
+p3_3 <- p3_3 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
+  scale_x_discrete(labels=t_names) +
+  ggtitle("Veh. B Manufacturer Liability") +
+  xlab ("Scenario Type") + ylab ("Measure") +
+  theme_classic() +
+  theme(axis.text.x = element_text(size=15)) +
+  theme(axis.text.y = element_text(size=15)) +
+  theme(axis.title = element_text(size=18)) +
+  theme(plot.title = element_text(size=18, hjust=0.5)) +
+  theme(legend.text=element_text(size=14),legend.title=element_text(size=14), legend.position="top")+
+  labs(fill='')+
+  geom_violin(width=0.9, alpha=0.38, size=0.75) +  
+  geom_sina(alpha=0.6, size=0.95, color = "#999999") +
+  stat_summary(fun.data = "mean_cl_boot", color = "black", 
+               size=0.4, 
+               position = position_dodge(width = 0.9)) +
+  stat_summary(fun.data = "mean_cl_boot", color = "black", 
+               position = position_dodge(width = 0.9),
+               geom="errorbar", width = 0.2)
+p3_3
+
+## (4) VA counterfactual
+cnstr_anno <- get_annotation(vA_cntrfctl_T_cnstr$p.value)
+uncnstr_anno <- get_annotation(vA_cntrfctl_T_uncnstr$p.value)
+dev.new(width=13,height=6,noRStudioGD = TRUE)
+p3_4 <- ggplot(d_merged,aes(x=factor(scen_name),y=vA_cntrfctl, fill=agent_name)) +  
+  theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
+  geom_signif(y_position = 105.00, xmin = c(0.8,1.8), xmax = c(1.2,2.2), annotation = c(unlist(cnstr_anno[1]),unlist(uncnstr_anno[1])), textsize=7.5)
+p3_4 <- p3_4 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
+  scale_x_discrete(labels=t_names) +
+  ggtitle("Consider Veh. A Counterfactual") +
+  xlab ("Scenario Type") + ylab ("Measure") +
+  theme_classic() +
+  theme(axis.text.x = element_text(size=15)) +
+  theme(axis.text.y = element_text(size=15)) +
+  theme(axis.title = element_text(size=18)) +
+  theme(plot.title = element_text(size=18, hjust=0.5)) +
+  theme(legend.text=element_text(size=14),legend.title=element_text(size=14), legend.position="top")+
+  labs(fill='')+
+  geom_violin(width=0.9, alpha=0.38, size=0.75) +  
+  geom_sina(alpha=0.6, size=0.95, color = "#999999") +
+  stat_summary(fun.data = "mean_cl_boot", color = "black", 
+               size=0.4, 
+               position = position_dodge(width = 0.9)) +
+  stat_summary(fun.data = "mean_cl_boot", color = "black", 
+               position = position_dodge(width = 0.9),
+               geom="errorbar", width = 0.2)
+p3_4
+
+## (5) VB counterfactual
+cnstr_anno <- get_annotation(vB_cntrfctl_T_cnstr$p.value)
+uncnstr_anno <- get_annotation(vB_cntrfctl_T_uncnstr$p.value)
+dev.new(width=13,height=6,noRStudioGD = TRUE)
+p3_5 <- ggplot(d_merged,aes(x=factor(scen_name),y=vB_cntrfctl, fill=agent_name)) +  
+  theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
+  geom_signif(y_position = 105.00, xmin = c(0.8,1.8), xmax = c(1.2,2.2), annotation = c(unlist(cnstr_anno[1]),unlist(uncnstr_anno[1])), textsize=7.5)
+p3_5 <- p3_5 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
+  scale_x_discrete(labels=t_names) +
+  ggtitle("Consider Veh. B Counterfactual") +
+  xlab ("Scenario Type") + ylab ("Measure") +
+  theme_classic() +
+  theme(axis.text.x = element_text(size=15)) +
+  theme(axis.text.y = element_text(size=15)) +
+  theme(axis.title = element_text(size=18)) +
+  theme(plot.title = element_text(size=18, hjust=0.5)) +
+  theme(legend.text=element_text(size=14),legend.title=element_text(size=14), legend.position="top")+
+  labs(fill='')+
+  geom_violin(width=0.9, alpha=0.38, size=0.75) +  
+  geom_sina(alpha=0.6, size=0.95, color = "#999999") +
+  stat_summary(fun.data = "mean_cl_boot", color = "black", 
+               size=0.4, 
+               position = position_dodge(width = 0.9)) +
+  stat_summary(fun.data = "mean_cl_boot", color = "black", 
+               position = position_dodge(width = 0.9),
+               geom="errorbar", width = 0.2)
+p3_5
+
+## (6) Capability to Avoid
+cnstr_anno <- get_annotation(avoid_T_cnstr$p.value)
+uncnstr_anno <- get_annotation(avoid_T_uncnstr$p.value)
+dev.new(width=13,height=6,noRStudioGD = TRUE)
+p3_6 <- ggplot(d_merged,aes(x=factor(scen_name),y=avoid, fill=agent_name)) +  
+  theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
+  geom_signif(y_position = 105.00, xmin = c(0.8,1.8), xmax = c(1.2,2.2), annotation = c(unlist(cnstr_anno[1]),unlist(uncnstr_anno[1])), textsize=7.5)
+p3_6 <- p3_6 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
+  scale_x_discrete(labels=t_names) +
+  ggtitle("Capability to Avoid") +
+  xlab ("Scenario Type") + ylab ("Measure") +
+  theme_classic() +
+  theme(axis.text.x = element_text(size=15)) +
+  theme(axis.text.y = element_text(size=15)) +
+  theme(axis.title = element_text(size=18)) +
+  theme(plot.title = element_text(size=18, hjust=0.5)) +
+  theme(legend.text=element_text(size=14),legend.title=element_text(size=14), legend.position="top")+
+  labs(fill='')+
+  geom_violin(width=0.9, alpha=0.38, size=0.75) +  
+  geom_sina(alpha=0.6, size=0.95, color = "#999999") +
+  stat_summary(fun.data = "mean_cl_boot", color = "black", 
+               size=0.4, 
+               position = position_dodge(width = 0.9)) +
+  stat_summary(fun.data = "mean_cl_boot", color = "black", 
+               position = position_dodge(width = 0.9),
+               geom="errorbar", width = 0.2)
+p3_6
 
 ## ================================================================================================================
 ##                                              PLOTTING MAIN FIGURES                 
