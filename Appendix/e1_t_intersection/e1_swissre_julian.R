@@ -25,8 +25,6 @@ pacman::p_load('ggplot2',         # plotting
                'pwr',             # package for power calculation
                'nlme',            # get p values for mixed effect model
                'DescTools',       # get Cramer's V
-               'compute.es',      # effect size package
-               'effsize',         # another effect size package
                'Hmisc'
 )
 
@@ -37,10 +35,10 @@ pacman::p_load('ggplot2',         # plotting
 ## read in data: 
 # if importing from Qualtrics: (i) export data as numeric values, and (ii) delete rows 2 and 3 of the .csv file.
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path)) #set working directory to current directory
-d <- read.csv('p1_e2_data.csv')
+d <- read.csv('e1_data.csv')
 
 ## explore dataframe: 
-dim(d) # will provide dimensions of the dataframe by row [1] and column [2]
+dim <- dim(d) # will provide dimensions of the dataframe by row [1] and column [2]
 colnames(d) # will provide all column names
 summary(d)
 
@@ -79,37 +77,26 @@ d_AV <- d_AV[-c(21:28,36:50)]
 d_HDV <- d_HDV[-c(21:35,36:43)]
 
 ## get mean age and gender:
-mean_age = mean(as.numeric(d$age), na.rm = TRUE) # removing NAs from the dataframe before computing mean 
-gender = table(d$gender)[2]/sum(table(d$gender))
+# mean(d$age, na.rm = TRUE) # removing NAs from the dataframe before computing mean 
+mean_age = mean(as.numeric(d$age), na.rm = TRUE)
+table(d$gender)[2]/sum(table(d$gender))
+
 
 ## ================================================================================================================
 ##                                                    SUBSETTING                 
 ## ================================================================================================================
 
 ## define new data frame to extract pre-processed data into:
-d_subset <- array(dim=c(n_final, 13))
+d_subset <- array(dim=c(n_final, 12))
 colnames(d_subset) <- c('cond', 'vA_sue', 'vB_sue', 'defective', 'negligence', 'counterfactual', 
-                        'capability', 'fault', 'superhuman', 'comp1', 'comp2', 'familiarity', 'mod')
+                        'capability', 'fault', 'superhuman', 'comp1', 'comp2', 'familiarity')
 d_subset <- as.data.frame(d_subset, stringsAsFactors=FALSE) 
-
-## assess moderator data from both AV and HDV
-moderator_mat = rbind(d_AV[31:35], d_HDV[31:35])
-# reverse code one moderator
-moderator_mat$av_trust_5_1 = 100 - as.numeric(moderator_mat$av_trust_5_1)
-moderator_mat <- data.frame(sapply(moderator_mat, as.numeric))
-cb_alpha = cronbach.alpha(moderator_mat)
-
-#d_AV$moderator <- rowMeans(sapply(d_AV[31:35], as.numeric))
-#d_HDV$moderator <- rowMeans(d_HDV[31:35])
-
-moderator_mat$moderator <- rowMeans(moderator_mat)
 
 ## extract good data from the middle part of raw data in AV:
 for(i in 1:n_final_AV) {
   curr <- d_AV[i,21:31][!is.na(d_AV[i,21:31])] # for a given row, get only the non-NA values
   d_subset[i,2:12] <- as.numeric(curr[curr!= ""]) # and only the non-empty values
-  d_subset[i,13] <- moderator_mat$moderator[i]
-  d_subset[i,1] <- d_AV[i,43][!is.na(d_AV[i,43])]
+  d_subset[i,1] <- d_AV[i,37][!is.na(d_AV[i,37])]
 }
 
 ## extract good data from the middle part of raw data in HDV:
@@ -117,11 +104,10 @@ for(i in 1:n_final_HDV) {
   j = i+n_final_AV
   curr <- d_HDV[i,21:31][!is.na(d_HDV[i,21:31])] # for a given row, get only the non-NA values
   d_subset[j,2:12] <- as.numeric(curr) # and only the non-empty values
-  d_subset[j,13] <- moderator_mat$moderator[j]
-  d_subset[j,1] <- d_HDV[i,43][!is.na(d_HDV[i,43])]
+  d_subset[j,1] <- d_HDV[i,37][!is.na(d_HDV[i,37])]
 }
 
-## just to keep the df names straight for next section
+## keep the df names straight for next section
 d_merged <- d_subset
 
 names(d_merged)[names(d_merged) == 'defective'] <- 'defec'
@@ -131,7 +117,6 @@ names(d_merged)[names(d_merged) == 'capability'] <- 'capab'
 names(d_merged)[names(d_merged) == 'superhuman'] <- 'superh'
 
 d_merged$countf2 <- d_merged$countf
-
 d_merged$cond_name <- ifelse(d_merged$cond=="FL_39", "av", "human")
 d_merged$cond_n <- ifelse(d_merged$cond_name=="av", 1, 2)
 
@@ -139,10 +124,11 @@ d_merged$cond_n <- ifelse(d_merged$cond_name=="av", 1, 2)
 ##                                             DATA ANALYSIS - T-TESTS               
 ## ================================================================================================================
 
+## run t-tests to compare friendship, partnership, and willingness to pay measures between conditions:
 table(d_merged$con) #give us table of number of people in each condition - want to have equal number of people in each condition
 
 ## (1) SUE VEHICLE A DRIVER
-vA_sue_T <- t.test(vA_sue ~ cond_name, data = d_merged, paired = FALSE) 
+vA_sue_T <- t.test(vA_sue ~ cond_name, data = d_merged, paired = FALSE)
 vA_sue_T$parameter
 vA_sue_T$statistic
 vA_sue_T$p.value
@@ -152,7 +138,7 @@ sd(d_merged[d_merged$cond_name == "av",]$vA_sue)
 sd(d_merged[d_merged$cond_name == "human",]$vA_sue)
 
 ## (2) SUE VEHICLE B MANUFACTURER
-vB_sue_T <- t.test(vB_sue ~ cond_name, data = d_merged, paired = FALSE) 
+vB_sue_T <- t.test(vB_sue ~ cond_name, data = d_merged, paired = FALSE)
 vB_sue_T$parameter
 vB_sue_T$statistic
 vB_sue_T$p.value
@@ -160,7 +146,6 @@ mean(d_merged[d_merged$cond_name == "av",]$vB_sue)
 mean(d_merged[d_merged$cond_name == "human",]$vB_sue)
 sd(d_merged[d_merged$cond_name == "av",]$vB_sue)
 sd(d_merged[d_merged$cond_name == "human",]$vB_sue)
-d_merged %>% cohens_d(vB_sue ~ cond_name, paired = FALSE, var.equal = TRUE)
 
 ## (3) VEHICLE B DEFECTIVE
 defective_T <- t.test(defec ~ cond_name, data = d_merged, paired = FALSE) 
@@ -173,7 +158,7 @@ sd(d_merged[d_merged$cond_name == "av",]$defec)
 sd(d_merged[d_merged$cond_name == "human",]$defec)
 
 ## (4) VEHICLE B NEGLIGENT
-negligent_T <- t.test(negl ~ cond_name, data = d_merged, paired = FALSE) 
+negligent_T <- t.test(negl ~ cond_name, data = d_merged, paired = FALSE)
 negligent_T$parameter
 negligent_T$statistic
 negligent_T$p.value
@@ -183,7 +168,7 @@ sd(d_merged[d_merged$cond_name == "av",]$negl)
 sd(d_merged[d_merged$cond_name == "human",]$negl)
 
 ## (5) COUNTERFACTUAL
-counterfactual_T <- t.test(countf ~ cond_name, data = d_merged, paired = FALSE) 
+counterfactual_T <- t.test(countf ~ cond_name, data = d_merged, paired = FALSE)
 counterfactual_T$parameter
 counterfactual_T$statistic
 counterfactual_T$p.value
@@ -202,7 +187,7 @@ mean(d_merged[d_merged$cond_name == "human",]$capab)
 sd(d_merged[d_merged$cond_name == "av",]$capab)
 sd(d_merged[d_merged$cond_name == "human",]$capab)
 
-## (7) FAULT
+## (7) FAULT or EXPECTATIONS
 fault_T <- t.test(fault ~ cond_name, data = d_merged, paired = FALSE) 
 fault_T$parameter
 fault_T$statistic
@@ -224,27 +209,17 @@ sd(d_merged[d_merged$cond_name == "human",]$superh)
 
 cor(d_merged[,2:9])
 
-#
-d_merged$trust_level <- ifelse(d_merged$mod>50, "High trust in AVs", "Low trust in AVs")
-d_merged$trust_level_n <- ifelse(d_merged$trust_level=="High trust in AVs",2,1)
-
-
 mod <- lm(countf ~ cond_name*superh, data = d_merged)
 summary(mod)
 
-mod_med <- median(d_merged$mod)
-median(d_merged$mod)
+## cor.test(d_merged$firm_sue, d_merged$v2_sue)
 
-d_merged$cond_name <- as.factor(d_merged$cond_name)
-d_merged$trust_level <- as.factor(d_merged$trust_level)
+## cor.test(d_merged$moral, d_merged$moral, data = d_merged)
+## cor.test(d_merged$blame_av, d_merged$moral, data = d_merged)
+## cor.test(d_merged$blame_firm, d_merged$moral, data = d_merged)
+## cor.test(d_merged$blame_v2, d_merged$moral, data = d_merged)
 
-mod <- aov(countf ~ trust_level*cond_name, data=d_merged)
-summary(mod)
-
-t.test(d_merged$countf[d_merged$cond_name=="av" & d_merged$trust_level_n == 1], d_merged$countf[d_merged$cond_name=="av" & d_merged$trust_level_n == 2], paired=FALSE)
-t.test(d_merged$countf[d_merged$cond_name=="human" & d_merged$trust_level_n == 1], d_merged$countf[d_merged$cond_name=="human" & d_merged$trust_level_n == 2], paired=FALSE)
-
-write.csv(d_merged, 'e2_processed.csv')
+write.csv(d_merged, 'e1_processed.csv')
 
 ## ================================================================================================================
 ##                                             MEDIATION ANALYSIS              
@@ -252,10 +227,11 @@ write.csv(d_merged, 'e2_processed.csv')
 
 d_merged$cond_n <- ifelse(d_merged$cond=="FL_39", 1, 2)
 
-# MODERATED SERIAL MEDIATION
-# 87 = B path, 83 = A path, 91 = center path
-process(data = d_merged, y = "vB_sue", x = "cond_n", 
-        m =c("countf", "defec"), w = "mod", model = 91, effsize =1, total =1, stand =1, 
+
+# SINGLE MEDIATION
+# investigate possible mediators
+process(data = d_merged, y = "vB_sue", x = "cond_n",
+        m =c("countf", "capab", "defec", "fault", "negl"), model = 4, effsize =1, total =1, stand =1,
         contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
 
 # SERIAL MEDIATION
@@ -263,6 +239,11 @@ process(data = d_merged, y = "vB_sue", x = "cond_n",
         m =c("countf", "defec"), model = 6, effsize =1, total =1, stand =1, 
         contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
 
+# MODERATED SERIAL MEDIATION
+# 87 = B path, 83 = A path, 91 = center path
+process(data = d_merged, y = "vB_sue", x = "cond_n", 
+        m =c("countf", "defec"), w = "superh", model = 83, effsize =1, total =1, stand =1, 
+        contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
 
 
 ## ================================================================================================================
@@ -272,41 +253,11 @@ process(data = d_merged, y = "vB_sue", x = "cond_n",
 ## plotting all measures
 ## FL39 --> AV condition; FL40 --> HDV condition
 t_names <- c("AV", "HDV")
-title_size <- 12
-
-#plot trust v. counterfactual relationship
-dev.new(width=13,height=6,noRStudioGD = TRUE)
-
-p1_0 <- ggplot(d_merged,aes(x=factor(cond_name),y=countf, fill=trust_level)) +  
-  theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
-  geom_signif(y_position = 105.00, xmin = c(0.8,1.8), xmax = c(1.2,2.2), annotation = c("***","ns"), textsize=7.5)
-
-
-p1_0 <- p1_0 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
-  scale_x_discrete(labels=t_names) +
-  ggtitle("Agreement Wt. Counterfactual") +
-  xlab ("Vehicle Type") + ylab ("Mean Agreement") +
-  theme_classic() +
-  theme(axis.text.x = element_text(size=15)) +
-  theme(axis.text.y = element_text(size=15)) +
-  theme(axis.title = element_text(size=18)) +
-  theme(plot.title = element_text(size=18, hjust=0.5)) +
-  theme(legend.text=element_text(size=14),legend.title=element_text(size=14), legend.position="top")+
-  labs(fill='')+
-  geom_violin(width=0.9, alpha=0.38, size=0.75) +  
-  geom_sina(alpha=0.6, size=0.95, color = "#999999") +
-  stat_summary(fun.data = "mean_cl_boot", color = "black", 
-               size=0.4, 
-               position = position_dodge(width = 0.9)) +
-  stat_summary(fun.data = "mean_cl_boot", color = "black", 
-               position = position_dodge(width = 0.9),
-               geom="errorbar", width = 0.2)
-p1_0
 
 ## (1) Sue VA driver
 p1_1 <- ggplot(d_merged,aes(x=factor(cond_name),y=vA_sue)) +  
   theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
-  geom_signif(comparisons = list(c("av", "human")), annotation="^", textsize = 5.5)
+  geom_signif(comparisons = list(c("av", "human")), annotation="NS", textsize = 3)
 
 p1_1 <- p1_1 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
   scale_x_discrete(labels=t_names) +
@@ -315,11 +266,12 @@ p1_1 <- p1_1 + theme(text = element_text(size=16),panel.grid.major = element_bla
   theme_classic() +
   theme(axis.text.x = element_text(size=12)) +
   theme(axis.text.y = element_text(size=10)) +
-  theme(plot.title = element_text(size=title_size, hjust=0.5)) +
-  geom_violin(width=0.9, alpha=0.38, size=0.75) +  
-  geom_sina(alpha=0.6, size=0.95, color = "#999999") +
+  theme(plot.title = element_text(size=12, hjust=0.5)) +
+  geom_bar(stat="summary", width = 0.9, alpha = 0.38, size = 0.75) +
+  # geom_violin(width=0.9, alpha=0.38, size=0.75) +  
+  # geom_sina(alpha=0.6, size=0.95, color = "#999999") +
   stat_summary(fun.data = "mean_cl_boot", color = "black", 
-               size=0.4, 
+               size=0.4,
                position = position_dodge(width = 0.9)) +
   stat_summary(fun.data = "mean_cl_boot", color = "black", 
                position = position_dodge(width = 0.9),
@@ -329,7 +281,7 @@ p1_1
 ## (2) Sue VB manufacturer
 p1_2 <- ggplot(d_merged,aes(x=factor(cond_name),y=vB_sue)) +  
   theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
-  geom_signif(comparisons = list(c("av", "human")), annotation="**", textsize = 5.5)
+  geom_signif(comparisons = list(c("av", "human")), annotation="^", textsize = 5.5)
 
 p1_2 <- p1_2 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
   scale_x_discrete(labels=t_names) +
@@ -338,11 +290,12 @@ p1_2 <- p1_2 + theme(text = element_text(size=16),panel.grid.major = element_bla
   theme_classic() +
   theme(axis.text.x = element_text(size=12)) +
   theme(axis.text.y = element_text(size=10)) +
-  theme(plot.title = element_text(size=title_size, hjust=0.5)) +
-  geom_violin(width=0.9, alpha=0.38, size=0.75) +  
-  geom_sina(alpha=0.6, size=0.95, color = "#999999") +
+  theme(plot.title = element_text(size=12, hjust=0.5)) +
+  geom_bar(stat="summary", width = 0.9, alpha = 0.38, size = 0.75) +
+  # geom_violin(width=0.9, alpha=0.38, size=0.75) +  
+  # geom_sina(alpha=0.6, size=0.95, color = "#999999") +
   stat_summary(fun.data = "mean_cl_boot", color = "black", 
-               size=0.4, 
+               size=0.4,
                position = position_dodge(width = 0.9)) +
   stat_summary(fun.data = "mean_cl_boot", color = "black", 
                position = position_dodge(width = 0.9),
@@ -361,11 +314,12 @@ p1_3 <- p1_3 + theme(text = element_text(size=16),panel.grid.major = element_bla
   theme_classic() +
   theme(axis.text.x = element_text(size=12)) +
   theme(axis.text.y = element_text(size=10)) +
-  theme(plot.title = element_text(size=title_size, hjust=0.5)) +
-  geom_violin(width=0.9, alpha=0.38, size=0.75) +  
-  geom_sina(alpha=0.6, size=0.95, color = "#999999") +
+  theme(plot.title = element_text(size=12, hjust=0.5)) +
+  geom_bar(stat="summary", width = 0.9, alpha = 0.38, size = 0.75) +
+  # geom_violin(width=0.9, alpha=0.38, size=0.75) +  
+  # geom_sina(alpha=0.6, size=0.95, color = "#999999") +
   stat_summary(fun.data = "mean_cl_boot", color = "black", 
-               size=0.4, 
+               size=0.4,
                position = position_dodge(width = 0.9)) +
   stat_summary(fun.data = "mean_cl_boot", color = "black", 
                position = position_dodge(width = 0.9),
@@ -375,7 +329,7 @@ p1_3
 ## (4) VB Negligence
 p1_4 <- ggplot(d_merged,aes(x=factor(cond_name),y=negl)) +  
   theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
-  geom_signif(comparisons = list(c("av", "human")), annotation="**", textsize = 5.5)
+  geom_signif(comparisons = list(c("av", "human")), annotation="***", textsize = 5.5)
 
 p1_4 <- p1_4 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
   scale_x_discrete(labels=t_names) +
@@ -384,11 +338,12 @@ p1_4 <- p1_4 + theme(text = element_text(size=16),panel.grid.major = element_bla
   theme_classic() +
   theme(axis.text.x = element_text(size=12)) +
   theme(axis.text.y = element_text(size=10)) +
-  theme(plot.title = element_text(size=title_size, hjust=0.5)) +
-  geom_violin(width=0.9, alpha=0.38, size=0.75) +  
-  geom_sina(alpha=0.6, size=0.95, color = "#999999") +
+  theme(plot.title = element_text(size=12, hjust=0.5)) +
+  geom_bar(stat="summary", width = 0.9, alpha = 0.38, size = 0.75) +
+  # geom_violin(width=0.9, alpha=0.38, size=0.75) +  
+  # geom_sina(alpha=0.6, size=0.95, color = "#999999") +
   stat_summary(fun.data = "mean_cl_boot", color = "black", 
-               size=0.4, 
+               size=0.4,
                position = position_dodge(width = 0.9)) +
   stat_summary(fun.data = "mean_cl_boot", color = "black", 
                position = position_dodge(width = 0.9),
@@ -407,11 +362,12 @@ p1_5 <- p1_5 + theme(text = element_text(size=16),panel.grid.major = element_bla
   theme_classic() +
   theme(axis.text.x = element_text(size=12)) +
   theme(axis.text.y = element_text(size=10)) +
-  theme(plot.title = element_text(size=title_size, hjust=0.5)) +
-  geom_violin(width=0.9, alpha=0.38, size=0.75) +  
-  geom_sina(alpha=0.6, size=0.95, color = "#999999") +
+  theme(plot.title = element_text(size=12, hjust=0.5)) +
+  geom_bar(stat="summary", width = 0.9, alpha = 0.38, size = 0.75) +
+  # geom_violin(width=0.9, alpha=0.38, size=0.75) +  
+  # geom_sina(alpha=0.6, size=0.95, color = "#999999") +
   stat_summary(fun.data = "mean_cl_boot", color = "black", 
-               size=0.4, 
+               size=0.4,
                position = position_dodge(width = 0.9)) +
   stat_summary(fun.data = "mean_cl_boot", color = "black", 
                position = position_dodge(width = 0.9),
@@ -421,7 +377,7 @@ p1_5
 ## (6) Capability to Avoid
 p1_6 <- ggplot(d_merged,aes(x=factor(cond_name),y=capab)) +  
   theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
-  geom_signif(comparisons = list(c("av", "human")), annotation="*", textsize = 5.5)
+  geom_signif(comparisons = list(c("av", "human")), annotation="***", textsize = 5.5)
 
 p1_6 <- p1_6 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
   scale_x_discrete(labels=t_names) +
@@ -430,11 +386,12 @@ p1_6 <- p1_6 + theme(text = element_text(size=16),panel.grid.major = element_bla
   theme_classic() +
   theme(axis.text.x = element_text(size=12)) +
   theme(axis.text.y = element_text(size=10)) +
-  theme(plot.title = element_text(size=title_size, hjust=0.5)) +
-  geom_violin(width=0.9, alpha=0.38, size=0.75) +  
-  geom_sina(alpha=0.6, size=0.95, color = "#999999") +
+  theme(plot.title = element_text(size=12, hjust=0.5)) +
+  geom_bar(stat="summary", width = 0.9, alpha = 0.38, size = 0.75) +
+  # geom_violin(width=0.9, alpha=0.38, size=0.75) +  
+  # geom_sina(alpha=0.6, size=0.95, color = "#999999") +
   stat_summary(fun.data = "mean_cl_boot", color = "black", 
-               size=0.4, 
+               size=0.4,
                position = position_dodge(width = 0.9)) +
   stat_summary(fun.data = "mean_cl_boot", color = "black", 
                position = position_dodge(width = 0.9),
@@ -444,7 +401,7 @@ p1_6
 ## (7) Avoid when not at fault
 p1_7 <- ggplot(d_merged,aes(x=factor(cond_name),y=fault)) +  
   theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
-  geom_signif(comparisons = list(c("av", "human")), annotation="NS", textsize = 3)
+  geom_signif(comparisons = list(c("av", "human")), annotation="***", textsize = 5.5)
 
 p1_7 <- p1_7 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
   scale_x_discrete(labels=t_names) +
@@ -453,11 +410,12 @@ p1_7 <- p1_7 + theme(text = element_text(size=16),panel.grid.major = element_bla
   theme_classic() +
   theme(axis.text.x = element_text(size=12)) +
   theme(axis.text.y = element_text(size=10)) +
-  theme(plot.title = element_text(size=title_size, hjust=0.5)) +
-  geom_violin(width=0.9, alpha=0.38, size=0.75) +  
-  geom_sina(alpha=0.6, size=0.95, color = "#999999") +
+  theme(plot.title = element_text(size=12, hjust=0.5)) +
+  geom_bar(stat="summary", width = 0.9, alpha = 0.38, size = 0.75) +
+  # geom_violin(width=0.9, alpha=0.38, size=0.75) +  
+  # geom_sina(alpha=0.6, size=0.95, color = "#999999") +
   stat_summary(fun.data = "mean_cl_boot", color = "black", 
-               size=0.4, 
+               size=0.4,
                position = position_dodge(width = 0.9)) +
   stat_summary(fun.data = "mean_cl_boot", color = "black", 
                position = position_dodge(width = 0.9),
@@ -476,11 +434,12 @@ p1_8 <- p1_8 + theme(text = element_text(size=16),panel.grid.major = element_bla
   theme_classic() +
   theme(axis.text.x = element_text(size=12)) +
   theme(axis.text.y = element_text(size=10)) +
-  theme(plot.title = element_text(size=title_size, hjust=0.5)) +
-  geom_violin(width=0.9, alpha=0.38, size=0.75) +  
-  geom_sina(alpha=0.6, size=0.95, color = "#999999") +
+  theme(plot.title = element_text(size=12, hjust=0.5)) +
+  geom_bar(stat="summary", width = 0.9, alpha = 0.38, size = 0.75) +
+  # geom_violin(width=0.9, alpha=0.38, size=0.75) +  
+  # geom_sina(alpha=0.6, size=0.95, color = "#999999") +
   stat_summary(fun.data = "mean_cl_boot", color = "black", 
-               size=0.4, 
+               size=0.4,
                position = position_dodge(width = 0.9)) +
   stat_summary(fun.data = "mean_cl_boot", color = "black", 
                position = position_dodge(width = 0.9),
@@ -488,25 +447,18 @@ p1_8 <- p1_8 + theme(text = element_text(size=16),panel.grid.major = element_bla
 p1_8
 
 ## PLOT SERIES 1
-dev.new(width=13,height=6,noRStudioGD = TRUE)
-figure1 <- ggarrange(p1_1, p1_2, p1_3, p1_4, p1_5, p1_6, p1_7, p1_8, nrow=2,ncol=4,common.legend = TRUE, legend="top", vjust = 1.0, hjust=0.5) 
-annotate_figure(figure1,left = text_grob("Mean Rating", color="black", face ="plain",size=16, rot=90),
-                bottom = text_grob("Scenario Condition", color="black", face ="plain",size=16)) 
-
-## PLOT SERIES 1
-dev.new(width=12,height=4,noRStudioGD = TRUE)
+dev.new(width=12,height=5,noRStudioGD = TRUE)
 figure1 <- ggarrange(p1_1, p1_2, p1_5, p1_3, nrow=1,ncol=4,common.legend = TRUE, legend="top", vjust = 1.0, hjust=0.5) 
 figure1 <- annotate_figure(figure1,left = text_grob("Mean Agreement", color="black", face ="plain",size=16, rot=90),
                 bottom = text_grob("Vehicle Type", color="black", face ="plain",size=16)) 
 
-
-dev.new(width=8,height=3,noRStudioGD = TRUE)
-figure1 <- ggarrange(p1_1, p1_2, nrow=1,ncol=2,common.legend = TRUE, legend="top", vjust = 1.0, hjust=0.5) 
-annotate_figure(figure1,left = text_grob("Mean Rating", color="black", face ="plain",size=20, rot=90),
-                bottom = text_grob("Vehicle Type", color="black", face ="plain",size=20)) 
-
+figure1 <- ggarrange(p1_2, p1_3, p1_5, nrow=1,ncol=3,common.legend = TRUE, legend="top", vjust = 1.0, hjust=0.5) 
+annotate_figure(figure1,left = text_grob("Mean Rating", color="black", face ="plain",size=16, rot=90),
+                bottom = text_grob("Scenario Condition", color="black", face ="plain",size=16)) 
 
 plot(figure1)
+figure1
+
 write.csv(d_merged, 'd_spss.csv')
 
 ## ================================================================================================================

@@ -312,8 +312,9 @@ p1 <- p1 + theme(text = element_text(size=16),panel.grid.major = element_blank()
   theme(axis.text.x = element_text(size=12)) +
   theme(axis.text.y = element_text(size=10)) +
   theme(plot.title = element_text(size=title_size, hjust=0.5)) +
-  geom_violin(width=0.9, alpha=0.38, size=0.75) +
-  geom_sina(alpha=0.6, size=0.95, color = "#999999") +
+  geom_bar(stat="summary", width = 0.9, alpha = 0.38, size = 0.75) +
+  # geom_violin(width=0.9, alpha=0.38, size=0.75) +  
+  # geom_sina(alpha=0.6, size=0.95, color = "#999999") +
   stat_summary(fun.data = "mean_cl_boot", color = "black", 
                size=0.4, 
                position = position_dodge(width = 0.9)) +
@@ -336,8 +337,9 @@ p2 <- p2 + theme(text = element_text(size=16),panel.grid.major = element_blank()
   theme(axis.text.x = element_text(size=12)) +
   theme(axis.text.y = element_text(size=10)) +
   theme(plot.title = element_text(size=title_size, hjust=0.5)) +
-  geom_violin(width=0.9, alpha=0.38, size=0.75) +
-  geom_sina(alpha=0.6, size=0.95, color = "#999999") +
+  geom_bar(stat="summary", width = 0.9, alpha = 0.38, size = 0.75) +
+  # geom_violin(width=0.9, alpha=0.38, size=0.75) +  
+  # geom_sina(alpha=0.6, size=0.95, color = "#999999") +
   stat_summary(fun.data = "mean_cl_boot", color = "black", 
                size=0.4, 
                position = position_dodge(width = 0.9)) +
@@ -360,8 +362,9 @@ p3 <- p3 + theme(text = element_text(size=16),panel.grid.major = element_blank()
   theme(axis.text.x = element_text(size=12)) +
   theme(axis.text.y = element_text(size=10)) +
   theme(plot.title = element_text(size=title_size, hjust=0.5)) +
-  geom_violin(width=0.9, alpha=0.38, size=0.75)+  
-  geom_sina(alpha=0.6, size=0.95, color = "#999999") +
+  geom_bar(stat="summary", width = 0.9, alpha = 0.38, size = 0.75) +
+  # geom_violin(width=0.9, alpha=0.38, size=0.75) +  
+  # geom_sina(alpha=0.6, size=0.95, color = "#999999") +
   stat_summary(fun.data = "mean_cl_boot", color = "black", 
                size=0.4, 
                position = position_dodge(width = 0.9)) +
@@ -406,8 +409,9 @@ p5 <- p5 + theme(text = element_text(size=16),panel.grid.major = element_blank()
   theme(axis.text.x = element_text(size=12)) +
   theme(axis.text.y = element_text(size=10)) +
   theme(plot.title = element_text(size=title_size, hjust=0.5)) +
-  geom_violin(width=0.9, alpha=0.38, size=0.75)+  
-  geom_sina(alpha=0.6, size=0.95, color = "#999999") +
+  geom_bar(stat="summary", width = 0.9, alpha = 0.38, size = 0.75) +
+  # geom_violin(width=0.9, alpha=0.38, size=0.75) +  
+  # geom_sina(alpha=0.6, size=0.95, color = "#999999") +
   stat_summary(fun.data = "mean_cl_boot", color = "black", 
                size=0.4, 
                position = position_dodge(width = 0.9)) +
@@ -463,7 +467,7 @@ p7 <- p7 + theme(text = element_text(size=16),panel.grid.major = element_blank()
 p7
 
 ## (4) ALL FIGURES
-dev.new(width=12,height=4,noRStudioGD = TRUE)
+dev.new(width=12,height=5,noRStudioGD = TRUE)
 
 figure <- ggarrange(p1, p2, p5, p3, nrow=1,ncol=4,common.legend = TRUE, legend="top", vjust = 1.0, hjust=0.5) 
 figure <- annotate_figure(figure,left = text_grob("Mean Agreement", color="black", face ="plain",size=16, rot=90),

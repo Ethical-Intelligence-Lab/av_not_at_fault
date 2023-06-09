@@ -36,7 +36,7 @@ pacman::p_load('ggplot2',         # plotting
 ## read in data: 
 # if importing from Qualtrics: (i) export data as numeric values, and (ii) delete rows 2 and 3 of the .csv file.
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path)) #set working directory to current directory
-d <- read.csv('high_powered_300.csv')
+d <- read.csv('high_powered_900.csv')
 
 ## explore dataframe: 
 dim(d) # will provide dimensions of the dataframe by row [1] and column [2]
@@ -236,6 +236,10 @@ get_annotation <- function(p_val) {
   }
 }
 
+## code for violin plots
+# geom_violin(width=0.9, alpha=0.38, size=0.75) +  
+#   geom_sina(alpha=0.6, size=0.95, color = "#999999") +
+
 ## (1) VA driver liable
 annotations <- get_annotation(vA_liable_T$p.value)
 p1_1 <- ggplot(d_merged,aes(x=factor(cond_name),y=vA_liable)) +  
@@ -250,8 +254,9 @@ p1_1 <- p1_1 + theme(text = element_text(size=16),panel.grid.major = element_bla
   theme(axis.text.x = element_text(size=12)) +
   theme(axis.text.y = element_text(size=10)) +
   theme(plot.title = element_text(size=12, hjust=0.5)) +
-  geom_violin(width=0.9, alpha=0.38, size=0.75) +  
-  geom_sina(alpha=0.6, size=0.95, color = "#999999") +
+  geom_bar(stat="summary", width = 0.9, alpha = 0.38, size = 0.75) +
+  # geom_violin(width=0.9, alpha=0.38, size=0.75) +  
+  # geom_sina(alpha=0.6, size=0.95, color = "#999999") +
   stat_summary(fun.data = "mean_cl_boot", color = "black", 
                size=0.4, 
                position = position_dodge(width = 0.9)) +
@@ -275,8 +280,9 @@ p1_2 <- p1_2 + theme(text = element_text(size=16),panel.grid.major = element_bla
   theme(axis.text.y = element_text(size=10)) +
   #theme(axis.title = element_text(size=18)) +
   theme(plot.title = element_text(size=12, hjust=0.5)) +
-  geom_violin(width=0.9, alpha=0.38, size=0.75) +  
-  geom_sina(alpha=0.6, size=0.95, color = "#999999") +
+  geom_bar(stat="summary", width = 0.9, alpha = 0.38, size = 0.75) +
+  # geom_violin(width=0.9, alpha=0.38, size=0.75) +  
+  # geom_sina(alpha=0.6, size=0.95, color = "#999999") +
   stat_summary(fun.data = "mean_cl_boot", color = "black", 
                size=0.4, 
                position = position_dodge(width = 0.9)) +
@@ -299,8 +305,9 @@ p1_3 <- p1_3 + theme(text = element_text(size=16),panel.grid.major = element_bla
   theme(axis.text.x = element_text(size=12)) +
   theme(axis.text.y = element_text(size=10)) +
   theme(plot.title = element_text(size=12, hjust=0.5)) +
-  geom_violin(width=0.9, alpha=0.38, size=0.75) +  
-  geom_sina(alpha=0.6, size=0.95, color = "#999999") +
+  geom_bar(stat="summary", width = 0.9, alpha = 0.38, size = 0.75) +
+  # geom_violin(width=0.9, alpha=0.38, size=0.75) +  
+  # geom_sina(alpha=0.6, size=0.95, color = "#999999") +
   stat_summary(fun.data = "mean_cl_boot", color = "black", 
                size=0.4, 
                position = position_dodge(width = 0.9)) +
@@ -323,8 +330,9 @@ p1_4 <- p1_4 + theme(text = element_text(size=16),panel.grid.major = element_bla
   theme(axis.text.x = element_text(size=12)) +
   theme(axis.text.y = element_text(size=10)) +
   theme(plot.title = element_text(size=12, hjust=0.5)) +
-  geom_violin(width=0.9, alpha=0.38, size=0.75) +  
-  geom_sina(alpha=0.6, size=0.95, color = "#999999") +
+  geom_bar(stat="summary", width = 0.9, alpha = 0.38, size = 0.75) +
+  # geom_violin(width=0.9, alpha=0.38, size=0.75) +  
+  # geom_sina(alpha=0.6, size=0.95, color = "#999999") +
   stat_summary(fun.data = "mean_cl_boot", color = "black", 
                size=0.4, 
                position = position_dodge(width = 0.9)) +
@@ -347,8 +355,9 @@ p1_5 <- p1_5 + theme(text = element_text(size=16),panel.grid.major = element_bla
   theme(axis.text.x = element_text(size=12)) +
   theme(axis.text.y = element_text(size=10)) +
   theme(plot.title = element_text(size=12, hjust=0.5)) +
-  geom_violin(width=0.9, alpha=0.38, size=0.75) +  
-  geom_sina(alpha=0.6, size=0.95, color = "#999999") +
+  geom_bar(stat="summary", width = 0.9, alpha = 0.38, size = 0.75) +
+  # geom_violin(width=0.9, alpha=0.38, size=0.75) +  
+  # geom_sina(alpha=0.6, size=0.95, color = "#999999") +
   stat_summary(fun.data = "mean_cl_boot", color = "black", 
                size=0.4, 
                position = position_dodge(width = 0.9)) +
@@ -371,8 +380,9 @@ p1_6 <- p1_6 + theme(text = element_text(size=16),panel.grid.major = element_bla
   theme(axis.text.x = element_text(size=12)) +
   theme(axis.text.y = element_text(size=10)) +
   theme(plot.title = element_text(size=12, hjust=0.5)) +
-  geom_violin(width=0.9, alpha=0.38, size=0.75) +  
-  geom_sina(alpha=0.6, size=0.95, color = "#999999") +
+  geom_bar(stat="summary", width = 0.9, alpha = 0.38, size = 0.75) +
+  # geom_violin(width=0.9, alpha=0.38, size=0.75) +  
+  # geom_sina(alpha=0.6, size=0.95, color = "#999999") +
   stat_summary(fun.data = "mean_cl_boot", color = "black", 
                size=0.4, 
                position = position_dodge(width = 0.9)) +
