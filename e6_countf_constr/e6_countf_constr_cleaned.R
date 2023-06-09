@@ -370,8 +370,9 @@ p0_1 <- p0_1 + theme(text = element_text(size=16),panel.grid.major = element_bla
   theme(plot.title = element_text(size=18, hjust=0.5)) +
   theme(legend.text=element_text(size=14),legend.title=element_text(size=14), legend.position="top")+
   labs(fill='')+
-  geom_violin(width=0.9, alpha=0.38, size=0.75) +  
-  geom_sina(alpha=0.6, size=0.95, color = "#999999") +
+  geom_bar(stat="summary", position = position_dodge(), width = 0.9, alpha = 0.38, size = 0.75) +
+  # geom_violin(width=0.9, alpha=0.38, size=0.75) +  
+  # geom_sina(alpha=0.6, size=0.95, color = "#999999") +
   stat_summary(fun.data = "mean_cl_boot", color = "black", 
                size=0.4, 
                position = position_dodge(width = 0.9)) +
@@ -398,8 +399,9 @@ p0_2 <- p0_2 + theme(text = element_text(size=16),panel.grid.major = element_bla
   theme(plot.title = element_text(size=18, hjust=0.5)) +
   theme(legend.text=element_text(size=14),legend.title=element_text(size=14), legend.position="top")+
   labs(fill='')+
-  geom_violin(width=0.9, alpha=0.38, size=0.75) +  
-  geom_sina(alpha=0.6, size=0.95, color = "#999999") +
+  geom_bar(stat="summary", position = position_dodge(), width = 0.9, alpha = 0.38, size = 0.75) +
+  # geom_violin(width=0.9, alpha=0.38, size=0.75) +  
+  # geom_sina(alpha=0.6, size=0.95, color = "#999999") +
   stat_summary(fun.data = "mean_cl_boot", color = "black", 
                size=0.4, 
                position = position_dodge(width = 0.9)) +
@@ -412,6 +414,7 @@ dev.new(width=10,height=5,noRStudioGD = TRUE)
 figure1 <- ggarrange(p0_1, p0_2, nrow=1,ncol=2,common.legend = TRUE, legend="top", vjust = 1.0, hjust=0.5) 
 figure1 <- annotate_figure(figure1, left = text_grob("Mean Agreement", color="black", face ="plain",size=16, rot=90),
                            bottom = text_grob("Scenario Type", color="black", face ="plain",size=18)) 
+plot(figure1)
 
 
 ## ================================================================================================================

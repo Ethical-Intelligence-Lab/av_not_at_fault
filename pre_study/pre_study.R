@@ -129,7 +129,9 @@ t_names <- c("Fear", "Safety", "Familiarity", "Risk")
 
 ## (1) Plot
 p1_1 <- ggplot(d_plot,aes(x=factor(question),y=measure)) +  
-  theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))
+  theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
+  geom_text(aes(y = 110, label = "***"), size = 4) +
+  geom_text(aes(y = 107, label = "|"), position = position_dodge(width = .75), size=2)
 
 p1_1 <- p1_1 + theme(text = element_text(size=20),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
   scale_x_discrete(labels=t_names) +
@@ -140,8 +142,9 @@ p1_1 <- p1_1 + theme(text = element_text(size=20),panel.grid.major = element_bla
   theme(axis.title = element_text(size=18)) +
   theme(axis.text.y = element_text(size=14)) +
   theme(plot.title = element_text(size=20, hjust=0.5)) +
-  geom_violin(width=0.9, alpha=0.38, size=0.75) +  
-  geom_sina(alpha=0.6, size=0.95, color = "#999999") +
+  geom_bar(stat="summary", width = 0.9, alpha = 0.38, size = 0.75) +
+  # geom_violin(width=0.9, alpha=0.38, size=0.75) +  
+  # geom_sina(alpha=0.6, size=0.95, color = "#999999") +
   stat_summary(fun.data = "mean_cl_boot", color = "black", 
                size=0.4, 
                position = position_dodge(width = 0.9)) +

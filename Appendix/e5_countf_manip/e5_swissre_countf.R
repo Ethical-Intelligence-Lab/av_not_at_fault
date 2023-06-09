@@ -35,7 +35,7 @@ pacman::p_load('ggplot2',         # plotting
 ## read in data: 
 # if importing from Qualtrics: (i) export data as numeric values, and (ii) delete rows 2 and 3 of the .csv file.
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path)) #set working directory to current directory
-d <- read.csv('e5_countf_manip_300_coded.csv')
+d <- read.csv('e5_data.csv')
 
 ## explore dataframe: 
 dim <- dim(d) # will provide dimensions of the dataframe by row [1] and column [2]
@@ -50,42 +50,24 @@ dim(d) # number of participants should decrease after attention exclusions
 ## get number of participants BEFORE exclusions: 
 n_original <- dim(d)[1] # extracting number of rows only, not columns
 
-## perform comprehension exclusions
+## perform comprehension exclusions separately for AV and HDV: 
 # this will remove responses from the dataframe that failed comprehension checks (i.e., "2")
-d <- subset(d, (d$comp1 == 1 & d$comp_accident == 1))
+d <- subset(d, (d$comp1 == 1 & d$comp_accident == 1 & d$countf_cat != 0))
 dim(d) # number of participants should decrease after comprehension exclusions
+
+## get number of participants AFTER exclusions: 
+n_final <- dim(d)[1] # extracting number of rows only, not columns
+percent_excluded <- (n_original - n_final)/n_original
+
+## remove unused columns according to condition
 
 ## get mean age and gender:
 # mean(d$age, na.rm = TRUE) # removing NAs from the dataframe before computing mean 
 mean_age = mean(as.numeric(d$age), na.rm = TRUE)
 table(d$gender)[2]/sum(table(d$gender))
 
-## get number of participants AFTER exclusions: 
-n_final <- dim(d)[1] # extracting number of rows only, not columns
-percent_excluded <- (n_original - n_final)/n_original
+d <- d[,19:48]
 
-## independent investigator coding check
-# read in and perform attention/comprehension exclusions for encoder 2
-d_2 <- read.csv('e5_countf_manip_300_jdf.csv')
-d_2 <- subset(d_2, (d_2$att1 == 2 & d_2$att2 == 2))
-d_2 <- subset(d_2, (d_2$comp1 == 1 & d_2$comp_accident == 1))
-# add encoding 2 data to d
-d$countf_cat_2 <- d_2$X
-d <- d %>% relocate(countf_cat_2, .after=countf_cat)
-# calculate cronbach alpha of both encodings
-cb_alpha = cronbach.alpha(d[,30:31])
-# remove values from 'd' where there is disagreement between encodings
-d <- d[which(d$countf_cat == d$countf_cat_2),]
-dim(d)
-# remove '0' (unclear) responses
-d <- subset(d, d$countf_cat != 0)
-dim(d)
-
-d <- d[,19:47]
-
-d$vA_liable_AV_1 <- as.numeric(d$vA_liable_AV_1)
-d$vB_mnfctr_liable_AV_1 <- as.numeric(d$vB_mnfctr_liable_AV_1)
-d$avoid_AV_1 <- as.numeric(d$avoid_AV_1)
 
 ## ================================================================================================================
 ##                                             DATA ANALYSIS - T-TESTS               
@@ -94,29 +76,56 @@ d$avoid_AV_1 <- as.numeric(d$avoid_AV_1)
 ## run t-tests
 table(d$countf_cat)[1]/sum(table(d$countf_cat))
 table(d$countf_cat)[2]/sum(table(d$countf_cat))
-tapply(d$vB_mnfctr_liable_AV_1, d$countf_cat, mean)
+table(d$countf_cat)[3]/sum(table(d$countf_cat))
+tapply(d$vB_sue_AV_1, d$countf_cat, mean)
 
-## (1) LIABLE VEHICLE A DRIVER
-vA_liable_T <- t.test(vA_liable_AV_1 ~ countf_cat, data = d, paired = FALSE) 
-vA_liable_T
-cohen.d(d$vA_liable_AV_1, d$countf_cat)
+d <- subset(d, d$countf_cat != 3)
 
-## (2) LIABLE VEHICLE B MANUFACTURER
-vB_mnfctr_liable_T <- t.test(vB_mnfctr_liable_AV_1 ~ countf_cat, data = d, paired = FALSE) 
-vB_mnfctr_liable_T
-cohen.d(d$vB_mnfctr_liable_AV_1, d$countf_cat)
+## (1) SUE VEHICLE A DRIVER
+vA_sue_T <- t.test(vA_sue_AV_1 ~ countf_cat, data = d, paired = FALSE) 
+vA_sue_T
 
-## (3) VEHICLE B CAN AVOID
-avoid_T <- t.test(avoid_AV_1 ~ countf_cat, data = d, paired = FALSE) 
-avoid_T
-cohen.d(d$avoid_AV_1, d$countf_cat)
+## (2) SUE VEHICLE B MANUFACTURER
+vB_sue_T <- t.test(vB_sue_AV_1 ~ countf_cat, data = d, paired = FALSE) 
+vB_sue_T
+
+## (3) VEHICLE B DEFECTIVE
+defective_T <- t.test(defective_AV_1 ~ countf_cat, data = d, paired = FALSE) 
+defective_T
+
+#cor(d_merged[,2:9])
+
+#mod <- lm(countf ~ cond_name*superh, data = d_merged)
+#summary(mod)
+
+## cor.test(d_merged$firm_sue, d_merged$v2_sue)
+
+## cor.test(d_merged$moral, d_merged$moral, data = d_merged)
+## cor.test(d_merged$blame_av, d_merged$moral, data = d_merged)
+## cor.test(d_merged$blame_firm, d_merged$moral, data = d_merged)
+## cor.test(d_merged$blame_v2, d_merged$moral, data = d_merged)
+
 ## ================================================================================================================
 ##                                             MEDIATION ANALYSIS              
 ## ================================================================================================================
 
 # SINGLE MEDIATION
-process(data = d, y = "vB_mnfctr_liable_AV_1", x = "countf_cat",
-        m ="avoid_AV_1", model = 4, effsize =1, total =1, stand =1,
+process(data = d, y = "vB_sue_AV_1", x = "countf_cat",
+        m ="defective_AV_1", model = 4, effsize =1, total =1, stand =1,
+        contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
+
+d_merged$cond_n <- ifelse(d_merged$cond=="FL_39", 1, 2)
+
+
+# MODERATED SERIAL MEDIATION
+# 87 = B path, 83 = A path, 91 = center path
+process(data = d_merged, y = "vB_sue_AV_1", x = "cond_n", 
+        m =c("countf", "defec"), w = "superh", model = 83, effsize =1, total =1, stand =1, 
+        contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
+
+# SERIAL MEDIATION
+process(data = d_merged, y = "vB_sue", x = "cond_n", 
+        m =c("countf", "capab"), model = 6, effsize =1, total =1, stand =1, 
         contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
 
 ## ================================================================================================================
@@ -124,38 +133,22 @@ process(data = d, y = "vB_mnfctr_liable_AV_1", x = "countf_cat",
 ## ================================================================================================================
 
 ## plotting all measures
+## FL39 --> AV condition; FL40 --> HDV condition
 t_names <- c("Yes", "No")
-title_size <- 20
 
-## function for getting the correct sig annotation
-get_annotation <- function(p_val) {
-  if (p_val < 0.001) {
-    return (list('***', 5.5))
-  } else if (p_val < 0.01) {
-    return (list('**', 5.5))
-  } else if (p_val < 0.05) {
-    return (list('*', 5.5))
-  } else if (p_val < 0.1) {
-    return (list('^', 5.5))
-  } else {
-    return (list('NS', 3))
-  }
-}
-
-## (1) VA driver liable
-annotations <- get_annotation(vA_liable_T$p.value)
-p1_1 <- ggplot(d,aes(x=factor(countf_cat),y=vA_liable_AV_1)) +  
+## (1) Sue VA driver
+p1_1 <- ggplot(d,aes(x=factor(countf_cat),y=vA_sue_AV_1)) +  
   theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
-  geom_signif(comparisons = list(c(1, 2)), annotation=unlist(annotations[1]), textsize = unlist(annotations[2]))
+  geom_signif(comparisons = list(c(1, 2)), annotation="***", textsize = 5.5)
 
 p1_1 <- p1_1 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
   scale_x_discrete(labels=t_names) +
-  ggtitle("Veh. A Driver Liability") +
+  ggtitle("Sue Veh. A Driver") +
   xlab ("") + ylab ("") +
   theme_classic() +
-  theme(axis.text.x = element_text(size=12)) +
-  theme(axis.text.y = element_text(size=10)) +
-  theme(plot.title = element_text(size=12, hjust=0.5)) +
+  theme(axis.text.x = element_text(size=15)) +
+  theme(axis.text.y = element_text(size=14)) +
+  theme(plot.title = element_text(size=16, hjust=0.5)) +
   geom_bar(stat="summary", width = 0.9, alpha = 0.38, size = 0.75) +
   # geom_violin(width=0.9, alpha=0.38, size=0.75) +  
   # geom_sina(alpha=0.6, size=0.95, color = "#999999") +
@@ -167,21 +160,19 @@ p1_1 <- p1_1 + theme(text = element_text(size=16),panel.grid.major = element_bla
                geom="errorbar", width = 0.2)
 p1_1
 
-## (2) VB manufacturer liabile
-annotations <- get_annotation(vB_mnfctr_liable_T$p.value)
-p1_2 <- ggplot(d,aes(x=factor(countf_cat),y=vB_mnfctr_liable_AV_1)) +  
+## (2) Sue VB manufacturer
+p1_2 <- ggplot(d,aes(x=factor(countf_cat),y=vB_sue_AV_1)) +  
   theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
-  geom_signif(comparisons = list(c(1,2)), annotation=unlist(annotations[1]), textsize = unlist(annotations[2]))
+  geom_signif(comparisons = list(c(1, 2)), annotation="***", textsize = 5.5)
 
 p1_2 <- p1_2 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
   scale_x_discrete(labels=t_names) +
-  ggtitle("Veh. B Manufacturer\nLiability") +
+  ggtitle("Sue Veh. B Manufacturer") +
   xlab ("") + ylab ("") +
   theme_classic() +
-  theme(axis.text.x = element_text(size=12)) +
-  theme(axis.text.y = element_text(size=10)) +
-  #theme(axis.title = element_text(size=18)) +
-  theme(plot.title = element_text(size=12, hjust=0.5)) +
+  theme(axis.text.x = element_text(size=15)) +
+  theme(axis.text.y = element_text(size=14)) +
+  theme(plot.title = element_text(size=16, hjust=0.5)) +
   geom_bar(stat="summary", width = 0.9, alpha = 0.38, size = 0.75) +
   # geom_violin(width=0.9, alpha=0.38, size=0.75) +  
   # geom_sina(alpha=0.6, size=0.95, color = "#999999") +
@@ -193,21 +184,19 @@ p1_2 <- p1_2 + theme(text = element_text(size=16),panel.grid.major = element_bla
                geom="errorbar", width = 0.2)
 p1_2
 
-## (3) Capability to Avoid
-annotations <- get_annotation(avoid_T$p.value)
-p1_3 <- ggplot(d,aes(x=factor(countf_cat),y=avoid_AV_1)) +  
+## (3) VB Defective
+p1_3 <- ggplot(d,aes(x=factor(countf_cat),y=defective_AV_1)) +  
   theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
-  geom_signif(comparisons = list(c(1,2)), annotation=unlist(annotations[1]), textsize = unlist(annotations[2]))
+  geom_signif(comparisons = list(c(1, 2)), annotation="***", textsize = 5.5)
 
 p1_3 <- p1_3 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
   scale_x_discrete(labels=t_names) +
-  ggtitle("Capability to Avoid") +
+  ggtitle("Veh. B Defective") +
   xlab ("") + ylab ("") +
   theme_classic() +
-  theme(axis.text.x = element_text(size=12)) +
-  theme(axis.text.y = element_text(size=10)) +
-  #theme(axis.title = element_text(size=18)) +
-  theme(plot.title = element_text(size=12, hjust=0.5)) +
+  theme(axis.text.x = element_text(size=15)) +
+  theme(axis.text.y = element_text(size=14)) +
+  theme(plot.title = element_text(size=16, hjust=0.5)) +
   geom_bar(stat="summary", width = 0.9, alpha = 0.38, size = 0.75) +
   # geom_violin(width=0.9, alpha=0.38, size=0.75) +  
   # geom_sina(alpha=0.6, size=0.95, color = "#999999") +
