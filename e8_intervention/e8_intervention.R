@@ -1,8 +1,6 @@
 ## clear workspace
 rm(list = ls()) 
 
-setwd(dirname(rstudioapi::getActiveDocumentContext()$path)) #set working directory to current directory
-
 options(download.file.method="libcurl")
 
 ## install packages
@@ -36,7 +34,8 @@ pacman::p_load('ggplot2',         # plotting
 
 ## read in data: 
 # if importing from Qualtrics: (i) export data as numeric values, and (ii) delete rows 2 and 3 of the .csv file.
-d <- read.csv('sample_data.csv')
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path)) #set working directory to current directory
+d <- read.csv('e8_intervention_300.csv')
 
 ## explore dataframe: 
 dim(d) # will provide dimensions of the dataframe by row [1] and column [2]
@@ -158,7 +157,7 @@ d_merged$scen_n <- ifelse(d_merged$scen_name=="yes", 1, 2)
 ## MANUFACTURER VS DRIVER --------
 ## get summary statistics
 d_merged %>%
-  group_by(agent_n) %>%
+  group_by(scen_n) %>%
   get_summary_stats(vB_m_v_d_sue, type = "mean_sd")
 
 mean(d_merged$vB_m_v_d_sue[d_merged$scen_name=="yes" & d_merged$agent_name == "human"])
@@ -174,7 +173,7 @@ d_merged %>%
   group_by(agent_n) %>%
   get_summary_stats(vB_m_v_m_sue, type = "mean_sd")
 
-mean(d_merged$vB_m_v_d_liable[d_merged$scen_name=="yes" & d_merged$agent_name == "av"])
+mean(d_merged$vB_m_v_d_sue[d_merged$scen_name=="yes" & d_merged$agent_name == "av"])
 
 ## anova
 m_v_m_mod <- aov(vB_m_v_m_sue ~ as.factor(agent_n) * as.factor(scen_n), data = d_merged)
@@ -217,12 +216,24 @@ vB_m_v_d_sue_T_scen$p.value
 # t-test; when intervention, does av and human differ
 vB_m_v_d_sue_T_intv <- t.test(d_merged$vB_m_v_d_sue[d_merged$scen_name=="yes" & d_merged$agent_name == "av"], 
                                   d_merged$vB_m_v_d_sue[d_merged$scen_name=="yes" & d_merged$agent_name == "human"], paired=FALSE)
+vB_m_v_d_sue_T_intv$p.value
 cohen.d(d_merged[d_merged$scen_name=="yes", ]$vB_m_v_d_sue, d_merged[d_merged$scen_name=="yes", ]$agent_name)
 
 # t-test; when no intervention, does av and human differ
 vB_m_v_d_sue_T_no_intv <- t.test(d_merged$vB_m_v_d_sue[d_merged$scen_name=="no" & d_merged$agent_name == "av"], 
                                     d_merged$vB_m_v_d_sue[d_merged$scen_name=="no" & d_merged$agent_name == "human"], paired=FALSE)
+vB_m_v_d_sue_T_no_intv$p.value
 cohen.d(d_merged[d_merged$scen_name=="no", ]$vB_m_v_d_sue, d_merged[d_merged$scen_name=="no", ]$agent_name)
+
+# t-test; when av, does intervention differ
+vB_m_v_d_sue_T_av <- t.test(d_merged$vB_m_v_d_sue[d_merged$scen_name=="yes" & d_merged$agent_name == "av"], 
+                              d_merged$vB_m_v_d_sue[d_merged$scen_name=="no" & d_merged$agent_name == "av"], paired=FALSE)
+vB_m_v_d_sue_T_av$p.value
+
+# t-test; when hdv, does intervention differ
+vB_m_v_d_sue_T_hdv <- t.test(d_merged$vB_m_v_d_sue[d_merged$scen_name=="yes" & d_merged$agent_name == "human"], 
+                                 d_merged$vB_m_v_d_sue[d_merged$scen_name=="no" & d_merged$agent_name == "human"], paired=FALSE)
+vB_m_v_d_sue_T_hdv$p.value
 
 
 ## (3) LIABLE VEHICLE B MANUFACTURER VS LIABLE HDV MANUFACTURER
@@ -241,12 +252,24 @@ vB_m_v_m_sue_T_scen$p.value
 # t-test; when intervention, does av and human differ
 vB_m_v_m_sue_T_intv <- t.test(d_merged$vB_m_v_m_sue[d_merged$scen_name=="yes" & d_merged$agent_name == "av"], 
                                   d_merged$vB_m_v_m_sue[d_merged$scen_name=="yes" & d_merged$agent_name == "human"], paired=FALSE)
+vB_m_v_m_sue_T_intv$p.value
 cohen.d(d_merged[d_merged$scen_name=="yes", ]$vB_m_v_m_sue, d_merged[d_merged$scen_name=="yes", ]$agent_name)
 
 # t-test; when no intervention, does av and human differ
 vB_m_v_m_sue_T_no_intv <- t.test(d_merged$vB_m_v_m_sue[d_merged$scen_name=="no" & d_merged$agent_name == "av"], 
                                     d_merged$vB_m_v_m_sue[d_merged$scen_name=="no" & d_merged$agent_name == "human"], paired=FALSE)
+vB_m_v_m_sue_T_no_intv$p.value
 cohen.d(d_merged[d_merged$scen_name=="no", ]$vB_m_v_m_sue, d_merged[d_merged$scen_name=="no", ]$agent_name)
+
+# t-test; when av, does intervention differ
+vB_m_v_m_sue_T_av <- t.test(d_merged$vB_m_v_m_sue[d_merged$scen_name=="yes" & d_merged$agent_name == "av"], 
+                              d_merged$vB_m_v_m_sue[d_merged$scen_name=="no" & d_merged$agent_name == "av"], paired=FALSE)
+vB_m_v_m_sue_T_av$p.value
+
+# t-test; when hdv, does intervention differ
+vB_m_v_m_sue_T_hdv <- t.test(d_merged$vB_m_v_m_sue[d_merged$scen_name=="yes" & d_merged$agent_name == "human"], 
+                                 d_merged$vB_m_v_m_sue[d_merged$scen_name=="no" & d_merged$agent_name == "human"], paired=FALSE)
+vB_m_v_m_sue_T_hdv$p.value
 
 ## (4) VEHICLE B CAN AVOID
 # t-test; does measure depend on agent
@@ -264,9 +287,20 @@ avoid_T_scen$p.value
 # t-test; when intervention, does av and human differ
 avoid_T_intv <- t.test(d_merged$avoid[d_merged$scen_name=="yes" & d_merged$agent_name == "av"], 
                         d_merged$avoid[d_merged$scen_name=="yes" & d_merged$agent_name == "human"], paired=FALSE)
+avoid_T_intv$p.value
 # t-test; when no intervention, does av and human differ
 avoid_T_no_intv <- t.test(d_merged$avoid[d_merged$scen_name=="no" & d_merged$agent_name == "av"], 
                         d_merged$avoid[d_merged$scen_name=="no" & d_merged$agent_name == "human"], paired=FALSE)
+avoid_T_no_intv$p.value
+# t-test; when av, does intervention differ
+avoid_T_av <- t.test(d_merged$avoid[d_merged$scen_name=="yes" & d_merged$agent_name == "av"], 
+                       d_merged$avoid[d_merged$scen_name=="no" & d_merged$agent_name == "av"], paired=FALSE)
+avoid_T_av$p.value
+# t-test; when av, does intervnetion differ
+avoid_T_hdv <- t.test(d_merged$avoid[d_merged$scen_name=="yes" & d_merged$agent_name == "human"], 
+                          d_merged$avoid[d_merged$scen_name=="no" & d_merged$agent_name == "human"], paired=FALSE)
+avoid_T_hdv$p.value
+
 
 cor(d_merged[,3:8])
 
@@ -562,7 +596,7 @@ write.csv(d_merged, 'd_spss.csv')
 ## ================================================================================================================
 
 ## plotting all measures
-t_names <- c("Constrained", "Unconstrained")
+t_names <- c("Yes", "No")
 
 ## (1) VA driver liable
 annotations <- get_annotation(vA_sue_T_scen$p.value)
@@ -640,7 +674,7 @@ annotations <- get_annotation(avoid_T_scen$p.value)
 p2_4 <- ggplot(d_merged,aes(x=factor(scen_name),y=avoid)) +  
   theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
   geom_signif(comparisons = list(c("yes", "no")), annotation=unlist(annotations[1]), textsize = unlist(annotations[2]))
-p2_4 <- p2_6 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
+p2_4 <- p2_4 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
   scale_x_discrete(labels=t_names) +
   ggtitle("Capability to Avoid") +
   xlab ("") + ylab ("") +
