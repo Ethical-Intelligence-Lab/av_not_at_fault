@@ -150,93 +150,78 @@ d_merged$agent_n <- ifelse(d_merged$agent_name=="av", 1, 2)
 d_merged$intv_n <- ifelse(d_merged$intv_appld=="yes", 1, 2)
 
 ## ================================================================================================================
-##                                             DATA ANALYSIS - T-TESTS               
+##                                      DATA ANALYSIS - ANOVA & T-TESTS               
 ## ================================================================================================================
 
-##### LIABILITY ANOVA
-## MANUFACTURER VS DRIVER --------
-## get summary statistics
+#### get summary statistics
 d_merged %>%
-  group_by(intv_appld) %>%
+  group_by(intv_appld, agent_name) %>%
   get_summary_stats(vB_m_v_d_sue, type = "mean_sd")
-mean(d_merged$vB_m_v_d_sue[d_merged$intv_appld=="yes" & d_merged$agent_name == "av"])
-mean(d_merged$vB_m_v_d_sue[d_merged$intv_appld=="no" & d_merged$agent_name == "av"])
+d_merged %>%
+  group_by(intv_appld, agent_name) %>%
+  get_summary_stats(vB_m_v_m_sue, type = "mean_sd")
 
-## anova
+##### ----- ANOVA -----
+### manufacturer vs driver
 m_v_d_mod <- aov(vB_m_v_d_sue ~ as.factor(agent_n) * as.factor(intv_n), data = d_merged)
 summary(m_v_d_mod)
 anova_stats(m_v_d_mod)
 
-## MANUFACTURER VS MANUFACTURER --------
-## get summary statistics
-d_merged %>%
-  group_by(intv_n) %>%
-  get_summary_stats(vB_m_v_m_sue, type = "mean_sd")
-
-mean(d_merged$vB_m_v_d_sue[d_merged$intv_appld=="yes" & d_merged$agent_name == "av"])
-
-## anova
+### manufacturer vs manufacturer
 m_v_m_mod <- aov(vB_m_v_m_sue ~ as.factor(agent_n) * as.factor(intv_n), data = d_merged)
 summary(m_v_m_mod)
 anova_stats(m_v_m_mod)
 
-## (1) LIABLE VEHICLE A DRIVER
-# t-test; does measure depend on agent
+##### ----- T-TESTS -----
+
+### (1) sue vehicle A driver
+# does measure depend on agent
 vA_sue_T_agent <- t.test(vA_sue ~ agent_name, data = d_merged, paired = FALSE) 
 vA_sue_T_agent$parameter
 vA_sue_T_agent$statistic
 vA_sue_T_agent$p.value
 
-# t-test; does measure depend on intervention
+# does measure depend on intervention
 vA_sue_T_scen <- t.test(vA_sue ~ intv_appld, data = d_merged, paired = FALSE) 
 vA_sue_T_scen$parameter
 vA_sue_T_scen$statistic
 vA_sue_T_scen$p.value
 
-# t-test; when intervention, does av and human differ
+# when intervention, do av and human differ
 vA_sue_T_intv <- t.test(d_merged$vA_sue[d_merged$intv_appld=="yes" & d_merged$agent_name == "av"], 
                             d_merged$vA_sue[d_merged$intv_appld=="yes" & d_merged$agent_name == "human"], paired=FALSE)
-# t-test; when no intervention, does av and human differ
+# when no intervention, do av and human differ
 vA_sue_T_no_intv <- t.test(d_merged$vA_sue[d_merged$intv_appld=="no" & d_merged$agent_name == "av"], 
                               d_merged$vA_sue[d_merged$intv_appld=="no" & d_merged$agent_name == "human"], paired=FALSE)
 
-## (2) LIABLE VEHICLE B MANUFACTURER VS LIABLE HDV DRIVER
-# t-test; does measure depend on agent
+
+### (2) sue vehicle B manufacturer VS vehicle A driver
+# does measure depend on agent
 vB_m_v_d_sue_T_agent <- t.test(vB_m_v_d_sue ~ agent_name, data = d_merged, paired = FALSE) 
 vB_m_v_d_sue_T_agent$parameter
 vB_m_v_d_sue_T_agent$statistic
 vB_m_v_d_sue_T_agent$p.value
 
-# t-test; does measure depend on intervention
+# does measure depend on intervention
 vB_m_v_d_sue_T_scen <- t.test(vB_m_v_d_sue ~ intv_appld, data = d_merged, paired = FALSE) 
 vB_m_v_d_sue_T_scen$parameter
 vB_m_v_d_sue_T_scen$statistic
 vB_m_v_d_sue_T_scen$p.value
 
-# t-test; when intervention, does av and human differ
+# when intervention, does av and human differ
 vB_m_v_d_sue_T_intv <- t.test(d_merged$vB_m_v_d_sue[d_merged$intv_appld=="yes" & d_merged$agent_name == "av"], 
                                   d_merged$vB_m_v_d_sue[d_merged$intv_appld=="yes" & d_merged$agent_name == "human"], paired=FALSE)
 vB_m_v_d_sue_T_intv$p.value
 cohen.d(d_merged[d_merged$intv_appld=="yes", ]$vB_m_v_d_sue, d_merged[d_merged$intv_appld=="yes", ]$agent_name)
 
-# t-test; when no intervention, does av and human differ
+# when no intervention, does av and human differ
 vB_m_v_d_sue_T_no_intv <- t.test(d_merged$vB_m_v_d_sue[d_merged$intv_appld=="no" & d_merged$agent_name == "av"], 
                                     d_merged$vB_m_v_d_sue[d_merged$intv_appld=="no" & d_merged$agent_name == "human"], paired=FALSE)
 vB_m_v_d_sue_T_no_intv$p.value
 cohen.d(d_merged[d_merged$intv_appld=="no", ]$vB_m_v_d_sue, d_merged[d_merged$intv_appld=="no", ]$agent_name)
 
-# t-test; when av, does intervention differ
-vB_m_v_d_sue_T_av <- t.test(d_merged$vB_m_v_d_sue[d_merged$intv_appld=="yes" & d_merged$agent_name == "av"], 
-                              d_merged$vB_m_v_d_sue[d_merged$intv_appld=="no" & d_merged$agent_name == "av"], paired=FALSE)
-vB_m_v_d_sue_T_av$p.value
 
-# t-test; when hdv, does intervention differ
-vB_m_v_d_sue_T_hdv <- t.test(d_merged$vB_m_v_d_sue[d_merged$intv_appld=="yes" & d_merged$agent_name == "human"], 
-                                 d_merged$vB_m_v_d_sue[d_merged$intv_appld=="no" & d_merged$agent_name == "human"], paired=FALSE)
-vB_m_v_d_sue_T_hdv$p.value
-
-
-## (3) LIABLE VEHICLE B MANUFACTURER VS LIABLE HDV MANUFACTURER
+### (3) sue vehicle B manufacturer VS vehicle A manufacturer
 # t-test; does measure depend on agent
 vB_m_v_m_sue_T_agent <- t.test(vB_m_v_m_sue ~ agent_name, data = d_merged, paired = FALSE) 
 vB_m_v_m_sue_T_agent$parameter
@@ -249,65 +234,42 @@ vB_m_v_m_sue_T_scen$parameter
 vB_m_v_m_sue_T_scen$statistic
 vB_m_v_m_sue_T_scen$p.value
 
-# t-test; when intervention, does av and human differ
+# when intervention, do av and human differ
 vB_m_v_m_sue_T_intv <- t.test(d_merged$vB_m_v_m_sue[d_merged$intv_appld=="yes" & d_merged$agent_name == "av"], 
                                   d_merged$vB_m_v_m_sue[d_merged$intv_appld=="yes" & d_merged$agent_name == "human"], paired=FALSE)
 vB_m_v_m_sue_T_intv$p.value
 cohen.d(d_merged[d_merged$intv_appld=="yes", ]$vB_m_v_m_sue, d_merged[d_merged$intv_appld=="yes", ]$agent_name)
 
-# t-test; when no intervention, does av and human differ
+# when no intervention, do av and human differ
 vB_m_v_m_sue_T_no_intv <- t.test(d_merged$vB_m_v_m_sue[d_merged$intv_appld=="no" & d_merged$agent_name == "av"], 
                                     d_merged$vB_m_v_m_sue[d_merged$intv_appld=="no" & d_merged$agent_name == "human"], paired=FALSE)
 vB_m_v_m_sue_T_no_intv$p.value
 cohen.d(d_merged[d_merged$intv_appld=="no", ]$vB_m_v_m_sue, d_merged[d_merged$intv_appld=="no", ]$agent_name)
 
-# t-test; when av, does intervention differ
-vB_m_v_m_sue_T_av <- t.test(d_merged$vB_m_v_m_sue[d_merged$intv_appld=="yes" & d_merged$agent_name == "av"], 
-                              d_merged$vB_m_v_m_sue[d_merged$intv_appld=="no" & d_merged$agent_name == "av"], paired=FALSE)
-vB_m_v_m_sue_T_av$p.value
 
-# t-test; when hdv, does intervention differ
-vB_m_v_m_sue_T_hdv <- t.test(d_merged$vB_m_v_m_sue[d_merged$intv_appld=="yes" & d_merged$agent_name == "human"], 
-                                 d_merged$vB_m_v_m_sue[d_merged$intv_appld=="no" & d_merged$agent_name == "human"], paired=FALSE)
-vB_m_v_m_sue_T_hdv$p.value
-
-## (4) VEHICLE B CAN AVOID
-# t-test; does measure depend on agent
+### (4) vehicle B can avoid
+# does measure depend on agent
 avoid_T_agent <- t.test(avoid ~ agent_name, data = d_merged, paired = FALSE) 
 avoid_T_agent$parameter
 avoid_T_agent$statistic
 avoid_T_agent$p.value
 
-# t-test; does measure depend on intervention
+# does measure depend on intervention
 avoid_T_scen <- t.test(avoid ~ intv_appld, data = d_merged, paired = FALSE) 
 avoid_T_scen$parameter
 avoid_T_scen$statistic
 avoid_T_scen$p.value
 
-# t-test; when intervention, does av and human differ
+# when intervention, do av and human differ
 avoid_T_intv <- t.test(d_merged$avoid[d_merged$intv_appld=="yes" & d_merged$agent_name == "av"], 
                         d_merged$avoid[d_merged$intv_appld=="yes" & d_merged$agent_name == "human"], paired=FALSE)
 avoid_T_intv$p.value
-# t-test; when no intervention, does av and human differ
+# when no intervention, do av and human differ
 avoid_T_no_intv <- t.test(d_merged$avoid[d_merged$intv_appld=="no" & d_merged$agent_name == "av"], 
                         d_merged$avoid[d_merged$intv_appld=="no" & d_merged$agent_name == "human"], paired=FALSE)
 avoid_T_no_intv$p.value
-# t-test; when av, does intervention differ
-avoid_T_av <- t.test(d_merged$avoid[d_merged$intv_appld=="yes" & d_merged$agent_name == "av"], 
-                       d_merged$avoid[d_merged$intv_appld=="no" & d_merged$agent_name == "av"], paired=FALSE)
-avoid_T_av$p.value
-# t-test; when av, does intervnetion differ
-avoid_T_hdv <- t.test(d_merged$avoid[d_merged$intv_appld=="yes" & d_merged$agent_name == "human"], 
-                          d_merged$avoid[d_merged$intv_appld=="no" & d_merged$agent_name == "human"], paired=FALSE)
-avoid_T_hdv$p.value
 
-mean(d_merged$avoid[d_merged$intv_appld=="yes" & d_merged$agent_name == "av"])
-mean(d_merged$avoid[d_merged$intv_appld=="no" & d_merged$agent_name == "av"])
-
-mean(d_merged$avoid[d_merged$intv_appld=="yes"])
-mean(d_merged$avoid[d_merged$intv_appld=="no"])
-
-cor(d_merged[,3:8])
+cor(d_merged[,3:6])
 
 ## ================================================================================================================
 ##                                             MEDIATION ANALYSIS              
@@ -316,7 +278,7 @@ cor(d_merged[,3:8])
 source("../process.R")
 
 # SIMPLE MEDIATION
-#  the effect of agent on judgments of liability
+#  agent -> avoid -> sue
 process(data = d_merged, y = "vB_m_v_m_sue", x = "agent_n",
         m =c("avoid"), model = 4, effsize =1, total =1, stand =1,
         contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
@@ -325,7 +287,7 @@ process(data = d_merged, y = "vB_m_v_d_sue", x = "agent_n",
         contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
 
 # MODERATED MEDIATION
-#  the effect of agent on judgments of liability
+#  agent -> avoid -> sue (moderated by intervention)
 # 7 = A path, 14 = B path
 process(data = d_merged, y = "vB_m_v_m_sue", x = "agent_n",
         m =c("avoid"), w = "intv_n", model = 7, effsize =1, total =1, stand =1,
@@ -335,11 +297,10 @@ process(data = d_merged, y = "vB_m_v_d_sue", x = "agent_n",
         contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
 
 ## ================================================================================================================
-##                                              PLOTTING MAIN FIGURES                 
+##                                           PLOTTING MAIN FIGURE - BY AGENT                 
 ## ================================================================================================================
 
-## plotting all measures
-## FL39 --> AV condition; FL40 --> HDV condition
+## x-axis = agent
 t_names <- c("AV", "HDV")
 title_size <- 20
 
@@ -358,12 +319,11 @@ get_annotation <- function(p_val) {
   }
 }
 
-## (1) VA driver liable
+### (1) sue vehicle A driver
 annotations <- get_annotation(vA_sue_T_agent$p.value)
 p1_1 <- ggplot(d_merged,aes(x=factor(agent_name),y=vA_sue)) +  
   theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
   geom_signif(comparisons = list(c("av", "human")), annotation=unlist(annotations[1]), textsize = unlist(annotations[2]))
-
 p1_1 <- p1_1 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
   scale_x_discrete(labels=t_names) +
   ggtitle("Veh. A Driver Sue") +
@@ -382,12 +342,11 @@ p1_1 <- p1_1 + theme(text = element_text(size=16),panel.grid.major = element_bla
                geom="errorbar", width = 0.2)
 p1_1
 
-## (2) VB manufacturer/driver liability
+## (2) sue vehicle B manufacturer VS vehicle A driver
 annotations <- get_annotation(vB_m_v_d_sue_T_agent$p.value)
 p1_2 <- ggplot(d_merged,aes(x=factor(agent_name),y=vB_m_v_d_sue)) +  
   theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
   geom_signif(comparisons = list(c("av", "human")), annotation=unlist(annotations[1]), textsize = unlist(annotations[2]))
-
 p1_2 <- p1_2 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
   scale_x_discrete(labels=t_names) +
   ggtitle("Veh. B Manufacturer\nor Driver Sue") +
@@ -407,12 +366,11 @@ p1_2 <- p1_2 + theme(text = element_text(size=16),panel.grid.major = element_bla
                geom="errorbar", width = 0.2)
 p1_2
 
-## (3) VB manufacturer liability
+## (3) sue vehicle B manufacturer VS vehicle A manufacturer
 annotations <- get_annotation(vB_m_v_m_sue_T_agent$p.value)
 p1_3 <- ggplot(d_merged,aes(x=factor(agent_name),y=vB_m_v_m_sue)) +  
   theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
   geom_signif(comparisons = list(c("av", "human")), annotation=unlist(annotations[1]), textsize = unlist(annotations[2]))
-
 p1_3 <- p1_3 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
   scale_x_discrete(labels=t_names) +
   ggtitle("Veh. B Manufacturer Sue") +
@@ -431,12 +389,11 @@ p1_3 <- p1_3 + theme(text = element_text(size=16),panel.grid.major = element_bla
                geom="errorbar", width = 0.2)
 p1_3
 
-## (4) Capability to Avoid
+## (4) vehicle B - capability to avoid
 annotations <- get_annotation(avoid_T_agent$p.value)
 p1_4 <- ggplot(d_merged,aes(x=factor(agent_name),y=avoid)) +  
   theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
   geom_signif(comparisons = list(c("av", "human")), annotation=unlist(annotations[1]), textsize = unlist(annotations[2]))
-
 p1_4 <- p1_4 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
   scale_x_discrete(labels=t_names) +
   ggtitle("Capability to Avoid") +
@@ -455,7 +412,7 @@ p1_4 <- p1_4 + theme(text = element_text(size=16),panel.grid.major = element_bla
                geom="errorbar", width = 0.2)
 p1_4
 
-## PLOT SERIES 1
+## PLOT SERIES 1 - BY AGENT
 #dev.new(width=10,height=8,noRStudioGD = TRUE)
 figure1 <- ggarrange(p1_1, p1_2, p1_3, p1_4, nrow=2,ncol=2,common.legend = TRUE, legend="top", vjust = 1.0, hjust=0.5) 
 figure1 <- annotate_figure(figure1,left = text_grob("Mean Agreement", color="black", face ="plain",size=16, rot=90),
@@ -464,288 +421,17 @@ figure1 <- annotate_figure(figure1,left = text_grob("Mean Agreement", color="bla
 plot(figure1)
 
 ## ================================================================================================================
-##                                              PLOTTING MAIN FIGURES                 
+##                                  PLOTTING MAIN FIGURE - BY INTERVENTION                 
 ## ================================================================================================================
 
-## plotting all measures
+### x-axis = intervention
 t_names <- c("No Intervention", "Intervention")
 
-# (1) VA driver liable
-intv_anno <- get_annotation(vA_sue_T_intv$p.value)
-no_intv_anno <- get_annotation(vA_sue_T_no_intv$p.value)
-p3_1 <- ggplot(d_merged,aes(x=factor(intv_appld),y=vA_sue, fill=agent_name)) +  
-  theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
-  geom_signif(y_position = 105.00, xmin = c(0.8,1.8), xmax = c(1.2,2.2), annotation = c(unlist(intv_anno[1]),unlist(no_intv_anno[1])), textsize=7.5)
-p3_1 <- p3_1 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
-  scale_x_discrete(labels=t_names) +
-  ggtitle("Veh. A Driver Sue") +
-  xlab ("Intervention Applied") + ylab ("Measure") +
-  theme_classic() +
-  theme(axis.text.x = element_text(size=15)) +
-  theme(axis.text.y = element_text(size=15)) +
-  theme(axis.title = element_text(size=18)) +
-  theme(plot.title = element_text(size=18, hjust=0.5)) +
-  theme(legend.text=element_text(size=14),legend.title=element_text(size=14), legend.position="top")+
-  labs(fill='')+
-  geom_violin(width=0.9, alpha=0.38, size=0.75) +  
-  geom_sina(alpha=0.6, size=0.95, color = "#999999") +
-  stat_summary(fun.data = "mean_cl_boot", color = "black", 
-               size=0.4, 
-               position = position_dodge(width = 0.9)) +
-  stat_summary(fun.data = "mean_cl_boot", color = "black", 
-               position = position_dodge(width = 0.9),
-               geom="errorbar", width = 0.2)
-p3_1
-
-vB_m_v_d_sue_T_no_intv$p.value
-
-## (2) VB manufacturer/driver liability
-intv_anno <- get_annotation(vB_m_v_d_sue_T_intv$p.value)
-no_intv_anno <- get_annotation(vB_m_v_d_sue_T_no_intv$p.value)
-p3_2 <- ggplot(d_merged,aes(x=factor(intv_appld),y=vB_m_v_d_sue, fill=agent_name)) +  
-  theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
-  geom_signif(y_position = 105.00, xmin = c(0.8,1.8), xmax = c(1.2,2.2), annotation = c(unlist(no_intv_anno[1]),unlist(intv_anno[1])), textsize=7.5)
-p3_2 <- p3_2 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
-  scale_x_discrete(labels=t_names) +
-  ggtitle("Veh. B Manufacturer\nor Driver Sue") +
-  xlab ("") + ylab ("") +
-  scale_fill_discrete(labels=c('AV', 'HDV')) +
-  theme_classic() +
-  theme(axis.text.x = element_text(size=15)) +
-  theme(axis.text.y = element_text(size=15)) +
-  theme(axis.title = element_text(size=18)) +
-  theme(plot.title = element_text(size=18, hjust=0.5)) +
-  theme(legend.text=element_text(size=14),legend.title=element_text(size=14), legend.position="top")+
-  labs(fill='')+
-  geom_violin(width=0.9, alpha=0.38, size=0.75) +  
-  geom_sina(alpha=0.6, size=0.95, color = "#999999") +
-  stat_summary(fun.data = "mean_cl_boot", color = "black", 
-               size=0.4, 
-               position = position_dodge(width = 0.9)) +
-  stat_summary(fun.data = "mean_cl_boot", color = "black", 
-               position = position_dodge(width = 0.9),
-               geom="errorbar", width = 0.2)
-p3_2
-
-## (3) VB manufacturer liability
-intv_anno <- get_annotation(vB_m_v_m_sue_T_intv$p.value)
-no_intv_anno <- get_annotation(vB_m_v_m_sue_T_no_intv$p.value)
-p3_3 <- ggplot(d_merged,aes(x=factor(intv_appld),y=vB_m_v_m_sue, fill=agent_name)) +  
-  theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
-  geom_signif(y_position = 105.00, xmin = c(0.8,1.8), xmax = c(1.2,2.2), annotation = c(unlist(no_intv_anno[1]),unlist(intv_anno[1])), textsize=7.5)
-p3_3 <- p3_3 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
-  scale_x_discrete(labels=t_names) +
-  ggtitle("Veh. B Manufacturer Sue") +
-  xlab ("") + ylab ("") +
-  scale_fill_discrete(labels=c('AV', 'HDV')) +
-  theme_classic() +
-  theme(axis.text.x = element_text(size=15)) +
-  theme(axis.text.y = element_text(size=15)) +
-  theme(axis.title = element_text(size=18)) +
-  theme(plot.title = element_text(size=18, hjust=0.5)) +
-  theme(legend.text=element_text(size=14),legend.title=element_text(size=14), legend.position="top")+
-  labs(fill='')+
-  geom_violin(width=0.9, alpha=0.38, size=0.75) +  
-  geom_sina(alpha=0.6, size=0.95, color = "#999999") +
-  stat_summary(fun.data = "mean_cl_boot", color = "black", 
-               size=0.4, 
-               position = position_dodge(width = 0.9)) +
-  stat_summary(fun.data = "mean_cl_boot", color = "black", 
-               position = position_dodge(width = 0.9),
-               geom="errorbar", width = 0.2)
-p3_3
-
-## (4) Capability to Avoid
-intv_anno <- get_annotation(avoid_T_intv$p.value)
-no_intv_anno <- get_annotation(avoid_T_no_intv$p.value)
-p3_4 <- ggplot(d_merged,aes(x=factor(intv_appld),y=avoid, fill=agent_name)) +  
-  theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
-  geom_signif(y_position = 105.00, xmin = c(0.8,1.8), xmax = c(1.2,2.2), annotation = c(unlist(no_intv_anno[1]),unlist(intv_anno[1])), textsize=7.5)
-p3_4 <- p3_4 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
-  scale_x_discrete(labels=t_names) +
-  ggtitle("Capability to Avoid") +
-  xlab ("") + ylab ("") +
-  scale_fill_discrete(labels=c('AV', 'HDV')) +
-  theme_classic() +
-  theme(axis.text.x = element_text(size=15)) +
-  theme(axis.text.y = element_text(size=15)) +
-  theme(axis.title = element_text(size=18)) +
-  theme(plot.title = element_text(size=18, hjust=0.5)) +
-  theme(legend.text=element_text(size=14),legend.title=element_text(size=14), legend.position="top")+
-  labs(fill='')+
-  geom_violin(width=0.9, alpha=0.38, size=0.75) +  
-  geom_sina(alpha=0.6, size=0.95, color = "#999999") +
-  stat_summary(fun.data = "mean_cl_boot", color = "black", 
-               size=0.4, 
-               position = position_dodge(width = 0.9)) +
-  stat_summary(fun.data = "mean_cl_boot", color = "black", 
-               position = position_dodge(width = 0.9),
-               geom="errorbar", width = 0.2)
-p3_4
-
-## PLOT SERIES 3
-#dev.new(width=10,height=8,noRStudioGD = TRUE)
-figure3 <- ggarrange(p3_1, p3_2, p3_3, p3_4, nrow=2,ncol=2,common.legend = TRUE, legend="top", vjust = 1.0, hjust=0.5) 
-figure3 <- annotate_figure(figure3,left = text_grob("Mean Agreement", color="black", face ="plain",size=16, rot=90),
-                           bottom = text_grob("Intervention Applied", color="black", face ="plain",size=16)) 
-
-#dev.new(width=10,height=5,noRStudioGD = TRUE)
-figure4 <- ggarrange(p3_2, p3_3, p3_4, nrow=1,ncol=3,common.legend = TRUE, legend="top", vjust = 1.0, hjust=0.5) 
-figure4 <- annotate_figure(figure4,left = text_grob("Mean Agreement", color="black", face ="plain",size=18, rot=90),
-                           bottom = text_grob("Intervention Applied", color="black", face ="plain",size=18)) 
-
-
-plot(figure4)
-
-write.csv(d_merged, 'd_spss.csv')
-
-## ================================================================================================================
-##                                              PLOTTING MAIN FIGURES                 
-## ================================================================================================================
-
-## plotting all measures
-t_names <- c("AV", "HDV")
-
-# (1) VA driver liable
-intv_anno <- get_annotation(vA_sue_T_intv$p.value)
-no_intv_anno <- get_annotation(vA_sue_T_no_intv$p.value)
-p3_1 <- ggplot(d_merged,aes(x=factor(intv_appld),y=vA_sue, fill=agent_name)) +  
-  theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
-  geom_signif(y_position = 105.00, xmin = c(0.8,1.8), xmax = c(1.2,2.2), annotation = c(unlist(no_intv_anno[1]),unlist(intv_anno[1])), textsize=7.5)
-p3_1 <- p3_1 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
-  scale_x_discrete(labels=t_names) +
-  ggtitle("Veh. A Driver Sue") +
-  xlab ("Intervention Applied") + ylab ("Measure") +
-  theme_classic() +
-  theme(axis.text.x = element_text(size=15)) +
-  theme(axis.text.y = element_text(size=15)) +
-  theme(axis.title = element_text(size=18)) +
-  theme(plot.title = element_text(size=18, hjust=0.5)) +
-  theme(legend.text=element_text(size=14),legend.title=element_text(size=14), legend.position="top")+
-  labs(fill='')+
-  geom_violin(width=0.9, alpha=0.38, size=0.75) +  
-  geom_sina(alpha=0.6, size=0.95, color = "#999999") +
-  stat_summary(fun.data = "mean_cl_boot", color = "black", 
-               size=0.4, 
-               position = position_dodge(width = 0.9)) +
-  stat_summary(fun.data = "mean_cl_boot", color = "black", 
-               position = position_dodge(width = 0.9),
-               geom="errorbar", width = 0.2)
-p3_1
-
-## (2) VB manufacturer/driver liability
-av_anno <- get_annotation(vB_m_v_d_sue_T_av$p.value)
-hdv_anno <- get_annotation(vB_m_v_d_sue_T_hdv$p.value)
-p3_2 <- ggplot(d_merged,aes(x=factor(agent_name),y=vB_m_v_d_sue, fill=intv_appld)) +  
-  theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
-  geom_signif(y_position = 105.00, xmin = c(0.8,1.8), xmax = c(1.2,2.2), annotation = c(unlist(av_anno[1]),unlist(hdv_anno[1])), textsize=7.5)
-p3_2 <- p3_2 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
-  scale_x_discrete(labels=t_names) +
-  ggtitle("Veh. B Manufacturer\nor Driver Sue") +
-  xlab ("") + ylab ("") +
-  scale_fill_discrete(labels=c('No Intervention', 'Intervention')) +
-  theme_classic() +
-  theme(axis.text.x = element_text(size=15)) +
-  theme(axis.text.y = element_text(size=15)) +
-  theme(axis.title = element_text(size=18)) +
-  theme(plot.title = element_text(size=18, hjust=0.5)) +
-  theme(legend.text=element_text(size=14),legend.title=element_text(size=14), legend.position="top")+
-  labs(fill='')+
-  geom_violin(width=0.9, alpha=0.38, size=0.75) +  
-  geom_sina(alpha=0.6, size=0.95, color = "#999999") +
-  stat_summary(fun.data = "mean_cl_boot", color = "black", 
-               size=0.4, 
-               position = position_dodge(width = 0.9)) +
-  stat_summary(fun.data = "mean_cl_boot", color = "black", 
-               position = position_dodge(width = 0.9),
-               geom="errorbar", width = 0.2)
-p3_2
-
-## (3) VB manufacturer liability
-av_anno <- get_annotation(vB_m_v_m_sue_T_av$p.value)
-hdv_anno <- get_annotation(vB_m_v_m_sue_T_hdv$p.value)
-p3_3 <- ggplot(d_merged,aes(x=factor(agent_name),y=vB_m_v_m_sue, fill=intv_appld)) +  
-  theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
-  geom_signif(y_position = 105.00, xmin = c(0.8,1.8), xmax = c(1.2,2.2), annotation = c(unlist(av_anno[1]),unlist(hdv_anno[1])), textsize=7.5)
-p3_3 <- p3_3 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
-  scale_x_discrete(labels=t_names) +
-  ggtitle("Veh. B Manufacturer Sue") +
-  xlab ("") + ylab ("") +
-  scale_fill_discrete(labels=c('No Intervention', 'Intervention')) +
-  theme_classic() +
-  theme(axis.text.x = element_text(size=15)) +
-  theme(axis.text.y = element_text(size=15)) +
-  theme(axis.title = element_text(size=18)) +
-  theme(plot.title = element_text(size=18, hjust=0.5)) +
-  theme(legend.text=element_text(size=14),legend.title=element_text(size=14), legend.position="top")+
-  labs(fill='')+
-  geom_violin(width=0.9, alpha=0.38, size=0.75) +  
-  geom_sina(alpha=0.6, size=0.95, color = "#999999") +
-  stat_summary(fun.data = "mean_cl_boot", color = "black", 
-               size=0.4, 
-               position = position_dodge(width = 0.9)) +
-  stat_summary(fun.data = "mean_cl_boot", color = "black", 
-               position = position_dodge(width = 0.9),
-               geom="errorbar", width = 0.2)
-p3_3
-
-## (4) Capability to Avoid
-av_anno <- get_annotation(avoid_T_av$p.value)
-hdv_anno <- get_annotation(avoid_T_hdv$p.value)
-p3_4 <- ggplot(d_merged,aes(x=factor(agent_name),y=avoid, fill=intv_appld)) +  
-  theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
-  geom_signif(y_position = 105.00, xmin = c(0.8,1.8), xmax = c(1.2,2.2), annotation = c(unlist(av_anno[1]),unlist(hdv_anno[1])), textsize=7.5)
-p3_4 <- p3_4 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
-  scale_x_discrete(labels=t_names) +
-  ggtitle("Capability to Avoid") +
-  xlab ("") + ylab ("") +
-  scale_fill_discrete(labels=c('No Intervention', 'Intervention')) +
-  theme_classic() +
-  theme(axis.text.x = element_text(size=15)) +
-  theme(axis.text.y = element_text(size=15)) +
-  theme(axis.title = element_text(size=18)) +
-  theme(plot.title = element_text(size=18, hjust=0.5)) +
-  theme(legend.text=element_text(size=14),legend.title=element_text(size=14), legend.position="top")+
-  labs(fill='')+
-  geom_violin(width=0.9, alpha=0.38, size=0.75) +  
-  geom_sina(alpha=0.6, size=0.95, color = "#999999") +
-  stat_summary(fun.data = "mean_cl_boot", color = "black", 
-               size=0.4, 
-               position = position_dodge(width = 0.9)) +
-  stat_summary(fun.data = "mean_cl_boot", color = "black", 
-               position = position_dodge(width = 0.9),
-               geom="errorbar", width = 0.2)
-p3_4
-
-## PLOT SERIES 3
-#dev.new(width=10,height=8,noRStudioGD = TRUE)
-figure3 <- ggarrange(p3_1, p3_2, p3_3, p3_4, nrow=2,ncol=2,common.legend = TRUE, legend="top", vjust = 1.0, hjust=0.5) 
-figure3 <- annotate_figure(figure3,left = text_grob("Mean Agreement", color="black", face ="plain",size=16, rot=90),
-                           bottom = text_grob("Intervention Applied", color="black", face ="plain",size=16)) 
-
-#dev.new(width=10,height=5,noRStudioGD = TRUE)
-figure4 <- ggarrange(p3_2, p3_3, p3_4, nrow=1,ncol=3,common.legend = TRUE, legend="top", vjust = 1.0, hjust=0.5) 
-figure4 <- annotate_figure(figure4,left = text_grob("Mean Agreement", color="black", face ="plain",size=18, rot=90),
-                           bottom = text_grob("Vehicle Type", color="black", face ="plain",size=18)) 
-
-
-plot(figure4)
-
-write.csv(d_merged, 'd_spss.csv')
-
-## ================================================================================================================
-##                                              PLOTTING MAIN FIGURES                 
-## ================================================================================================================
-
-## plotting all measures
-t_names <- c("No Intervention", "Intervention")
-
-## (1) VA driver liable
+## (1) sue vehicle A driver
 annotations <- get_annotation(vA_sue_T_scen$p.value)
 p2_1 <- ggplot(d_merged,aes(x=factor(intv_appld),y=vA_sue)) +  
   theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
-  geom_signif(comparisons = list(c("yes", "no")), annotation=unlist(annotations[1]), textsize = unlist(annotations[2]))
-
+  geom_signif(comparisons = list(c("no", "yes")), annotation=unlist(annotations[1]), textsize = unlist(annotations[2]))
 p2_1 <- p2_1 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
   scale_x_discrete(labels=t_names) +
   ggtitle("Veh. A Driver Sue") +
@@ -764,12 +450,11 @@ p2_1 <- p2_1 + theme(text = element_text(size=16),panel.grid.major = element_bla
                geom="errorbar", width = 0.2)
 p2_1
 
-## (2) VB manufacturer/driver liability
+## (2) sue vehicle B manufacturer VS vehicle A driver
 annotations <- get_annotation(vB_m_v_d_sue_T_scen$p.value)
 p2_2 <- ggplot(d_merged,aes(x=factor(intv_appld),y=vB_m_v_d_sue)) +  
   theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
-  geom_signif(comparisons = list(c("yes", "no")), annotation=unlist(annotations[1]), textsize = unlist(annotations[2]))
-
+  geom_signif(comparisons = list(c("no", "yes")), annotation=unlist(annotations[1]), textsize = unlist(annotations[2]))
 p2_2 <- p2_2 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
   scale_x_discrete(labels=t_names) +
   ggtitle("Veh. B Manufacturer\nor Driver Sue") +
@@ -788,11 +473,11 @@ p2_2 <- p2_2 + theme(text = element_text(size=16),panel.grid.major = element_bla
                geom="errorbar", width = 0.2)
 p2_2
 
-## (3) VB manufacturer liability
+## (3) sue vehicle B manufacturer VS vehicle A manufacturer
 annotations <- get_annotation(vB_m_v_m_sue_T_scen$p.value)
 p2_3 <- ggplot(d_merged,aes(x=factor(intv_appld),y=vB_m_v_m_sue)) +  
   theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
-  geom_signif(comparisons = list(c("yes", "no")), annotation=unlist(annotations[1]), textsize = unlist(annotations[2]))
+  geom_signif(comparisons = list(c("no", "yes")), annotation=unlist(annotations[1]), textsize = unlist(annotations[2]))
 p2_3 <- p2_3 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
   scale_x_discrete(labels=t_names) +
   ggtitle("Veh. B Manufacturer Sue") +
@@ -811,11 +496,11 @@ p2_3 <- p2_3 + theme(text = element_text(size=16),panel.grid.major = element_bla
                geom="errorbar", width = 0.2)
 p2_3
 
-## (4) Capability to Avoid
+## (4) vehicle B - capability to avoid
 annotations <- get_annotation(avoid_T_scen$p.value)
 p2_4 <- ggplot(d_merged,aes(x=factor(intv_appld),y=avoid)) +  
   theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
-  geom_signif(comparisons = list(c("yes", "no")), annotation=unlist(annotations[1]), textsize = unlist(annotations[2]))
+  geom_signif(comparisons = list(c("no", "yes")), annotation=unlist(annotations[1]), textsize = unlist(annotations[2]))
 p2_4 <- p2_4 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
   scale_x_discrete(labels=t_names) +
   ggtitle("Capability to Avoid") +
@@ -834,7 +519,7 @@ p2_4 <- p2_4 + theme(text = element_text(size=16),panel.grid.major = element_bla
                geom="errorbar", width = 0.2)
 p2_4
 
-## PLOT SERIES 2
+## PLOT SERIES 2 - BY INTERVENTION
 #dev.new(width=10,height=8,noRStudioGD = TRUE)
 figure2 <- ggarrange(p2_1, p2_2, p2_3, p2_4, nrow=2,ncol=2,common.legend = TRUE, legend="top", vjust = 1.0, hjust=0.5) 
 figure2 <- annotate_figure(figure2,left = text_grob("Mean Agreement", color="black", face ="plain",size=16, rot=90),
@@ -842,7 +527,137 @@ figure2 <- annotate_figure(figure2,left = text_grob("Mean Agreement", color="bla
 
 plot(figure2)
 
-write.csv(d_merged, 'd_spss.csv')
+## ================================================================================================================
+##                                PLOTTING MAIN FIGURE - BY INTERVENTION --> AGENT                   
+## ================================================================================================================
+
+## x-axis = intervention
+t_names <- c("No Intervention", "Intervention")
+
+# (1) sue vehicle A driver
+intv_anno <- get_annotation(vA_sue_T_intv$p.value)
+no_intv_anno <- get_annotation(vA_sue_T_no_intv$p.value)
+p3_1 <- ggplot(d_merged,aes(x=factor(intv_appld),y=vA_sue, fill=agent_name)) +  
+  theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
+  geom_signif(y_position = 105.00, xmin = c(0.8,1.8), xmax = c(1.2,2.2), annotation = c(unlist(intv_anno[1]),unlist(no_intv_anno[1])), textsize=6)
+p3_1 <- p3_1 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
+  scale_x_discrete(labels=t_names) +
+  ggtitle("Veh. A Driver Sue") +
+  xlab ("") + ylab ("") +
+  scale_fill_discrete(labels=c('AV', 'HDV')) +
+  theme_classic() +
+  theme(axis.text.x = element_text(size=15)) +
+  theme(axis.text.y = element_text(size=15)) +
+  theme(axis.title = element_text(size=18)) +
+  theme(plot.title = element_text(size=18, hjust=0.5)) +
+  theme(legend.text=element_text(size=14),legend.title=element_text(size=14), legend.position="top")+
+  labs(fill='')+
+  geom_violin(width=0.9, alpha=0.38, size=0.75) +  
+  geom_sina(alpha=0.6, size=0.95, color = "#999999") +
+  stat_summary(fun.data = "mean_cl_boot", color = "black", 
+               size=0.4, 
+               position = position_dodge(width = 0.9)) +
+  stat_summary(fun.data = "mean_cl_boot", color = "black", 
+               position = position_dodge(width = 0.9),
+               geom="errorbar", width = 0.2)
+p3_1
+
+## (2) sue vehicle B manufacturer VS vehicle A driver
+intv_anno <- get_annotation(vB_m_v_d_sue_T_intv$p.value)
+no_intv_anno <- get_annotation(vB_m_v_d_sue_T_no_intv$p.value)
+p3_2 <- ggplot(d_merged,aes(x=factor(intv_appld),y=vB_m_v_d_sue, fill=agent_name)) +  
+  theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
+  geom_signif(y_position = 105.00, xmin = c(0.8,1.8), xmax = c(1.2,2.2), annotation = c(unlist(no_intv_anno[1]), unlist(intv_anno[1])), textsize=6)
+p3_2 <- p3_2 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
+  scale_x_discrete(labels=t_names) +
+  ggtitle("Veh. B Manufacturer\nor Driver Sue") +
+  xlab ("") + ylab ("") +
+  scale_fill_discrete(labels=c('AV', 'HDV')) +
+  theme_classic() +
+  theme(axis.text.x = element_text(size=15)) +
+  theme(axis.text.y = element_text(size=15)) +
+  theme(axis.title = element_text(size=18)) +
+  theme(plot.title = element_text(size=18, hjust=0.5)) +
+  theme(legend.text=element_text(size=14),legend.title=element_text(size=14), legend.position="top")+
+  labs(fill='')+
+  geom_violin(width=0.9, alpha=0.38, size=0.75) +  
+  geom_sina(alpha=0.6, size=0.95, color = "#999999") +
+  stat_summary(fun.data = "mean_cl_boot", color = "black", 
+               size=0.4, 
+               position = position_dodge(width = 0.9)) +
+  stat_summary(fun.data = "mean_cl_boot", color = "black", 
+               position = position_dodge(width = 0.9),
+               geom="errorbar", width = 0.2)
+p3_2
+
+## (3) sue vehicle B manufacturer VS vehicle A manufacturer
+intv_anno <- get_annotation(vB_m_v_m_sue_T_intv$p.value)
+no_intv_anno <- get_annotation(vB_m_v_m_sue_T_no_intv$p.value)
+p3_3 <- ggplot(d_merged,aes(x=factor(intv_appld),y=vB_m_v_m_sue, fill=agent_name)) +  
+  theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
+  geom_signif(y_position = 105.00, xmin = c(0.8,1.8), xmax = c(1.2,2.2), annotation = c(unlist(no_intv_anno[1]),unlist(intv_anno[1])), textsize=6)
+p3_3 <- p3_3 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
+  scale_x_discrete(labels=t_names) +
+  ggtitle("Veh. B Manufacturer Sue") +
+  xlab ("") + ylab ("") +
+  scale_fill_discrete(labels=c('AV', 'HDV')) +
+  theme_classic() +
+  theme(axis.text.x = element_text(size=15)) +
+  theme(axis.text.y = element_text(size=15)) +
+  theme(axis.title = element_text(size=18)) +
+  theme(plot.title = element_text(size=18, hjust=0.5)) +
+  theme(legend.text=element_text(size=14),legend.title=element_text(size=14), legend.position="top")+
+  labs(fill='')+
+  geom_violin(width=0.9, alpha=0.38, size=0.75) +  
+  geom_sina(alpha=0.6, size=0.95, color = "#999999") +
+  stat_summary(fun.data = "mean_cl_boot", color = "black", 
+               size=0.4, 
+               position = position_dodge(width = 0.9)) +
+  stat_summary(fun.data = "mean_cl_boot", color = "black", 
+               position = position_dodge(width = 0.9),
+               geom="errorbar", width = 0.2)
+p3_3
+
+## (4) vehicle B - capability to avoid
+intv_anno <- get_annotation(avoid_T_intv$p.value)
+no_intv_anno <- get_annotation(avoid_T_no_intv$p.value)
+p3_4 <- ggplot(d_merged,aes(x=factor(intv_appld),y=avoid, fill=agent_name)) +  
+  theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
+  geom_signif(y_position = 105.00, xmin = c(0.8,1.8), xmax = c(1.2,2.2), annotation = c(unlist(no_intv_anno[1]),unlist(intv_anno[1])), textsize=6)
+p3_4 <- p3_4 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
+  scale_x_discrete(labels=t_names) +
+  ggtitle("Capability to Avoid") +
+  xlab ("") + ylab ("") +
+  scale_fill_discrete(labels=c('AV', 'HDV')) +
+  theme_classic() +
+  theme(axis.text.x = element_text(size=15)) +
+  theme(axis.text.y = element_text(size=15)) +
+  theme(axis.title = element_text(size=18)) +
+  theme(plot.title = element_text(size=18, hjust=0.5)) +
+  theme(legend.text=element_text(size=14),legend.title=element_text(size=14), legend.position="top")+
+  labs(fill='')+
+  geom_violin(width=0.9, alpha=0.38, size=0.75) +  
+  geom_sina(alpha=0.6, size=0.95, color = "#999999") +
+  stat_summary(fun.data = "mean_cl_boot", color = "black", 
+               size=0.4, 
+               position = position_dodge(width = 0.9)) +
+  stat_summary(fun.data = "mean_cl_boot", color = "black", 
+               position = position_dodge(width = 0.9),
+               geom="errorbar", width = 0.2)
+p3_4
+
+## PLOT SERIES 3 AND 4 - BY INTERVENTION --> AGENT
+#dev.new(width=10,height=8,noRStudioGD = TRUE)
+figure3 <- ggarrange(p3_1, p3_2, p3_3, p3_4, nrow=2,ncol=2,common.legend = TRUE, legend="top", vjust = 1.0, hjust=0.5) 
+figure3 <- annotate_figure(figure3,left = text_grob("Mean Agreement", color="black", face ="plain",size=16, rot=90),
+                           bottom = text_grob("Intervention Applied", color="black", face ="plain",size=16)) 
+plot(figure3)
+
+#dev.new(width=10,height=5,noRStudioGD = TRUE)
+figure4 <- ggarrange(p3_2, p3_3, p3_4, nrow=1,ncol=3,common.legend = TRUE, legend="top", vjust = 1.0, hjust=0.5) 
+figure4 <- annotate_figure(figure4,left = text_grob("Mean Agreement", color="black", face ="plain",size=18, rot=90),
+                           bottom = text_grob("Intervention Applied", color="black", face ="plain",size=18)) 
+plot(figure4)
 
 ## ================================================================================================================
 ##                                                  END OF ANALYSIS                 
