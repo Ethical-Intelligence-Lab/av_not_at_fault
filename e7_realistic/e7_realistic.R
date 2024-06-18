@@ -93,7 +93,7 @@ d_AV <- d_AV %>% relocate(vB_mnfctr_sue_AV_2, .after=vB_mnfctr_sue_AV_1)
 
 ## get mean age and gender:
 mean_age = mean(as.numeric(d$age), na.rm = TRUE) # removing NAs from the dataframe before computing mean 
-gender = table(d$gender)[1]/sum(table(d$gender))
+gender = table(d$gender)["2"]/sum(table(d$gender)) # percent females
 
 ## ================================================================================================================
 ##                                                    SUBSETTING                 
@@ -157,6 +157,7 @@ mean(d_merged[d_merged$cond_name == "av",]$vA_sue)
 mean(d_merged[d_merged$cond_name == "human",]$vA_sue)
 sd(d_merged[d_merged$cond_name == "av",]$vA_sue)
 sd(d_merged[d_merged$cond_name == "human",]$vA_sue)
+cohen.d(d_merged[d_merged$cond_name=="av", ]$vA_sue, d_merged[d_merged$cond_name=="human", ]$vA_sue)
 
 ## (2) LIABLE VEHICLE B MANUFACTURER VS LIABLE HDV DRIVER
 vB_m_v_d_sue_T <- t.test(vB_m_v_d_sue ~ cond_name, data = d_merged, paired = FALSE) 
@@ -167,6 +168,7 @@ mean(d_merged[d_merged$cond_name == "av",]$vB_m_v_d_sue)
 mean(d_merged[d_merged$cond_name == "human",]$vB_m_v_d_sue)
 sd(d_merged[d_merged$cond_name == "av",]$vB_m_v_d_sue)
 sd(d_merged[d_merged$cond_name == "human",]$vB_m_v_d_sue)
+cohen.d(d_merged[d_merged$cond_name=="av", ]$vB_m_v_d_sue, d_merged[d_merged$cond_name=="human", ]$vB_m_v_d_sue)
 
 ## (3) LIABLE VEHICLE B MANUFACTURER VS LIABLE HDV MANUFACTURER
 vB_m_v_m_sue_T <- t.test(vB_m_v_m_sue ~ cond_name, data = d_merged, paired = FALSE) 
@@ -177,6 +179,7 @@ mean(d_merged[d_merged$cond_name == "av",]$vB_m_v_m_sue)
 mean(d_merged[d_merged$cond_name == "human",]$vB_m_v_m_sue)
 sd(d_merged[d_merged$cond_name == "av",]$vB_m_v_m_sue)
 sd(d_merged[d_merged$cond_name == "human",]$vB_m_v_m_sue)
+cohen.d(d_merged[d_merged$cond_name=="av", ]$vB_m_v_m_sue, d_merged[d_merged$cond_name=="human", ]$vB_m_v_m_sue)
 
 ## (4) CONSIDER VEHICLE A COUNTERFACTUAL
 vA_cntrfctl_T <- t.test(vA_cntrfctl ~ cond_name, data = d_merged, paired = FALSE) 
@@ -187,6 +190,7 @@ mean(d_merged[d_merged$cond_name == "av",]$vA_cntrfctl)
 mean(d_merged[d_merged$cond_name == "human",]$vA_cntrfctl)
 sd(d_merged[d_merged$cond_name == "av",]$vA_cntrfctl)
 sd(d_merged[d_merged$cond_name == "human",]$vA_cntrfctl)
+cohen.d(d_merged[d_merged$cond_name=="av", ]$vA_cntrfctl, d_merged[d_merged$cond_name=="human", ]$vA_cntrfctl)
 
 ## (5) CONSIDER VEHICLE B COUNTERFACTUAL
 vB_cntrfctl_T <- t.test(vB_cntrfctl ~ cond_name, data = d_merged, paired = FALSE) 
@@ -197,6 +201,7 @@ mean(d_merged[d_merged$cond_name == "av",]$vB_cntrfctl)
 mean(d_merged[d_merged$cond_name == "human",]$vB_cntrfctl)
 sd(d_merged[d_merged$cond_name == "av",]$vB_cntrfctl)
 sd(d_merged[d_merged$cond_name == "human",]$vB_cntrfctl)
+cohen.d(d_merged[d_merged$cond_name=="av", ]$vB_cntrfctl, d_merged[d_merged$cond_name=="human", ]$vB_cntrfctl)
 
 ## (6) VEHICLE B CAN AVOID
 avoid_T <- t.test(avoid ~ cond_name, data = d_merged, paired = FALSE) 
@@ -207,12 +212,18 @@ mean(d_merged[d_merged$cond_name == "av",]$avoid)
 mean(d_merged[d_merged$cond_name == "human",]$avoid)
 sd(d_merged[d_merged$cond_name == "av",]$avoid)
 sd(d_merged[d_merged$cond_name == "human",]$avoid)
+cohen.d(d_merged[d_merged$cond_name=="av", ]$avoid, d_merged[d_merged$cond_name=="human", ]$avoid)
 
 ## (7) MODERATOR CHECK
 mod_T <- t.test(mod ~ cond_name, data = d_merged, paired = FALSE) 
 mod_T$parameter
 mod_T$statistic
 mod_T$p.value
+mean(d_merged[d_merged$cond_name == "av",]$mod)
+mean(d_merged[d_merged$cond_name == "human",]$mod)
+sd(d_merged[d_merged$cond_name == "av",]$mod)
+sd(d_merged[d_merged$cond_name == "human",]$mod)
+cohen.d(d_merged[d_merged$cond_name=="av", ]$mod, d_merged[d_merged$cond_name=="human", ]$mod)
 
 cor(d_merged[,2:7])
 
@@ -237,6 +248,16 @@ process(data = d_merged, y = "vB_m_v_m_sue", x = "cond_n",
 process(data = d_merged, y = "vB_m_v_d_sue", x = "cond_n",
         m =c("vB_cntrfctl"), model = 4, effsize =1, total =1, stand =1,
         contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
+
+# MODERATION
+# investigate possible mediators
+process(data = d_merged, y = "vB_m_v_m_sue", x = "cond_n",
+        w = "mod", model = 1, effsize =1, total =1, stand =1,
+        contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
+process(data = d_merged, y = "vB_m_v_d_sue", x = "cond_n",
+        m =c("vB_cntrfctl"), model = 4, effsize =1, total =1, stand =1,
+        contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
+
 
 # SERIAL MEDIATION
 process(data = d_merged, y = "vB_m_v_m_sue", x = "cond_n", 
@@ -323,8 +344,9 @@ p1_1 <- p1_1 + theme(text = element_text(size=16),panel.grid.major = element_bla
   theme(axis.text.x = element_text(size=12)) +
   theme(axis.text.y = element_text(size=10)) +
   theme(plot.title = element_text(size=12, hjust=0.5)) +
-  geom_violin(width=0.9, alpha=0.38, size=0.75) +  
-  geom_sina(alpha=0.6, size=0.95, color = "#999999") +
+  geom_bar(stat="summary", position = position_dodge(), width = 0.9, alpha = 0.38, size = 0.75) +
+  # geom_violin(width=0.9, alpha=0.38, size=0.75) +  
+  # geom_sina(alpha=0.6, size=0.95, color = "#999999") +
   stat_summary(fun.data = "mean_cl_boot", color = "black", 
                size=0.4, 
                position = position_dodge(width = 0.9)) +
@@ -348,8 +370,9 @@ p1_2 <- p1_2 + theme(text = element_text(size=16),panel.grid.major = element_bla
   theme(axis.text.y = element_text(size=10)) +
   #theme(axis.title = element_text(size=18)) +
   theme(plot.title = element_text(size=12, hjust=0.5)) +
-  geom_violin(width=0.9, alpha=0.38, size=0.75) +  
-  geom_sina(alpha=0.6, size=0.95, color = "#999999") +
+  geom_bar(stat="summary", position = position_dodge(), width = 0.9, alpha = 0.38, size = 0.75) +
+  # geom_violin(width=0.9, alpha=0.38, size=0.75) +  
+  # geom_sina(alpha=0.6, size=0.95, color = "#999999") +
   stat_summary(fun.data = "mean_cl_boot", color = "black", 
                size=0.4, 
                position = position_dodge(width = 0.9)) +
@@ -372,8 +395,9 @@ p1_3 <- p1_3 + theme(text = element_text(size=16),panel.grid.major = element_bla
   theme(axis.text.x = element_text(size=12)) +
   theme(axis.text.y = element_text(size=10)) +
   theme(plot.title = element_text(size=12, hjust=0.5)) +
-  geom_violin(width=0.9, alpha=0.38, size=0.75) +  
-  geom_sina(alpha=0.6, size=0.95, color = "#999999") +
+  geom_bar(stat="summary", position = position_dodge(), width = 0.9, alpha = 0.38, size = 0.75) +
+  # geom_violin(width=0.9, alpha=0.38, size=0.75) +  
+  # geom_sina(alpha=0.6, size=0.95, color = "#999999") +
   stat_summary(fun.data = "mean_cl_boot", color = "black", 
                size=0.4, 
                position = position_dodge(width = 0.9)) +
@@ -396,8 +420,9 @@ p1_4 <- p1_4 + theme(text = element_text(size=16),panel.grid.major = element_bla
   theme(axis.text.x = element_text(size=12)) +
   theme(axis.text.y = element_text(size=10)) +
   theme(plot.title = element_text(size=12, hjust=0.5)) +
-  geom_violin(width=0.9, alpha=0.38, size=0.75) +  
-  geom_sina(alpha=0.6, size=0.95, color = "#999999") +
+  geom_bar(stat="summary", position = position_dodge(), width = 0.9, alpha = 0.38, size = 0.75) +
+  # geom_violin(width=0.9, alpha=0.38, size=0.75) +  
+  # geom_sina(alpha=0.6, size=0.95, color = "#999999") +
   stat_summary(fun.data = "mean_cl_boot", color = "black", 
                size=0.4, 
                position = position_dodge(width = 0.9)) +
@@ -420,8 +445,9 @@ p1_5 <- p1_5 + theme(text = element_text(size=16),panel.grid.major = element_bla
   theme(axis.text.x = element_text(size=12)) +
   theme(axis.text.y = element_text(size=10)) +
   theme(plot.title = element_text(size=12, hjust=0.5)) +
-  geom_violin(width=0.9, alpha=0.38, size=0.75) +  
-  geom_sina(alpha=0.6, size=0.95, color = "#999999") +
+  geom_bar(stat="summary", position = position_dodge(), width = 0.9, alpha = 0.38, size = 0.75) +
+  # geom_violin(width=0.9, alpha=0.38, size=0.75) +  
+  # geom_sina(alpha=0.6, size=0.95, color = "#999999") +
   stat_summary(fun.data = "mean_cl_boot", color = "black", 
                size=0.4, 
                position = position_dodge(width = 0.9)) +
@@ -444,8 +470,9 @@ p1_6 <- p1_6 + theme(text = element_text(size=16),panel.grid.major = element_bla
   theme(axis.text.x = element_text(size=12)) +
   theme(axis.text.y = element_text(size=10)) +
   theme(plot.title = element_text(size=12, hjust=0.5)) +
-  geom_violin(width=0.9, alpha=0.38, size=0.75) +  
-  geom_sina(alpha=0.6, size=0.95, color = "#999999") +
+  geom_bar(stat="summary", position = position_dodge(), width = 0.9, alpha = 0.38, size = 0.75) +
+  # geom_violin(width=0.9, alpha=0.38, size=0.75) +  
+  # geom_sina(alpha=0.6, size=0.95, color = "#999999") +
   stat_summary(fun.data = "mean_cl_boot", color = "black", 
                size=0.4, 
                position = position_dodge(width = 0.9)) +
