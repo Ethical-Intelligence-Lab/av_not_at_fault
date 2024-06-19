@@ -147,6 +147,7 @@ mean(d_merged[d_merged$cond_name == "av",]$vA_liable)
 mean(d_merged[d_merged$cond_name == "human",]$vA_liable)
 sd(d_merged[d_merged$cond_name == "av",]$vA_liable)
 sd(d_merged[d_merged$cond_name == "human",]$vA_liable)
+cohen.d(d_merged[d_merged$cond_name=="av", ]$vA_liable, d_merged[d_merged$cond_name=="human", ]$vA_liable)
 
 ## (2) LIABLE VEHICLE B MANUFACTURER VS LIABLE HDV DRIVER
 vB_m_v_d_liable_T <- t.test(vB_m_v_d_liable ~ cond_name, data = d_merged, paired = FALSE) 
@@ -157,6 +158,7 @@ mean(d_merged[d_merged$cond_name == "av",]$vB_m_v_d_liable)
 mean(d_merged[d_merged$cond_name == "human",]$vB_m_v_d_liable)
 sd(d_merged[d_merged$cond_name == "av",]$vB_m_v_d_liable)
 sd(d_merged[d_merged$cond_name == "human",]$vB_m_v_d_liable)
+cohen.d(d_merged[d_merged$cond_name=="av", ]$vB_m_v_d_liable, d_merged[d_merged$cond_name=="human", ]$vB_m_v_d_liable)
 
 ## (3) LIABLE VEHICLE B MANUFACTURER VS LIABLE HDV MANUFACTURER
 vB_m_v_m_liable_T <- t.test(vB_m_v_m_liable ~ cond_name, data = d_merged, paired = FALSE) 
@@ -167,6 +169,7 @@ mean(d_merged[d_merged$cond_name == "av",]$vB_m_v_m_liable)
 mean(d_merged[d_merged$cond_name == "human",]$vB_m_v_m_liable)
 sd(d_merged[d_merged$cond_name == "av",]$vB_m_v_m_liable)
 sd(d_merged[d_merged$cond_name == "human",]$vB_m_v_m_liable)
+cohen.d(d_merged[d_merged$cond_name=="av", ]$vB_m_v_m_liable, d_merged[d_merged$cond_name=="human", ]$vB_m_v_m_liable)
 
 ## (4) CONSIDER VEHICLE A COUNTERFACTUAL
 vA_cntrfctl_T <- t.test(vA_cntrfctl ~ cond_name, data = d_merged, paired = FALSE) 
@@ -177,6 +180,7 @@ mean(d_merged[d_merged$cond_name == "av",]$vA_cntrfctl)
 mean(d_merged[d_merged$cond_name == "human",]$vA_cntrfctl)
 sd(d_merged[d_merged$cond_name == "av",]$vA_cntrfctl)
 sd(d_merged[d_merged$cond_name == "human",]$vA_cntrfctl)
+cohen.d(d_merged[d_merged$cond_name=="av", ]$vA_cntrfctl, d_merged[d_merged$cond_name=="human", ]$vA_cntrfctl)
 
 ## (5) CONSIDER VEHICLE B COUNTERFACTUAL
 vB_cntrfctl_T <- t.test(vB_cntrfctl ~ cond_name, data = d_merged, paired = FALSE) 
@@ -187,6 +191,7 @@ mean(d_merged[d_merged$cond_name == "av",]$vB_cntrfctl)
 mean(d_merged[d_merged$cond_name == "human",]$vB_cntrfctl)
 sd(d_merged[d_merged$cond_name == "av",]$vB_cntrfctl)
 sd(d_merged[d_merged$cond_name == "human",]$vB_cntrfctl)
+cohen.d(d_merged[d_merged$cond_name=="av", ]$vB_cntrfctl, d_merged[d_merged$cond_name=="human", ]$vB_cntrfctl)
 
 ## (6) VEHICLE B CAN AVOID
 avoid_T <- t.test(avoid ~ cond_name, data = d_merged, paired = FALSE) 
@@ -197,6 +202,7 @@ mean(d_merged[d_merged$cond_name == "av",]$avoid)
 mean(d_merged[d_merged$cond_name == "human",]$avoid)
 sd(d_merged[d_merged$cond_name == "av",]$avoid)
 sd(d_merged[d_merged$cond_name == "human",]$avoid)
+cohen.d(d_merged[d_merged$cond_name=="av", ]$avoid, d_merged[d_merged$cond_name=="human", ]$avoid)
 
 ## (7) TRUST
 mod_T <- t.test(mod ~ cond_name, data = d_merged, paired = FALSE) 
@@ -209,7 +215,7 @@ sd(d_merged[d_merged$cond_name == "av",]$avoid)
 sd(d_merged[d_merged$cond_name == "human",]$avoid)
 cohen.d(d_merged[d_merged$cond_name=="av", ]$mod, d_merged[d_merged$cond_name=="human", ]$mod)
 
-cor(d_merged[,2:7])
+cor(d_merged[,2:10])
 
 ## trust agreement with coutnerfactual
 countf_trust_AV_T <- t.test(d_merged$vB_cntrfctl[d_merged$cond_name=="av" & d_merged$trust_level_n == 1], 
