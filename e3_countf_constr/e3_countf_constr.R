@@ -37,7 +37,7 @@ pacman::p_load('ggplot2',         # plotting
 ## read in data: 
 # if importing from Qualtrics: (i) export data as numeric values, and (ii) delete rows 2 and 3 of the .csv file.
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path)) #set working directory to current directory
-d <- read.csv('e6_countf_constr_900.csv')
+d <- read.csv('e3_countf_constr.csv')
 
 ## explore dataframe: 
 dim(d) # will provide dimensions of the dataframe by row [1] and column [2]
@@ -190,108 +190,105 @@ table(d_merged$con) #give us table of number of people in each condition - want 
 
 #### (1) LIABLE VEHICLE A DRIVER
 ## between agent conditions
-vA_liable_T_agent <- t.test(vA_liable ~ agent_name, data = d_merged, paired = FALSE) 
-vA_liable_T_agent
+t.test(vA_liable ~ agent_name, data = d_merged, paired = FALSE) 
+
 ## between scenario conditions
-vA_liable_T_scen <- t.test(vA_liable ~ scen_name, data = d_merged, paired = FALSE) 
-vA_liable_T_scen
+t.test(vA_liable ~ scen_name, data = d_merged, paired = FALSE) 
+
 ## between agent conditions for constrained
-vA_liable_T_cnstr <- t.test(d_merged$vA_liable[d_merged$scen_name=="cnstr" & d_merged$agent_name == "av"], 
+t.test(d_merged$vA_liable[d_merged$scen_name=="cnstr" & d_merged$agent_name == "av"], 
                             d_merged$vA_liable[d_merged$scen_name=="cnstr" & d_merged$agent_name == "human"], paired=FALSE)
-vA_liable_T_cnstr
+
 ## between agent conditions for unconstrained
-vA_liable_T_uncnstr <- t.test(d_merged$vA_liable[d_merged$scen_name=="uncnstr" & d_merged$agent_name == "av"], 
+t.test(d_merged$vA_liable[d_merged$scen_name=="uncnstr" & d_merged$agent_name == "av"], 
                               d_merged$vA_liable[d_merged$scen_name=="uncnstr" & d_merged$agent_name == "human"], paired=FALSE)
-vA_liable_T_uncnstr
 
 
 #### (2) LIABLE VEHICLE B MANUFACTURER VS LIABLE HDV DRIVER
 ## between agent conditions
-vB_m_v_d_liable_T_agent <- t.test(vB_m_v_d_liable ~ agent_name, data = d_merged, paired = FALSE) 
-vB_m_v_d_liable_T_agent
+t.test(vB_m_v_d_liable ~ agent_name, data = d_merged, paired = FALSE) 
+
 ## between scenario conditions
-vB_m_v_d_liable_T_scen <- t.test(vB_m_v_d_liable ~ scen_name, data = d_merged, paired = FALSE) 
-vB_m_v_d_liable_T_scen
+t.test(vB_m_v_d_liable ~ scen_name, data = d_merged, paired = FALSE) 
+
 ## between agent conditions for constrained
-vB_m_v_d_liable_T_cnstr <- t.test(d_merged$vB_m_v_d_liable[d_merged$scen_name=="cnstr" & d_merged$agent_name == "av"], 
+t.test(d_merged$vB_m_v_d_liable[d_merged$scen_name=="cnstr" & d_merged$agent_name == "av"], 
                                   d_merged$vB_m_v_d_liable[d_merged$scen_name=="cnstr" & d_merged$agent_name == "human"], paired=FALSE)
-vB_m_v_d_liable_T_cnstr
+
 cohen.d(d_merged[d_merged$scen_name=="cnstr", ]$vB_m_v_d_liable, d_merged[d_merged$scen_name=="cnstr", ]$agent_name)
 ## between agent conditions for unconstrained
-vB_m_v_d_liable_T_uncnstr <- t.test(d_merged$vB_m_v_d_liable[d_merged$scen_name=="uncnstr" & d_merged$agent_name == "av"], 
+t.test(d_merged$vB_m_v_d_liable[d_merged$scen_name=="uncnstr" & d_merged$agent_name == "av"], 
                                     d_merged$vB_m_v_d_liable[d_merged$scen_name=="uncnstr" & d_merged$agent_name == "human"], paired=FALSE)
-vB_m_v_d_liable_T_uncnstr
 cohen.d(d_merged[d_merged$scen_name=="uncnstr", ]$vB_m_v_d_liable, d_merged[d_merged$scen_name=="uncnstr", ]$agent_name)
 
 
 #### (3) LIABLE VEHICLE B MANUFACTURER VS LIABLE HDV MANUFACTURER
 ## between agent conditions
-vB_m_v_m_liable_T_agent <- t.test(vB_m_v_m_liable ~ agent_name, data = d_merged, paired = FALSE) 
-vB_m_v_m_liable_T_agent
+t.test(vB_m_v_m_liable ~ agent_name, data = d_merged, paired = FALSE) 
+
 ## between scenario conditions
-vB_m_v_m_liable_T_scen <- t.test(vB_m_v_m_liable ~ scen_name, data = d_merged, paired = FALSE) 
-vB_m_v_m_liable_T_scen
+t.test(vB_m_v_m_liable ~ scen_name, data = d_merged, paired = FALSE) 
+
 ## between agent conditions for constrained
-vB_m_v_m_liable_T_cnstr <- t.test(d_merged$vB_m_v_m_liable[d_merged$scen_name=="cnstr" & d_merged$agent_name == "av"], 
+t.test(d_merged$vB_m_v_m_liable[d_merged$scen_name=="cnstr" & d_merged$agent_name == "av"], 
                                   d_merged$vB_m_v_m_liable[d_merged$scen_name=="cnstr" & d_merged$agent_name == "human"], paired=FALSE)
-vB_m_v_m_liable_T_cnstr
+
 cohen.d(d_merged[d_merged$scen_name=="cnstr", ]$vB_m_v_m_liable, d_merged[d_merged$scen_name=="cnstr", ]$agent_name)
 ## between agent conditions for unconstrained
-vB_m_v_m_liable_T_uncnstr <- t.test(d_merged$vB_m_v_m_liable[d_merged$scen_name=="uncnstr" & d_merged$agent_name == "av"], 
+t.test(d_merged$vB_m_v_m_liable[d_merged$scen_name=="uncnstr" & d_merged$agent_name == "av"], 
                                     d_merged$vB_m_v_m_liable[d_merged$scen_name=="uncnstr" & d_merged$agent_name == "human"], paired=FALSE)
-vB_m_v_m_liable_T_uncnstr
 cohen.d(d_merged[d_merged$scen_name=="uncnstr", ]$vB_m_v_m_liable, d_merged[d_merged$scen_name=="uncnstr", ]$agent_name)
 
 
 #### (4) CONSIDER VEHICLE A COUNTERFACTUAL
 ## between agent conditions
-vA_cntrfctl_T_agent <- t.test(vA_cntrfctl ~ agent_name, data = d_merged, paired = FALSE) 
-vA_cntrfctl_T_agent
+t.test(vA_cntrfctl ~ agent_name, data = d_merged, paired = FALSE) 
+
 ## between scenario conditions
-vA_cntrfctl_T_scen <- t.test(vA_cntrfctl ~ scen_name, data = d_merged, paired = FALSE) 
-vA_cntrfctl_T_scen
+t.test(vA_cntrfctl ~ scen_name, data = d_merged, paired = FALSE) 
+
 ## between agent conditions for constrained
-vA_cntrfctl_T_cnstr <- t.test(d_merged$vA_cntrfctl[d_merged$scen_name=="cnstr" & d_merged$agent_name == "av"], 
+t.test(d_merged$vA_cntrfctl[d_merged$scen_name=="cnstr" & d_merged$agent_name == "av"], 
                               d_merged$vA_cntrfctl[d_merged$scen_name=="cnstr" & d_merged$agent_name == "human"], paired=FALSE)
-vA_cntrfctl_T_cnstr
+
 ## between agent conditions for unconstrained
-vA_cntrfctl_T_uncnstr <- t.test(d_merged$vA_cntrfctl[d_merged$scen_name=="uncnstr" & d_merged$agent_name == "av"], 
+t.test(d_merged$vA_cntrfctl[d_merged$scen_name=="uncnstr" & d_merged$agent_name == "av"], 
                                 d_merged$vA_cntrfctl[d_merged$scen_name=="uncnstr" & d_merged$agent_name == "human"], paired=FALSE)
-vA_cntrfctl_T_uncnstr
+
 
 
 #### (5) CONSIDER VEHICLE B COUNTERFACTUAL
 ## between agent conditions
-vB_cntrfctl_T_agent <- t.test(vB_cntrfctl ~ agent_name, data = d_merged, paired = FALSE) 
-vB_cntrfctl_T_agent
+t.test(vB_cntrfctl ~ agent_name, data = d_merged, paired = FALSE) 
+
 ## between scenario conditions
-vB_cntrfctl_T_scen <- t.test(vB_cntrfctl ~ scen_name, data = d_merged, paired = FALSE) 
-vB_cntrfctl_T_scen
+t.test(vB_cntrfctl ~ scen_name, data = d_merged, paired = FALSE) 
+
 ## between agent conditions for constrained
-vB_cntrfctl_T_cnstr <- t.test(d_merged$vB_cntrfctl[d_merged$scen_name=="cnstr" & d_merged$agent_name == "av"], 
+t.test(d_merged$vB_cntrfctl[d_merged$scen_name=="cnstr" & d_merged$agent_name == "av"], 
                               d_merged$vB_cntrfctl[d_merged$scen_name=="cnstr" & d_merged$agent_name == "human"], paired=FALSE)
-vB_cntrfctl_T_cnstr
+
 ## between agent conditions for unconstrained
-vB_cntrfctl_T_uncnstr <- t.test(d_merged$vB_cntrfctl[d_merged$scen_name=="uncnstr" & d_merged$agent_name == "av"], 
+t.test(d_merged$vB_cntrfctl[d_merged$scen_name=="uncnstr" & d_merged$agent_name == "av"], 
                                 d_merged$vB_cntrfctl[d_merged$scen_name=="uncnstr" & d_merged$agent_name == "human"], paired=FALSE)
-vB_cntrfctl_T_uncnstr
+
 
 
 #### (6) VEHICLE B CAN AVOID
 ## between agent conditions
-avoid_T_agent <- t.test(avoid ~ agent_name, data = d_merged, paired = FALSE) 
-avoid_T_agent
+t.test(avoid ~ agent_name, data = d_merged, paired = FALSE) 
+
 ## between scenario conditions
-avoid_T_scen <- t.test(avoid ~ scen_name, data = d_merged, paired = FALSE) 
-avoid_T_scen
+t.test(avoid ~ scen_name, data = d_merged, paired = FALSE) 
+
 ## between agent conditions for constrained
-avoid_T_cnstr <- t.test(d_merged$avoid[d_merged$scen_name=="cnstr" & d_merged$agent_name == "av"], 
+t.test(d_merged$avoid[d_merged$scen_name=="cnstr" & d_merged$agent_name == "av"], 
                         d_merged$avoid[d_merged$scen_name=="cnstr" & d_merged$agent_name == "human"], paired=FALSE)
-avoid_T_cnstr
+
 ## between agent conditions for unconstrained
-avoid_T_uncnstr <- t.test(d_merged$avoid[d_merged$scen_name=="uncnstr" & d_merged$agent_name == "av"], 
+t.test(d_merged$avoid[d_merged$scen_name=="uncnstr" & d_merged$agent_name == "av"], 
                         d_merged$avoid[d_merged$scen_name=="uncnstr" & d_merged$agent_name == "human"], paired=FALSE)
-avoid_T_uncnstr
+
 
 
 cor(d_merged[,3:8])
@@ -352,63 +349,40 @@ get_annotation <- function(p_val) {
   }
 }
 
-## (MAIN 1) VB manufacturer/driver liability
-cnstr_anno <- get_annotation(vB_m_v_d_liable_T_cnstr$p.value)
-uncnstr_anno <- get_annotation(vB_m_v_d_liable_T_uncnstr$p.value)
-p0_1 <- ggplot(d_merged,aes(x=factor(scen_name),y=vB_m_v_d_liable, fill=agent_name)) +  
-  theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
-  geom_signif(y_position = 105.00, xmin = c(0.8,1.8), xmax = c(1.2,2.2), annotation = c(unlist(cnstr_anno[1]),unlist(uncnstr_anno[1])), textsize=7.5)
-p0_1 <- p0_1 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
-  scale_x_discrete(labels=t_names) +
-  ggtitle("Veh. B Manufacturer\nor Driver Liability") +
-  xlab ("") + ylab ("") +
-  scale_fill_discrete(labels=c('AV', 'HDV')) +
-  theme_classic() +
-  theme(axis.text.x = element_text(size=15)) +
-  theme(axis.text.y = element_text(size=15)) +
-  theme(axis.title = element_text(size=18)) +
-  theme(plot.title = element_text(size=18, hjust=0.5)) +
-  theme(legend.text=element_text(size=14),legend.title=element_text(size=14), legend.position="top")+
-  labs(fill='')+
-  geom_bar(stat="summary", position = position_dodge(), width = 0.9, alpha = 0.38, size = 0.75) +
-  # geom_violin(width=0.9, alpha=0.38, size=0.75) +  
-  # geom_sina(alpha=0.6, size=0.95, color = "#999999") +
-  stat_summary(fun.data = "mean_cl_boot", color = "black", 
-               size=0.4, 
-               position = position_dodge(width = 0.9)) +
-  stat_summary(fun.data = "mean_cl_boot", color = "black", 
-               position = position_dodge(width = 0.9),
-               geom="errorbar", width = 0.2)
-p0_1
+##PLOTTING FUNCTION
+plotting <- function(cond_1_T, cond_2_T, title_liability, liable) {
+  cnstr_anno <- get_annotation(cond_1_T$p.value)
+  uncnstr_anno <- get_annotation(cond_2_T$p.value)
+  p <- ggplot(d_merged, aes(x=factor(scen_name), y={{liable}}, fill=agent_name)) +  
+    theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
+    geom_signif(y_position = 105.00, xmin = c(0.8,1.8), xmax = c(1.2,2.2), annotation = c(unlist(cnstr_anno[1]),unlist(uncnstr_anno[1])), textsize=7.5)
+  p <- p + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
+    scale_x_discrete(labels=t_names) +
+    ggtitle(title_liability) +
+    xlab ("") + ylab ("") +
+    scale_fill_discrete(labels=c('AV', 'HDV')) +
+    theme_classic() +
+    theme(axis.text.x = element_text(size=15)) +
+    theme(axis.text.y = element_text(size=15)) +
+    theme(axis.title = element_text(size=18)) +
+    theme(plot.title = element_text(size=18, hjust=0.5)) +
+    theme(legend.text=element_text(size=14),legend.title=element_text(size=14), legend.position="top")+
+    labs(fill='')+
+    geom_bar(stat="summary", position = position_dodge(), width = 0.9, alpha = 0.38, size = 0.75) +
+    stat_summary(fun.data = "mean_cl_boot", color = "black", 
+                 size=0.4, 
+                 position = position_dodge(width = 0.9)) +
+    stat_summary(fun.data = "mean_cl_boot", color = "black", 
+                 position = position_dodge(width = 0.9),
+                 geom="errorbar", width = 0.2)
+  p
+}
+
+  ## (MAIN 1) VB manufacturer/driver liability
+plotting(vB_m_v_d_liable_T_cnstr,vB_m_v_d_liable_T_uncnstr,"Veh. B Manufacturer\nor Driver Liability",vB_m_v_d_liable)
 
 ## (MAIN 2) VB manufacturer liability
-cnstr_anno <- get_annotation(vB_m_v_m_liable_T_cnstr$p.value)
-uncnstr_anno <- get_annotation(vB_m_v_m_liable_T_uncnstr$p.value)
-p0_2 <- ggplot(d_merged,aes(x=factor(scen_name),y=vB_m_v_m_liable, fill=agent_name)) +  
-  theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
-  geom_signif(y_position = 105.00, xmin = c(0.8,1.8), xmax = c(1.2,2.2), annotation = c(unlist(cnstr_anno[1]),unlist(uncnstr_anno[1])), textsize=7.5)
-p0_2 <- p0_2 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
-  scale_x_discrete(labels=t_names) +
-  ggtitle("Veh. B Manufacturer Liability") +
-  xlab ("") + ylab ("") +
-  scale_fill_discrete(labels=c('AV', 'HDV')) +
-  theme_classic() +
-  theme(axis.text.x = element_text(size=15)) +
-  theme(axis.text.y = element_text(size=15)) +
-  theme(axis.title = element_text(size=18)) +
-  theme(plot.title = element_text(size=18, hjust=0.5)) +
-  theme(legend.text=element_text(size=14),legend.title=element_text(size=14), legend.position="top")+
-  labs(fill='')+
-  geom_bar(stat="summary", position = position_dodge(), width = 0.9, alpha = 0.38, size = 0.75) +
-  # geom_violin(width=0.9, alpha=0.38, size=0.75) +  
-  # geom_sina(alpha=0.6, size=0.95, color = "#999999") +
-  stat_summary(fun.data = "mean_cl_boot", color = "black", 
-               size=0.4, 
-               position = position_dodge(width = 0.9)) +
-  stat_summary(fun.data = "mean_cl_boot", color = "black", 
-               position = position_dodge(width = 0.9),
-               geom="errorbar", width = 0.2)
-p0_2
+plotting(vB_m_v_m_liable_T_cnstr,vB_m_v_m_liable_T_uncnstr,"Veh. B Manufacturer Liability",vB_m_v_m_liable)
 
 dev.new(width=10,height=5,noRStudioGD = TRUE)
 figure1 <- ggarrange(p0_1, p0_2, nrow=1,ncol=2,common.legend = TRUE, legend="top", vjust = 1.0, hjust=0.5) 
@@ -424,173 +398,52 @@ plot(figure1)
 ## plotting all measures
 t_names <- c("Constrained", "Unconstrained")
 
+plotting_violin <- function(cond_1_T, cond_2_T, title_liability, liable) {
+  cnstr_anno <- get_annotation(cond_1_T$p.value)
+  uncnstr_anno <- get_annotation(cond_2_T$p.value)
+  p <- ggplot(d_merged, aes(x=factor(scen_name), y={{liable}}, fill=agent_name)) +  
+    theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
+    geom_signif(y_position = 105.00, xmin = c(0.8,1.8), xmax = c(1.2,2.2), annotation = c(unlist(cnstr_anno[1]),unlist(uncnstr_anno[1])), textsize=7.5)
+  p <- p + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
+    scale_x_discrete(labels=t_names) +
+    ggtitle(title) +
+    xlab ("Scenario Type") + ylab ("Measure") +
+    scale_fill_discrete(labels=c('AV', 'HDV')) +
+    theme_classic() +
+    theme(axis.text.x = element_text(size=15)) +
+    theme(axis.text.y = element_text(size=15)) +
+    theme(axis.title = element_text(size=18)) +
+    theme(plot.title = element_text(size=18, hjust=0.5)) +
+    theme(legend.text=element_text(size=14),legend.title=element_text(size=14), legend.position="top")+
+    labs(fill='')+
+    geom_violin(width=0.9, alpha=0.38, size=0.75) +  
+    geom_sina(alpha=0.6, size=0.95, color = "#999999") +
+    stat_summary(fun.data = "mean_cl_boot", color = "black", 
+                 size=0.4, 
+                 position = position_dodge(width = 0.9)) +
+    stat_summary(fun.data = "mean_cl_boot", color = "black", 
+                 position = position_dodge(width = 0.9),
+                 geom="errorbar", width = 0.2)
+  p
+}
+
 # (1) VA driver liable
-cnstr_anno <- get_annotation(vA_liable_T_cnstr$p.value)
-uncnstr_anno <- get_annotation(vA_liable_T_uncnstr$p.value)
-p1_1 <- ggplot(d_merged,aes(x=factor(scen_name),y=vA_liable, fill=agent_name)) +  
-  theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
-  geom_signif(y_position = 105.00, xmin = c(0.8,1.8), xmax = c(1.2,2.2), annotation = c(unlist(cnstr_anno[1]),unlist(uncnstr_anno[1])), textsize=7.5)
-p1_1 <- p1_1 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
-  scale_x_discrete(labels=t_names) +
-  ggtitle("Veh. A Driver Liability") +
-  xlab ("Scenario Type") + ylab ("Measure") +
-  scale_fill_discrete(labels=c('AV', 'HDV')) +
-  theme_classic() +
-  theme(axis.text.x = element_text(size=15)) +
-  theme(axis.text.y = element_text(size=15)) +
-  theme(axis.title = element_text(size=18)) +
-  theme(plot.title = element_text(size=18, hjust=0.5)) +
-  theme(legend.text=element_text(size=14),legend.title=element_text(size=14), legend.position="top")+
-  labs(fill='')+
-  geom_violin(width=0.9, alpha=0.38, size=0.75) +  
-  geom_sina(alpha=0.6, size=0.95, color = "#999999") +
-  stat_summary(fun.data = "mean_cl_boot", color = "black", 
-               size=0.4, 
-               position = position_dodge(width = 0.9)) +
-  stat_summary(fun.data = "mean_cl_boot", color = "black", 
-               position = position_dodge(width = 0.9),
-               geom="errorbar", width = 0.2)
-p1_1
+plotting_violin(vA_liable_T_cnstr,vA_liable_T_uncnstr,"Veh. A Driver Liability",vA_liable)
 
 ## (2) VB manufacturer/driver liability
-cnstr_anno <- get_annotation(vB_m_v_d_liable_T_cnstr$p.value)
-uncnstr_anno <- get_annotation(vB_m_v_d_liable_T_uncnstr$p.value)
-p1_2 <- ggplot(d_merged,aes(x=factor(scen_name),y=vB_m_v_d_liable, fill=agent_name)) +  
-  theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
-  geom_signif(y_position = 105.00, xmin = c(0.8,1.8), xmax = c(1.2,2.2), annotation = c(unlist(cnstr_anno[1]),unlist(uncnstr_anno[1])), textsize=7.5)
-p1_2 <- p1_2 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
-  scale_x_discrete(labels=t_names) +
-  ggtitle("Veh. B Manufacturer\nor Driver Liability") +
-  xlab ("Scenario Type") + ylab ("Measure") +
-  scale_fill_discrete(labels=c('AV', 'HDV')) +
-  theme_classic() +
-  theme(axis.text.x = element_text(size=15)) +
-  theme(axis.text.y = element_text(size=15)) +
-  theme(axis.title = element_text(size=18)) +
-  theme(plot.title = element_text(size=18, hjust=0.5)) +
-  theme(legend.text=element_text(size=14),legend.title=element_text(size=14), legend.position="top")+
-  labs(fill='')+
-  geom_violin(width=0.9, alpha=0.38, size=0.75) +  
-  geom_sina(alpha=0.6, size=0.95, color = "#999999") +
-  stat_summary(fun.data = "mean_cl_boot", color = "black", 
-               size=0.4, 
-               position = position_dodge(width = 0.9)) +
-  stat_summary(fun.data = "mean_cl_boot", color = "black", 
-               position = position_dodge(width = 0.9),
-               geom="errorbar", width = 0.2)
-p1_2
+plotting_violin(vB_m_v_d_liable_T_cnstr,vB_m_v_d_liable_T_uncnstr,"Veh. B Manufacturer\nor Driver Liability",vB_m_v_d_liable)
 
 ## (3) VB manufacturer liability
-cnstr_anno <- get_annotation(vB_m_v_m_liable_T_cnstr$p.value)
-uncnstr_anno <- get_annotation(vB_m_v_m_liable_T_uncnstr$p.value)
-p1_3 <- ggplot(d_merged,aes(x=factor(scen_name),y=vB_m_v_m_liable, fill=agent_name)) +  
-  theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
-  geom_signif(y_position = 105.00, xmin = c(0.8,1.8), xmax = c(1.2,2.2), annotation = c(unlist(cnstr_anno[1]),unlist(uncnstr_anno[1])), textsize=7.5)
-p1_3 <- p1_3 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
-  scale_x_discrete(labels=t_names) +
-  ggtitle("Veh. B Manufacturer Liability") +
-  xlab ("Scenario Type") + ylab ("Measure") +
-  scale_fill_discrete(labels=c('AV', 'HDV')) +
-  theme_classic() +
-  theme(axis.text.x = element_text(size=15)) +
-  theme(axis.text.y = element_text(size=15)) +
-  theme(axis.title = element_text(size=18)) +
-  theme(plot.title = element_text(size=18, hjust=0.5)) +
-  theme(legend.text=element_text(size=14),legend.title=element_text(size=14), legend.position="top")+
-  labs(fill='')+
-  geom_violin(width=0.9, alpha=0.38, size=0.75) +  
-  geom_sina(alpha=0.6, size=0.95, color = "#999999") +
-  stat_summary(fun.data = "mean_cl_boot", color = "black", 
-               size=0.4, 
-               position = position_dodge(width = 0.9)) +
-  stat_summary(fun.data = "mean_cl_boot", color = "black", 
-               position = position_dodge(width = 0.9),
-               geom="errorbar", width = 0.2)
-p1_3
+plotting_violin(vB_m_v_m_liable_T_cnstr,vB_m_v_m_liable_T_uncnstr,"Veh. B Manufacturer Liability",vB_m_v_m_liable)
 
 ## (4) VA counterfactual
-cnstr_anno <- get_annotation(vA_cntrfctl_T_cnstr$p.value)
-uncnstr_anno <- get_annotation(vA_cntrfctl_T_uncnstr$p.value)
-p1_4 <- ggplot(d_merged,aes(x=factor(scen_name),y=vA_cntrfctl, fill=agent_name)) +  
-  theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
-  geom_signif(y_position = 105.00, xmin = c(0.8,1.8), xmax = c(1.2,2.2), annotation = c(unlist(cnstr_anno[1]),unlist(uncnstr_anno[1])), textsize=7.5)
-p1_4 <- p1_4 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
-  scale_x_discrete(labels=t_names) +
-  ggtitle("Consider Veh. A Counterfactual") +
-  xlab ("Scenario Type") + ylab ("Measure") +
-  scale_fill_discrete(labels=c('AV', 'HDV')) +
-  theme_classic() +
-  theme(axis.text.x = element_text(size=15)) +
-  theme(axis.text.y = element_text(size=15)) +
-  theme(axis.title = element_text(size=18)) +
-  theme(plot.title = element_text(size=18, hjust=0.5)) +
-  theme(legend.text=element_text(size=14),legend.title=element_text(size=14), legend.position="top")+
-  labs(fill='')+
-  geom_violin(width=0.9, alpha=0.38, size=0.75) +  
-  geom_sina(alpha=0.6, size=0.95, color = "#999999") +
-  stat_summary(fun.data = "mean_cl_boot", color = "black", 
-               size=0.4, 
-               position = position_dodge(width = 0.9)) +
-  stat_summary(fun.data = "mean_cl_boot", color = "black", 
-               position = position_dodge(width = 0.9),
-               geom="errorbar", width = 0.2)
-p1_4
+plotting_violin(vA_cntrfctl_T_cnstr,vA_cntrfctl_T_uncnstr,"Consider Veh. A Counterfactual",vA_cntrfctl)
 
 ## (5) VB counterfactual
-cnstr_anno <- get_annotation(vB_cntrfctl_T_cnstr$p.value)
-uncnstr_anno <- get_annotation(vB_cntrfctl_T_uncnstr$p.value)
-p1_5 <- ggplot(d_merged,aes(x=factor(scen_name),y=vB_cntrfctl, fill=agent_name)) +  
-  theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
-  geom_signif(y_position = 105.00, xmin = c(0.8,1.8), xmax = c(1.2,2.2), annotation = c(unlist(cnstr_anno[1]),unlist(uncnstr_anno[1])), textsize=7.5)
-p1_5 <- p1_5 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
-  scale_x_discrete(labels=t_names) +
-  ggtitle("Consider Veh. B Counterfactual") +
-  xlab ("Scenario Type") + ylab ("Measure") +
-  scale_fill_discrete(labels=c('AV', 'HDV')) +
-  theme_classic() +
-  theme(axis.text.x = element_text(size=15)) +
-  theme(axis.text.y = element_text(size=15)) +
-  theme(axis.title = element_text(size=18)) +
-  theme(plot.title = element_text(size=18, hjust=0.5)) +
-  theme(legend.text=element_text(size=14),legend.title=element_text(size=14), legend.position="top")+
-  labs(fill='')+
-  geom_violin(width=0.9, alpha=0.38, size=0.75) +  
-  geom_sina(alpha=0.6, size=0.95, color = "#999999") +
-  stat_summary(fun.data = "mean_cl_boot", color = "black", 
-               size=0.4, 
-               position = position_dodge(width = 0.9)) +
-  stat_summary(fun.data = "mean_cl_boot", color = "black", 
-               position = position_dodge(width = 0.9),
-               geom="errorbar", width = 0.2)
-p1_5
+plotting_violin(vB_cntrfctl_T_cnstr,vB_cntrfctl_T_uncnstr,"Consider Veh. B Counterfactual",vB_cntrfctl)
 
 ## (6) Capability to Avoid
-cnstr_anno <- get_annotation(avoid_T_cnstr$p.value)
-uncnstr_anno <- get_annotation(avoid_T_uncnstr$p.value)
-p1_6 <- ggplot(d_merged,aes(x=factor(scen_name),y=avoid, fill=agent_name)) +  
-  theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
-  geom_signif(y_position = 105.00, xmin = c(0.8,1.8), xmax = c(1.2,2.2), annotation = c(unlist(cnstr_anno[1]),unlist(uncnstr_anno[1])), textsize=7.5)
-p1_6 <- p1_6 + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
-  scale_x_discrete(labels=t_names) +
-  ggtitle("Capability to Avoid") +
-  xlab ("Scenario Type") + ylab ("Measure") +
-  scale_fill_discrete(labels=c('AV', 'HDV')) +
-  theme_classic() +
-  theme(axis.text.x = element_text(size=15)) +
-  theme(axis.text.y = element_text(size=15)) +
-  theme(axis.title = element_text(size=18)) +
-  theme(plot.title = element_text(size=18, hjust=0.5)) +
-  theme(legend.text=element_text(size=14),legend.title=element_text(size=14), legend.position="top")+
-  labs(fill='')+
-  geom_violin(width=0.9, alpha=0.38, size=0.75) +  
-  geom_sina(alpha=0.6, size=0.95, color = "#999999") +
-  stat_summary(fun.data = "mean_cl_boot", color = "black", 
-               size=0.4, 
-               position = position_dodge(width = 0.9)) +
-  stat_summary(fun.data = "mean_cl_boot", color = "black", 
-               position = position_dodge(width = 0.9),
-               geom="errorbar", width = 0.2)
-p1_6
+plotting_violin(avoid_T_cnstr,avoid_T_uncnstr,"Capability to Avoid",avoid)
 
 write.csv(d_merged, 'd_spss.csv')
 
