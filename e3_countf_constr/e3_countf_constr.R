@@ -1,323 +1,170 @@
 ## clear workspace
 rm(list = ls()) 
 
-source("../process.R")
+options(download.file.method="libcurl") # sets method for downloading files
 
-options(download.file.method="libcurl")
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path)) # set working directory to current directory
 
-## install packages
-if (!require(pacman)) {install.packages("pacman")}
-pacman::p_load('ggplot2',         # plotting
-               'ggsignif',        # plotting significance bars
-               'lme4',            # functions for fitting linear regression models
-               'ggforce',         # make ggplot even fancier
-               'ggpubr',          # arrange plots in a grid, if needed
-               'ltm',             # probably not using..
-               'tidyr',           # tools for cleaning messy data
-               'stringr',         # perform string substitutions easily
-               'assertthat',      # allows me to check whether a variable is a string, with is.string
-               'lsmeans',         # contrast analysis for regression models
-               'stats',           # use function to adjust for multiple comparisons
-               'filesstrings',    # create and move files
-               'simr',            # power analysis for mixed models
-               'compute.es',      # effect size package
-               'effsize',         # another effect size package
-               'pwr',             # package for power calculation
-               'nlme',            # get p values for mixed effect model
-               'DescTools',       # get Cramer's V
-               'dplyr',           # package to move columns around
-               'Hmisc',           # confidence intervals
-               'sjstats'          # anova stats
-)
+source("../common.R") # install packages; import common plotting functions
 
 ## ================================================================================================================
-##                                                  PRE-PROCESSING                 
+##                                            PRE-PROCESSING (EXCLUSIONS)                 
 ## ================================================================================================================
 
 ## read in data: 
-# if importing from Qualtrics: (i) export data as numeric values, and (ii) delete rows 2 and 3 of the .csv file.
-setwd(dirname(rstudioapi::getActiveDocumentContext()$path)) #set working directory to current directory
 d <- read.csv('e3_countf_constr.csv')
 
 ## explore dataframe: 
-dim(d) # will provide dimensions of the dataframe by row [1] and column [2]
-colnames(d) # will provide all column names
+dim(d) # provide dimensions of the dataframe by row [1] and column [2]
+colnames(d)
 summary(d)
 
-## perform attention exclusions: 
-# this will remove responses from the dataframe that failed attention checks (i.e., "1" or "2")
+## perform attention exclusions:
+# remove responses from the dataframe that failed attention checks (i.e., "1" or "2")
 d <- subset(d, (d$att1 == 2 & d$att2 == 2))
 dim(d) # number of participants should decrease after attention exclusions
 
-## split up dataframes between AV and HDV conditions
-## this is necessary before comprehension exclusions
-d_AV_cnstr <- subset(d, (d$FL_4_DO == "FL_39"))
-d_HDV_cnstr <- subset(d, (d$FL_4_DO == "FL_40"))
-d_AV_uncnstr <- subset(d, (d$FL_4_DO == "FL_54"))
-d_HDV_uncnstr <- subset(d, (d$FL_4_DO == "FL_58"))
+## new columns to label agent (av/hdv), scenario (cnstr/uncnstr), and condition (combination of the 2)
+d$agent <- ifelse(d$FL_4_DO %in% c("FL_39", "FL_54"), "av", "hdv") #FL_40/58 are hdv
+d$scen <- ifelse(d$FL_4_DO %in% c("FL_39", "FL_40"), "cnstr", "uncnstr") #FL_54/58 are uncnstr
+d$cond <- paste(d$agent, d$scen, sep="_")
 
-## get number of participants BEFORE exclusions: 
-n_original <- dim(d)[1] # extracting number of rows only, not columns
-n_original_AV_cnstr <- dim(d_AV_cnstr)[1]
-n_original_HDV_cnstr <- dim(d_HDV_cnstr)[1]
-n_original_AV_uncnstr <- dim(d_AV_uncnstr)[1]
-n_original_HDV_uncnstr <- dim(d_HDV_uncnstr)[1]
+## get number of participants before comp exclusions
+n_orig_all <- dim(d)[1]
+n_orig <- as.list(table(d$cond))
 
-## perform comprehension exclusions separately for AV and HDV: 
-# this will remove responses from the dataframe that failed comprehension checks (i.e., "2")
-d_AV_cnstr <- subset(d_AV_cnstr, (d_AV_cnstr$comp1 == 1 & d_AV_cnstr$comp_accident == 1))
-d_HDV_cnstr <- subset(d_HDV_cnstr, (d_HDV_cnstr$comp1 == 2 & d_HDV_cnstr$comp_accident == 1))
-d_AV_uncnstr <- subset(d_AV_uncnstr, (d_AV_uncnstr$comp1 == 1 & d_AV_uncnstr$comp_accident == 1))
-d_HDV_uncnstr <- subset(d_HDV_uncnstr, (d_HDV_uncnstr$comp1 == 2 & d_HDV_uncnstr$comp_accident == 1))
-dim(d_AV_cnstr) # number of participants should decrease after comprehension exclusions
-dim(d_HDV_cnstr)
-dim(d_AV_uncnstr)
-dim(d_HDV_uncnstr)
+## perform comp exclusions
+d_clean <- d
+d_clean <- subset(d_clean, comp_accident == 1) # include only comp check 2 passes
+d_clean <- subset(d_clean, !(agent == "av" & comp1 != 1)) # remove comp check 1 fails for av
+d_clean <- subset(d_clean, !(agent == "hdv" & comp1 != 2)) # remove comp check 1 fails for hdv
 
-## get number of participants AFTER exclusions: 
-n_final_AV_cnstr <- dim(d_AV_cnstr)[1] # extracting number of rows only, not columns
-n_final_HDV_cnstr <- dim(d_HDV_cnstr)[1]
-n_final_AV_uncnstr <- dim(d_AV_uncnstr)[1]
-n_final_HDV_uncnstr <- dim(d_HDV_uncnstr)[1]
-n_final <- n_final_AV_cnstr + n_final_HDV_cnstr + n_final_AV_uncnstr + n_final_HDV_uncnstr
-percent_excluded <- (n_original - n_final)/n_original
-percent_excluded_AV_cnstr <- (n_original_AV_cnstr - n_final_AV_cnstr)/n_original_AV_cnstr 
-percent_excluded_HDV_cnstr <- (n_original_HDV_cnstr - n_final_HDV_cnstr)/n_original_HDV_cnstr
-percent_excluded_AV_uncnstr <- (n_original_AV_uncnstr - n_final_AV_uncnstr)/n_original_AV_uncnstr 
-percent_excluded_HDV_uncnstr <- (n_original_HDV_uncnstr - n_final_HDV_uncnstr)/n_original_HDV_uncnstr
+## get number of participants AFTER conclusions
+n_final_all <- dim(d_clean)[1]
+percent_excl_all <- (n_orig_all - n_final_all)/n_orig_all
+n_excl_all <- n_orig_all - n_final_all
+n_final <- as.list(table(d_clean$cond))
+percent_excl <- as.list((table(d$cond) - table(d_clean$cond))/table(d$cond))
 
-## remove unused columns (other condition and click info) according to condition
-d_AV_cnstr <- d_AV_cnstr[-c(21:28,34:74)] # first=click info, second=all other columns
-d_HDV_cnstr <- d_HDV_cnstr[-c(21:33,34:41,48:74)] # first=prior columns, second=click info, third=later columns
-d_AV_uncnstr <- d_AV_uncnstr[-c(21:47,48:55,61:74)] # first=prior columns, second=click info, third=later columns
-d_HDV_uncnstr <- d_HDV_uncnstr[-c(21:60,61:68)] # first=prior columns, second=click info
-
-## duplicate AV condition vB liability column to match with HDV condition driver liability col
-d_AV_cnstr$vB_frm_liab_AV_cnstr_2 <- d_AV_cnstr$vB_frm_liab_AV_cnstr_1
-d_AV_uncnstr$vB_frm_liab_AV_2 <- d_AV_uncnstr$vB_frm_liab_AV_1
-d_AV_cnstr <- d_AV_cnstr %>% relocate(vB_frm_liab_AV_cnstr_2, .after=vB_frm_liab_AV_cnstr_1)
-d_AV_uncnstr <- d_AV_uncnstr %>% relocate(vB_frm_liab_AV_2, .after=vB_frm_liab_AV_1)
+## duplicate AV condition vB liability columns to match with HDV condition driver liability cols
+d_clean$vB_frm_liab_AV_cnstr_2 <- d_clean$vB_frm_liab_AV_cnstr_1 # duplicate
+d_clean <- d_clean %>% relocate(vB_frm_liab_AV_cnstr_2, .after=vB_frm_liab_AV_cnstr_1) # move new column
+d_clean$vB_frm_liab_AV_2 <- d_clean$vB_frm_liab_AV_1 # duplicate
+d_clean <- d_clean %>% relocate(vB_frm_liab_AV_2, .after=vB_frm_liab_AV_1) # move new column
 
 ## get mean age and gender:
 mean_age = mean(as.numeric(d$age), na.rm = TRUE) # removing NAs from the dataframe before computing mean 
-gender = table(d$gender)["1"]/sum(table(d$gender)) # percent male
+gender_f = table(d$gender)["2"]/sum(table(d$gender))
 
 ## ================================================================================================================
-##                                                    SUBSETTING                 
+##                                                   SUBSETTING                 
 ## ================================================================================================================
 
-## define new data frame to extract pre-processed data into:
-d_subset <- array(dim=c(n_final, 10))
-colnames(d_subset) <- c('agent_name', 'scen_name', 'vA_liable', 'vB_m_v_d_liable', 'vB_m_v_m_liable', 'vA_cntrfctl', 'vB_cntrfctl', 
-                        'avoid', 'comp1', 'comp2')
-d_subset <- as.data.frame(d_subset, stringsAsFactors=FALSE)
+## create df to fill
+d_merged <- array(dim=c(0, 11))
+colnames(d_merged) <- c('vA_liable', 'vB_m_v_d_liable', 'vB_m_v_m_liable', 'vA_cntrfctl', 'vB_cntrfctl', 
+                        'avoid', 'comp1', 'comp2', 'age', 'agent_name', 'scen_name')
+d_merged <- as.data.frame(d_merged, stringsAsFactors=FALSE)
 
-## extract good data from the middle part of raw data in AV constrained
-for(i in 1:n_final_AV_cnstr) {
-  curr <- d_AV_cnstr[i,21:28][!is.na(d_AV_cnstr[i,21:28])] # for a given row, get only the non-NA values
-  d_subset[i,3:10] <- as.numeric(curr[curr!= ""]) # and only the non-empty values
-  d_subset[i,1] <- "av"
-  d_subset[i,2] <- "cnstr"
-}
+## select only the used columns
+fixed_cols = c(77:78,82,97:98) # fixed columns - comp checks, age, conditions
+d_merged[(dim(d_merged)[1]+1):(dim(d_merged)[1]+n_final$av_cnstr), ] <- subset(d_clean, cond == "av_cnstr")[c(29:34,fixed_cols)]
+d_merged[(dim(d_merged)[1]+1):(dim(d_merged)[1]+n_final$hdv_cnstr), ] <- subset(d_clean, cond == "hdv_cnstr")[c(43:48,fixed_cols)]
+d_merged[(dim(d_merged)[1]+1):(dim(d_merged)[1]+n_final$av_uncnstr), ] <- subset(d_clean, cond == "av_uncnstr")[c(57:62,fixed_cols)]
+d_merged[(dim(d_merged)[1]+1):(dim(d_merged)[1]+n_final$hdv_uncnstr), ] <- subset(d_clean, cond == "hdv_uncnstr")[c(71:76,fixed_cols)]
 
-## extract good data from the middle part of raw data in HDV constrained
-for(i in 1:n_final_HDV_cnstr) {
-  j = i+n_final_AV_cnstr
-  curr <- d_HDV_cnstr[i,21:28][!is.na(d_HDV_cnstr[i,21:28])] # for a given row, get only the non-NA values
-  d_subset[j,3:10] <- as.numeric(curr) # and only the non-empty values
-  d_subset[j,1] <- "human"
-  d_subset[j,2] <- "cnstr"
-}
+# make columns numeric
+d_merged[,1:9] <- lapply(d_merged[,1:9], as.numeric)
 
-## extract good data from the middle part of raw data in AV unconstrained
-for(i in 1:n_final_AV_uncnstr) {
-  j = i+n_final_AV_cnstr+n_final_HDV_cnstr
-  curr <- d_AV_uncnstr[i,21:28][!is.na(d_AV_uncnstr[i,21:28])] # for a given row, get only the non-NA values
-  d_subset[j,3:10] <- as.numeric(curr) # and only the non-empty values
-  d_subset[j,1] <- "av"
-  d_subset[j,2] <- "uncnstr"
-}
-
-## extract good data from the middle part of raw data in HDV unconstrained
-for(i in 1:n_final_HDV_uncnstr) {
-  j = i+n_final_AV_cnstr+n_final_HDV_cnstr+n_final_AV_uncnstr
-  curr <- d_HDV_uncnstr[i,21:28][!is.na(d_HDV_uncnstr[i,21:28])] # for a given row, get only the non-NA values
-  d_subset[j,3:10] <- as.numeric(curr) # and only the non-empty values
-  d_subset[j,1] <- "human"
-  d_subset[j,2] <- "uncnstr"
-}
-
-## just to keep the df names straight for next section
-d_merged <- d_subset
-
-# cond_n where av=1, human=2
+# agent_n where av=1, human=2; scen_n where cnstr=1, uncnstr=2
 d_merged$agent_n <- ifelse(d_merged$agent_name=="av", 1, 2)
 d_merged$scen_n <- ifelse(d_merged$scen_name=="cnstr", 1, 2)
 
 ## ================================================================================================================
-##                                    DATA ANALYSIS - ANOVA              
+##                                              DATA ANALYSIS - ANOVA              
 ## ================================================================================================================
 
-#### Manufacturer vs Driver --------
-## get summary statistics
-d_merged %>%
-  group_by(agent_n) %>%
-  get_summary_stats(vB_m_v_d_liable, type = "mean_sd")
-mean(d_merged$vB_m_v_d_liable[d_merged$scen_name=="cnstr" & d_merged$agent_name == "human"])
+cor(d_merged[,1:6]) # check correlations between measures
 
-## anova
-m_v_d_mod <- aov(vB_m_v_d_liable ~ as.factor(agent_n) * as.factor(scen_n), data = d_merged)
-summary(m_v_d_mod)
-anova_stats(m_v_d_mod)
-
-#### Manufacturer vs Manufacturer --------
-## get summary statistics
-d_merged %>%
-  group_by(scen_n) %>%
-  get_summary_stats(vB_m_v_m_liable, type = "mean_sd")
-mean(d_merged$vB_m_v_m_liable[d_merged$scen_name=="cnstr" & d_merged$agent_name == "av"])
-
-## anova
+## Liable, Manufacturer vs Manufacturer (DV)
 m_v_m_mod <- aov(vB_m_v_m_liable ~ as.factor(agent_n) * as.factor(scen_n), data = d_merged)
 summary(m_v_m_mod)
 anova_stats(m_v_m_mod)
 
+# summary statistics
+aggregate(vB_m_v_m_liable ~ agent_name, data = d_merged, FUN = mean)
+aggregate(vB_m_v_m_liable ~ scen_name, data = d_merged, FUN = mean)
+
+## Liable, Manufacturer vs Driver (DV)
+m_v_d_mod <- aov(vB_m_v_d_liable ~ as.factor(agent_n) * as.factor(scen_n), data = d_merged)
+summary(m_v_d_mod)
+anova_stats(m_v_d_mod)
+
+# summary statistics
+aggregate(vB_m_v_d_liable ~ agent_name, data = d_merged, FUN = mean)
+aggregate(vB_m_v_d_liable ~ scen_name, data = d_merged, FUN = mean)
+
 ## ================================================================================================================
 ##                                            DATA ANALYSIS - T-TESTS               
 ## ================================================================================================================
-table(d_merged$con) #give us table of number of people in each condition - want to have equal number of people in each condition
 
-#### (1) LIABLE VEHICLE A DRIVER
-## between agent conditions
-vA_liable_T_agent <- t.test(vA_liable ~ agent_name, data = d_merged, paired = FALSE) 
-vA_liable_T_agent
-## between scenario conditions
-vA_liable_T_scen <- t.test(vA_liable ~ scen_name, data = d_merged, paired = FALSE) 
-vA_liable_T_scen
-## between agent conditions for constrained
-vA_liable_T_cnstr <- t.test(d_merged$vA_liable[d_merged$scen_name=="cnstr" & d_merged$agent_name == "av"], 
-                            d_merged$vA_liable[d_merged$scen_name=="cnstr" & d_merged$agent_name == "human"], paired=FALSE)
-vA_liable_T_cnstr
-## between agent conditions for unconstrained
-vA_liable_T_uncnstr <- t.test(d_merged$vA_liable[d_merged$scen_name=="uncnstr" & d_merged$agent_name == "av"], 
-                              d_merged$vA_liable[d_merged$scen_name=="uncnstr" & d_merged$agent_name == "human"], paired=FALSE)
-vA_liable_T_uncnstr
+## Liable, at-fault (DV)
+t.test(vA_liable ~ agent_name, data = d_merged, paired = FALSE)
+t.test(vA_liable ~ agent_name, data = d_merged[d_merged$scen_name=="cnstr", ], paired = FALSE)
+t.test(vA_liable ~ agent_name, data = d_merged[d_merged$scen_name=="uncnstr", ], paired = FALSE)
+cohen.d(d_merged$vA_liable, d_merged$agent_name)
+cohen.d(d_merged[d_merged$scen_name=="cnstr", ]$vA_liable, d_merged[d_merged$scen_name=="cnstr", ]$agent_name)
+cohen.d(d_merged[d_merged$scen_name=="uncnstr", ]$vA_liable, d_merged[d_merged$scen_name=="uncnstr", ]$agent_name)
 
-
-#### (2) LIABLE VEHICLE B MANUFACTURER VS LIABLE HDV DRIVER
-## between agent conditions
-vB_m_v_d_liable_T_agent <- t.test(vB_m_v_d_liable ~ agent_name, data = d_merged, paired = FALSE) 
-vB_m_v_d_liable_T_agent
-## between scenario conditions
-vB_m_v_d_liable_T_scen <- t.test(vB_m_v_d_liable ~ scen_name, data = d_merged, paired = FALSE) 
-vB_m_v_d_liable_T_scen
-## between agent conditions for constrained
-vB_m_v_d_liable_T_cnstr <- t.test(d_merged$vB_m_v_d_liable[d_merged$scen_name=="cnstr" & d_merged$agent_name == "av"], 
-                                  d_merged$vB_m_v_d_liable[d_merged$scen_name=="cnstr" & d_merged$agent_name == "human"], paired=FALSE)
-vB_m_v_d_liable_T_cnstr
-cohen.d(d_merged[d_merged$scen_name=="cnstr", ]$vB_m_v_d_liable, d_merged[d_merged$scen_name=="cnstr", ]$agent_name)
-## between agent conditions for unconstrained
-vB_m_v_d_liable_T_uncnstr <- t.test(d_merged$vB_m_v_d_liable[d_merged$scen_name=="uncnstr" & d_merged$agent_name == "av"], 
-                                    d_merged$vB_m_v_d_liable[d_merged$scen_name=="uncnstr" & d_merged$agent_name == "human"], paired=FALSE)
-vB_m_v_d_liable_T_uncnstr
-cohen.d(d_merged[d_merged$scen_name=="uncnstr", ]$vB_m_v_d_liable, d_merged[d_merged$scen_name=="uncnstr", ]$agent_name)
-
-
-#### (3) LIABLE VEHICLE B MANUFACTURER VS LIABLE HDV MANUFACTURER
-## between agent conditions
-vB_m_v_m_liable_T_agent <- t.test(vB_m_v_m_liable ~ agent_name, data = d_merged, paired = FALSE) 
-vB_m_v_m_liable_T_agent
-## between scenario conditions
-vB_m_v_m_liable_T_scen <- t.test(vB_m_v_m_liable ~ scen_name, data = d_merged, paired = FALSE) 
-vB_m_v_m_liable_T_scen
-## between agent conditions for constrained
-vB_m_v_m_liable_T_cnstr <- t.test(d_merged$vB_m_v_m_liable[d_merged$scen_name=="cnstr" & d_merged$agent_name == "av"], 
-                                  d_merged$vB_m_v_m_liable[d_merged$scen_name=="cnstr" & d_merged$agent_name == "human"], paired=FALSE)
-vB_m_v_m_liable_T_cnstr
+## Liable, Manufacturer vs Manufacturer (DV)
+t.test(vB_m_v_m_liable ~ agent_name, data = d_merged, paired = FALSE)
+t.test(vB_m_v_m_liable ~ agent_name, data = d_merged[d_merged$scen_name=="cnstr", ], paired = FALSE)
+t.test(vB_m_v_m_liable ~ agent_name, data = d_merged[d_merged$scen_name=="uncnstr", ], paired = FALSE)
+cohen.d(d_merged$vB_m_v_m_liable, d_merged$agent_name)
 cohen.d(d_merged[d_merged$scen_name=="cnstr", ]$vB_m_v_m_liable, d_merged[d_merged$scen_name=="cnstr", ]$agent_name)
-## between agent conditions for unconstrained
-vB_m_v_m_liable_T_uncnstr <- t.test(d_merged$vB_m_v_m_liable[d_merged$scen_name=="uncnstr" & d_merged$agent_name == "av"], 
-                                    d_merged$vB_m_v_m_liable[d_merged$scen_name=="uncnstr" & d_merged$agent_name == "human"], paired=FALSE)
-vB_m_v_m_liable_T_uncnstr
 cohen.d(d_merged[d_merged$scen_name=="uncnstr", ]$vB_m_v_m_liable, d_merged[d_merged$scen_name=="uncnstr", ]$agent_name)
 
+## Liable, Manufacturer vs Driver (DV)
+t.test(vB_m_v_d_liable ~ agent_name, data = d_merged, paired = FALSE)
+t.test(vB_m_v_d_liable ~ agent_name, data = d_merged[d_merged$scen_name=="cnstr", ], paired = FALSE)
+t.test(vB_m_v_d_liable ~ agent_name, data = d_merged[d_merged$scen_name=="uncnstr", ], paired = FALSE)
+cohen.d(d_merged$vB_m_v_d_liable, d_merged$agent_name)
+cohen.d(d_merged[d_merged$scen_name=="cnstr", ]$vB_m_v_d_liable, d_merged[d_merged$scen_name=="cnstr", ]$agent_name)
+cohen.d(d_merged[d_merged$scen_name=="uncnstr", ]$vB_m_v_d_liable, d_merged[d_merged$scen_name=="uncnstr", ]$agent_name)
 
-#### (4) CONSIDER VEHICLE A COUNTERFACTUAL
-## between agent conditions
-vA_cntrfctl_T_agent <- t.test(vA_cntrfctl ~ agent_name, data = d_merged, paired = FALSE) 
-vA_cntrfctl_T_agent
-## between scenario conditions
-vA_cntrfctl_T_scen <- t.test(vA_cntrfctl ~ scen_name, data = d_merged, paired = FALSE) 
-vA_cntrfctl_T_scen
-## between agent conditions for constrained
-vA_cntrfctl_T_cnstr <- t.test(d_merged$vA_cntrfctl[d_merged$scen_name=="cnstr" & d_merged$agent_name == "av"], 
-                              d_merged$vA_cntrfctl[d_merged$scen_name=="cnstr" & d_merged$agent_name == "human"], paired=FALSE)
-vA_cntrfctl_T_cnstr
-## between agent conditions for unconstrained
-vA_cntrfctl_T_uncnstr <- t.test(d_merged$vA_cntrfctl[d_merged$scen_name=="uncnstr" & d_merged$agent_name == "av"], 
-                                d_merged$vA_cntrfctl[d_merged$scen_name=="uncnstr" & d_merged$agent_name == "human"], paired=FALSE)
-vA_cntrfctl_T_uncnstr
+## Vehicle A Counterfactual (M)
+t.test(vA_cntrfctl ~ agent_name, data = d_merged, paired = FALSE)
+t.test(vA_cntrfctl ~ agent_name, data = d_merged[d_merged$scen_name=="cnstr", ], paired = FALSE)
+t.test(vA_cntrfctl ~ agent_name, data = d_merged[d_merged$scen_name=="uncnstr", ], paired = FALSE)
+cohen.d(d_merged$vA_cntrfctl, d_merged$agent_name)
+cohen.d(d_merged[d_merged$scen_name=="cnstr", ]$vA_cntrfctl, d_merged[d_merged$scen_name=="cnstr", ]$agent_name)
+cohen.d(d_merged[d_merged$scen_name=="uncnstr", ]$vA_cntrfctl, d_merged[d_merged$scen_name=="uncnstr", ]$agent_name)
 
+## Vehicle B Counterfactual (M)
+t.test(vB_cntrfctl ~ agent_name, data = d_merged, paired = FALSE)
+t.test(vB_cntrfctl ~ agent_name, data = d_merged[d_merged$scen_name=="cnstr", ], paired = FALSE)
+t.test(vB_cntrfctl ~ agent_name, data = d_merged[d_merged$scen_name=="uncnstr", ], paired = FALSE)
+cohen.d(d_merged$vB_cntrfctl, d_merged$agent_name)
+cohen.d(d_merged[d_merged$scen_name=="cnstr", ]$vB_cntrfctl, d_merged[d_merged$scen_name=="cnstr", ]$agent_name)
+cohen.d(d_merged[d_merged$scen_name=="uncnstr", ]$vB_cntrfctl, d_merged[d_merged$scen_name=="uncnstr", ]$agent_name)
 
-#### (5) CONSIDER VEHICLE B COUNTERFACTUAL
-## between agent conditions
-vB_cntrfctl_T_agent <- t.test(vB_cntrfctl ~ agent_name, data = d_merged, paired = FALSE) 
-vB_cntrfctl_T_agent
-## between scenario conditions
-vB_cntrfctl_T_scen <- t.test(vB_cntrfctl ~ scen_name, data = d_merged, paired = FALSE) 
-vB_cntrfctl_T_scen
-## between agent conditions for constrained
-vB_cntrfctl_T_cnstr <- t.test(d_merged$vB_cntrfctl[d_merged$scen_name=="cnstr" & d_merged$agent_name == "av"], 
-                              d_merged$vB_cntrfctl[d_merged$scen_name=="cnstr" & d_merged$agent_name == "human"], paired=FALSE)
-vB_cntrfctl_T_cnstr
-## between agent conditions for unconstrained
-vB_cntrfctl_T_uncnstr <- t.test(d_merged$vB_cntrfctl[d_merged$scen_name=="uncnstr" & d_merged$agent_name == "av"], 
-                                d_merged$vB_cntrfctl[d_merged$scen_name=="uncnstr" & d_merged$agent_name == "human"], paired=FALSE)
-vB_cntrfctl_T_uncnstr
-
-
-#### (6) VEHICLE B CAN AVOID
-## between agent conditions
-avoid_T_agent <- t.test(avoid ~ agent_name, data = d_merged, paired = FALSE) 
-avoid_T_agent
-## between scenario conditions
-avoid_T_scen <- t.test(avoid ~ scen_name, data = d_merged, paired = FALSE) 
-avoid_T_scen
-## between agent conditions for constrained
-avoid_T_cnstr <- t.test(d_merged$avoid[d_merged$scen_name=="cnstr" & d_merged$agent_name == "av"], 
-                        d_merged$avoid[d_merged$scen_name=="cnstr" & d_merged$agent_name == "human"], paired=FALSE)
-avoid_T_cnstr
-## between agent conditions for unconstrained
-avoid_T_uncnstr <- t.test(d_merged$avoid[d_merged$scen_name=="uncnstr" & d_merged$agent_name == "av"], 
-                          d_merged$avoid[d_merged$scen_name=="uncnstr" & d_merged$agent_name == "human"], paired=FALSE)
-avoid_T_uncnstr
-
-
-cor(d_merged[,3:8])
+# Could have done more to avoid (M)
+t.test(avoid ~ agent_name, data = d_merged, paired = FALSE)
+t.test(avoid ~ agent_name, data = d_merged[d_merged$scen_name=="cnstr", ], paired = FALSE)
+t.test(avoid ~ agent_name, data = d_merged[d_merged$scen_name=="uncnstr", ], paired = FALSE)
+cohen.d(d_merged$avoid, d_merged$agent_name)
+cohen.d(d_merged[d_merged$scen_name=="cnstr", ]$avoid, d_merged[d_merged$scen_name=="cnstr", ]$agent_name)
+cohen.d(d_merged[d_merged$scen_name=="uncnstr", ]$avoid, d_merged[d_merged$scen_name=="uncnstr", ]$agent_name)
 
 ## ================================================================================================================
 ##                                             MEDIATION ANALYSIS              
 ## ================================================================================================================
 
-# MODERATED MEDIATION
-# the effect of scenario on A or B path
-# 7 = A path, 14 = B path
-process(data = d_merged, y = "vB_m_v_m_liable", x = "agent_n",
-        m =c("avoid"), w = "scen_n", model = 7, effsize =1, total =1, stand =1,
-        contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
-process(data = d_merged, y = "vB_m_v_d_liable", x = "agent_n",
-        m =c("avoid"), w = "scen_n", model = 7, effsize =1, total =1, stand =1,
-        contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
+source("../process.R")
 
-# MODERATED SERIAL MEDIATION
-# the effect of scenario on center path
-# 87 = B path, 83 = A path, 91 = center path
-process(data = d_merged, y = "vB_m_v_m_liable", x = "agent_n", 
-        m =c("vB_cntrfctl", "avoid"), w = "scen_n", model = 91, effsize =1, total =1, stand =1, 
-        contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
-process(data = d_merged, y = "vB_m_v_d_liable", x = "agent_n", 
-        m =c("vB_cntrfctl", "avoid"), w = "scen_n", model = 91, effsize =1, total =1, stand =1, 
-        contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
+# test age as moderator
+summary(lm(vB_m_v_m_liable ~ agent_n*age, data=d_merged))
+summary(lm(vB_m_v_d_liable ~ agent_n*age, data=d_merged))
 
 # SERIAL MEDIATION
 process(data = d_merged, y = "vB_m_v_m_liable", x = "agent_n", 
@@ -327,193 +174,83 @@ process(data = d_merged, y = "vB_m_v_d_liable", x = "agent_n",
         m =c("vB_cntrfctl", "avoid"), model = 6, effsize =1, total =1, stand =1, 
         contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
 
+# MODERATED SERIAL MEDIATION
+# the effect of scenario on center path (91)
+process(data = d_merged, y = "vB_m_v_m_liable", x = "agent_n", 
+        m =c("vB_cntrfctl", "avoid"), w = "scen_n", model = 91, effsize =1, total =1, stand =1, 
+        contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
+process(data = d_merged, y = "vB_m_v_d_liable", x = "agent_n", 
+        m =c("vB_cntrfctl", "avoid"), w = "scen_n", model = 91, effsize =1, total =1, stand =1, 
+        contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
 
 ## ================================================================================================================
-##                                              PLOTTING MAIN FIGURE                 
+##                                              PLOTTING 2X2 FIGURE                 
 ## ================================================================================================================
 
-## plotting main measure
-t_names <- c("Constrained", "Unconstrained")
-title_size <- 20
+t_labels <- c("Constrained", "Unconstrained")
+fill_labels <- c("AV", "HDV")
 
-## function for getting the correct sig annotation
-get_annotation <- function(p_val) {
-  if (p_val < 0.001) {
-    return (list('***', 5.5))
-  } else if (p_val < 0.01) {
-    return (list('**', 5.5))
-  } else if (p_val < 0.05) {
-    return (list('*', 5.5))
-  } else if (p_val < 0.1) {
-    return (list('^', 5.5))
-  } else {
-    return (list('NS', 3))
-  }
-}
+## Liable, Manufacturer vs Manufacturer (DV)
+p_val_L = t.test(vB_m_v_m_liable ~ agent_name, data = d_merged[d_merged$scen_name=="cnstr", ], paired = FALSE)$p.value
+p_val_R = t.test(vB_m_v_m_liable ~ agent_name, data = d_merged[d_merged$scen_name=="uncnstr", ], paired = FALSE)$p.value
+p1_1 <- plot_2x2(d_merged, x=scen_name, y=vB_m_v_m_liable, fill=agent_name, p_val_L, p_val_R, 
+                 title="Veh. B Manufacturer Liability", t_labels, fill_labels)
 
-##PLOTTING FUNCTION
-plotting <- function(cond_1_T, cond_2_T, title_liability, liable) {
-  cnstr_anno <- get_annotation(cond_1_T$p.value)
-  uncnstr_anno <- get_annotation(cond_2_T$p.value)
-  p <- ggplot(d_merged, aes(x=factor(scen_name), y={{liable}}, fill=agent_name)) +  
-    theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
-    geom_signif(y_position = 105.00, xmin = c(0.8,1.8), xmax = c(1.2,2.2), annotation = c(unlist(cnstr_anno[1]),unlist(uncnstr_anno[1])), textsize=7.5)
-  p <- p + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
-    scale_x_discrete(labels=t_names) +
-    ggtitle(title_liability) +
-    xlab ("") + ylab ("") +
-    scale_fill_discrete(labels=c('AV', 'HDV')) +
-    theme_classic() +
-    theme(axis.text.x = element_text(size=15)) +
-    theme(axis.text.y = element_text(size=15)) +
-    theme(axis.title = element_text(size=18)) +
-    theme(plot.title = element_text(size=18, hjust=0.5)) +
-    theme(legend.text=element_text(size=14),legend.title=element_text(size=14), legend.position="top")+
-    labs(fill='')+
-    geom_bar(stat="summary", position = position_dodge(), width = 0.9, alpha = 0.38, size = 0.75) +
-    stat_summary(fun.data = "mean_cl_boot", color = "black", 
-                 size=0.4, 
-                 position = position_dodge(width = 0.9)) +
-    stat_summary(fun.data = "mean_cl_boot", color = "black", 
-                 position = position_dodge(width = 0.9),
-                 geom="errorbar", width = 0.2)
-  return(p)
-}
+## Liable, Manufacturer vs Driver (DV)
+p_val_L = t.test(vB_m_v_d_liable ~ agent_name, data = d_merged[d_merged$scen_name=="cnstr", ], paired = FALSE)$p.value
+p_val_R = t.test(vB_m_v_d_liable ~ agent_name, data = d_merged[d_merged$scen_name=="uncnstr", ], paired = FALSE)$p.value
+p1_2 <- plot_2x2(d_merged, x=scen_name, y=vB_m_v_d_liable, fill=agent_name, p_val_L, p_val_R, 
+                 title="Veh. B Manufacturer\nor Driver Liability", t_labels, fill_labels)
 
-  ## (MAIN 1) VB manufacturer/driver liability
-p0_1<-plotting(vB_m_v_d_liable_T_cnstr,vB_m_v_d_liable_T_uncnstr,"Veh. B Manufacturer\nor Driver Liability",vB_m_v_d_liable)
-
-## (MAIN 2) VB manufacturer liability
-p0_2<-plotting(vB_m_v_m_liable_T_cnstr,vB_m_v_m_liable_T_uncnstr,"Veh. B Manufacturer Liability",vB_m_v_m_liable)
-
-dev.new(width=10,height=5,noRStudioGD = TRUE)
-figure1 <- ggarrange(p0_1, p0_2, nrow=1,ncol=2,common.legend = TRUE, legend="top", vjust = 1.0, hjust=0.5) 
+figure1 <- ggarrange(p1_1, p1_2, nrow=1, ncol=2,common.legend = TRUE, legend="top", vjust = 1.0, hjust=0.5) 
 figure1 <- annotate_figure(figure1, left = text_grob("Mean Agreement", color="black", face ="plain",size=16, rot=90),
                            bottom = text_grob("Scenario Type", color="black", face ="plain",size=18)) 
 plot(figure1)
 
-
 ## ================================================================================================================
-##                                              PLOTTING ALL FIGURES                 
+##                                              PLOTTING BY AGENT               
 ## ================================================================================================================
 
-## plotting all measures
-t_names <- c("Constrained", "Unconstrained")
+t_labels <- c("AV", "HDV")
+sig_comparisons <- c("av", "hdv")
 
-plotting_violin <- function(cond_1_T, cond_2_T, title_liability, liable) {
-  cnstr_anno <- get_annotation(cond_1_T$p.value)
-  uncnstr_anno <- get_annotation(cond_2_T$p.value)
-  p <- ggplot(d_merged, aes(x=factor(scen_name), y={{liable}}, fill=agent_name)) +  
-    theme_bw() + coord_cartesian(ylim=c(1,110))+scale_y_continuous(breaks = scales::pretty_breaks(n = 3))+
-    geom_signif(y_position = 105.00, xmin = c(0.8,1.8), xmax = c(1.2,2.2), annotation = c(unlist(cnstr_anno[1]),unlist(uncnstr_anno[1])), textsize=7.5)
-  p <- p + theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
-    scale_x_discrete(labels=t_names) +
-    ggtitle(title_liability) +
-    xlab ("Scenario Type") + ylab ("Measure") +
-    scale_fill_discrete(labels=c('AV', 'HDV')) +
-    theme_classic() +
-    theme(axis.text.x = element_text(size=15)) +
-    theme(axis.text.y = element_text(size=15)) +
-    theme(axis.title = element_text(size=18)) +
-    theme(plot.title = element_text(size=18, hjust=0.5)) +
-    theme(legend.text=element_text(size=14),legend.title=element_text(size=14), legend.position="top")+
-    labs(fill='')+
-    geom_violin(width=0.9, alpha=0.38, size=0.75) +  
-    geom_sina(alpha=0.6, size=0.95, color = "#999999") +
-    stat_summary(fun.data = "mean_cl_boot", color = "black", 
-                 size=0.4, 
-                 position = position_dodge(width = 0.9)) +
-    stat_summary(fun.data = "mean_cl_boot", color = "black", 
-                 position = position_dodge(width = 0.9),
-                 geom="errorbar", width = 0.2)
-  print(p)
-}
+## Liable, at-fault (DV)
+p_val = t.test(vA_liable ~ agent_name, data = d_merged, paired = FALSE)$p.value
+p2_1 <- plot_std(d_merged, x=agent_name, y=vA_liable, p_val, 
+                 title="Veh. A Driver Liability", t_labels, sig_comparisons)
 
-# (1) VA driver liable
-plotting_violin(vA_liable_T_cnstr,vA_liable_T_uncnstr,"Veh. A Driver Liability",vA_liable)
+## Liable, Manufacturer vs Manufacturer (DV)
+p_val = t.test(vB_m_v_m_liable ~ agent_name, data = d_merged, paired = FALSE)$p.value
+p2_2 <- plot_std(d_merged, x=agent_name, y=vB_m_v_m_liable, p_val, 
+             title="Veh. B Manufacturer Liability", t_labels, sig_comparisons)
 
-## (2) VB manufacturer/driver liability
-plotting_violin(vB_m_v_d_liable_T_cnstr,vB_m_v_d_liable_T_uncnstr,"Veh. B Manufacturer\nor Driver Liability",vB_m_v_d_liable)
+## Liable, Manufacturer vs Driver (DV)
+p_val = t.test(vB_m_v_d_liable ~ agent_name, data = d_merged, paired = FALSE)$p.value
+p2_3 <- plot_std(d_merged, x=agent_name, y=vB_m_v_d_liable, p_val, 
+             title="Veh. B Manufacturer\nor Driver Liability", t_labels, sig_comparisons)
 
-## (3) VB manufacturer liability
-plotting_violin(vB_m_v_m_liable_T_cnstr,vB_m_v_m_liable_T_uncnstr,"Veh. B Manufacturer Liability",vB_m_v_m_liable)
+## Vehicle A Counterfactual (M)
+p_val = t.test(vA_cntrfctl ~ agent_name, data = d_merged, paired = FALSE)$p.value
+p2_4 <- plot_std(d_merged, x=agent_name, y=vA_cntrfctl, p_val, 
+             title="Consider Veh. A Counterfactual", t_labels, sig_comparisons)
 
-## (4) VA counterfactual
-plotting_violin(vA_cntrfctl_T_cnstr,vA_cntrfctl_T_uncnstr,"Consider Veh. A Counterfactual",vA_cntrfctl)
+## Vehicle B Counterfactual (M)
+p_val = t.test(vB_cntrfctl ~ agent_name, data = d_merged, paired = FALSE)$p.value
+p2_5 <- plot_std(d_merged, x=agent_name, y=vB_cntrfctl, p_val, 
+             title="Consider Veh. B Counterfactual", t_labels, sig_comparisons)
 
-## (5) VB counterfactual
-plotting_violin(vB_cntrfctl_T_cnstr,vB_cntrfctl_T_uncnstr,"Consider Veh. B Counterfactual",vB_cntrfctl)
+## Could have done more to avoid (M)
+p_val = t.test(avoid ~ agent_name, data = d_merged, paired = FALSE)$p.value
+p2_6 <- plot_std(d_merged, x=agent_name, y=avoid, p_val, 
+             title="Could have done more", t_labels, sig_comparisons)
 
-## (6) Capability to Avoid
-plotting_violin(avoid_T_cnstr,avoid_T_uncnstr,"Capability to Avoid",avoid)
+figure2 <- ggarrange(p2_1, p2_2, p2_3, p2_4, p2_5, p2_6, nrow=2,ncol=3,common.legend = TRUE, legend="top", vjust = 1.0, hjust=0.5) 
+figure2 <- annotate_figure(figure2,left = text_grob("Mean Agreement", color="black", face ="plain",size=16, rot=90),
+                           bottom = text_grob("Vehicle Type", color="black", face ="plain",size=16)) 
+plot(figure2)
 
 write.csv(d_merged, 'd_spss.csv')
 
-
-
-
-
-
-# Successful plotting function
-plotting <- function(cond_1_T, cond_2_T, title_liability, liable) {
-  cnstr_anno <- get_annotation(cond_1_T$p.value)
-  uncnstr_anno <- get_annotation(cond_2_T$p.value)
-  p <- ggplot(d_merged, aes(x=factor(scen_name), y={{liable}}, fill=agent_name)) +  
-    theme_bw() + 
-    coord_cartesian(ylim=c(1,110)) +
-    scale_y_continuous(breaks = scales::pretty_breaks(n = 3)) +
-    geom_signif(y_position = 105.00, xmin = c(0.8,1.8), xmax = c(1.2,2.2), annotation = c(unlist(cnstr_anno[1]), unlist(uncnstr_anno[1])), textsize=7.5) +
-    theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
-    scale_x_discrete(labels=t_names) +
-    ggtitle(title_liability) +
-    xlab ("") + ylab ("") +
-    scale_fill_discrete(labels=c('AV', 'HDV')) +
-    theme_classic() +
-    theme(axis.text.x = element_text(size=15)) +
-    theme(axis.text.y = element_text(size=15)) +
-    theme(axis.title = element_text(size=18)) +
-    theme(plot.title = element_text(size=18, hjust=0.5)) +
-    theme(legend.text=element_text(size=14),legend.title=element_text(size=14), legend.position="top") +
-    labs(fill='') +
-    geom_bar(stat="summary", position = position_dodge(), width = 0.9, alpha = 0.38, size = 0.75) +
-    stat_summary(fun.data = "mean_cl_boot", color = "black", size=0.4, position = position_dodge(width = 0.9)) +
-    stat_summary(fun.data = "mean_cl_boot", color = "black", position = position_dodge(width = 0.9), geom="errorbar", width = 0.2)
-  return(p)
-}
-
-p0_1 <- plotting(vB_m_v_d_liable_T_cnstr, vB_m_v_d_liable_T_uncnstr, "Veh. B Manufacturer\nor Driver Liability", vB_m_v_d_liable)
-print(p0_1)
-
-# Failing plotting function
-plotting_violin <- function(cond_1_T, cond_2_T, title_liability, liable) {
-  cnstr_anno <- get_annotation(cond_1_T$p.value)
-  uncnstr_anno <- get_annotation(cond_2_T$p.value)
-  p <- ggplot(d_merged, aes(x=factor(scen_name), y={{liable}}, fill=agent_name)) +  
-    theme_bw() + 
-    coord_cartesian(ylim=c(1,110)) +
-    scale_y_continuous(breaks = scales::pretty_breaks(n = 3)) +
-    geom_signif(y_position = 105.00, xmin = c(0.8,1.8), xmax = c(1.2,2.2), annotation = c(unlist(cnstr_anno[1]), unlist(uncnstr_anno[1])), textsize=7.5) +
-    theme(text = element_text(size=16),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
-    scale_x_discrete(labels=t_names) +
-    ggtitle(title_liability) +
-    xlab ("Scenario Type") + ylab ("Measure") +
-    scale_fill_discrete(labels=c('AV', 'HDV')) +
-    theme_classic() +
-    theme(axis.text.x = element_text(size=15)) +
-    theme(axis.text.y = element_text(size=15)) +
-    theme(axis.title = element_text(size=18)) +
-    theme(plot.title = element_text(size=18, hjust=0.5)) +
-    theme(legend.text=element_text(size=14),legend.title=element_text(size=14), legend.position="top") +
-    labs(fill='') +
-    geom_violin(width=0.9, alpha=0.38, size=0.75) +  
-    geom_sina(alpha=0.6, size=0.95, color = "#999999") +
-    stat_summary(fun.data = "mean_cl_boot", color = "black", size=0.4, position = position_dodge(width = 0.9)) +
-    stat_summary(fun.data = "mean_cl_boot", color = "black", position = position_dodge(width = 0.9), geom="errorbar", width = 0.2)
-  return(p)
-}
-
-p0_2 <- plotting_violin(vA_liable_T_cnstr, vA_liable_T_uncnstr, "Veh. A Driver Liability", vA_liable)
-print(p0_2)
 ## ================================================================================================================
 ##                                                  END OF ANALYSIS                 
 ## ================================================================================================================
