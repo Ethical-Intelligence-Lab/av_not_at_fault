@@ -120,7 +120,6 @@ if(mediation) {
   
   # test age as moderator
   summary(lm(vB_m_v_m_liable ~ cond_n*age, data=d_merged))
-  summary(lm(vB_m_v_d_liable ~ cond_n*age, data=d_merged))
   
   # SERIAL MEDIATION
   process(data = d_merged, y = "vB_m_v_m_liable", x = "cond_n", 

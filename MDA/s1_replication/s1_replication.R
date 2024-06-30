@@ -102,11 +102,6 @@ t.test(defec ~ cond_name, data = d_merged)
 aggregate(defec ~ cond_name, data = d_merged, FUN = sd)
 cohen.d(d_merged$defec, d_merged$cond_name)
 
-## Negligence (M)
-t.test(negl ~ cond_name, data = d_merged)
-aggregate(negl ~ cond_name, data = d_merged, FUN = sd)
-cohen.d(d_merged$negl, d_merged$cond_name)
-
 ## Counterfactual (M)
 t.test(countf ~ cond_name, data = d_merged)
 aggregate(countf ~ cond_name, data = d_merged, FUN = sd)
@@ -117,20 +112,15 @@ t.test(avoid ~ cond_name, data = d_merged)
 aggregate(avoid ~ cond_name, data = d_merged, FUN = sd)
 cohen.d(d_merged$avoid, d_merged$cond_name)
 
-## Should avoid when not-at-fault (M)
-t.test(avoid_fault ~ cond_name, data = d_merged)
-aggregate(avoid_fault ~ cond_name, data = d_merged, FUN = sd)
-cohen.d(d_merged$avoid_fault, d_merged$cond_name)
+## Trust (MOD)
+t.test(mod ~ cond_name, data = d_merged)
+aggregate(mod ~ cond_name, data = d_merged, FUN = sd)
+cohen.d(d_merged$mod, d_merged$cond_name)
 
 ## AV superhuman expectations (MOD)
 t.test(superh ~ cond_name, data = d_merged)
 aggregate(superh ~ cond_name, data = d_merged, FUN = sd)
 cohen.d(d_merged$superh, d_merged$cond_name)
-
-## Trust (MOD)
-t.test(mod ~ cond_name, data = d_merged)
-aggregate(mod ~ cond_name, data = d_merged, FUN = sd)
-cohen.d(d_merged$mod, d_merged$cond_name)
 
 ## trust agreement with counterfactual
 t.test(countf ~ trust_level_n, data = d_merged[d_merged$cond_name=="av", ])
