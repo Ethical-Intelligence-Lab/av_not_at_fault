@@ -170,6 +170,10 @@ p1_0 <- plot_2x2(d_merged, x=cond_name, y=vB_cntrfctl, fill=trust_level, p_val_L
 p1_0 <- p1_0 + xlab ("Vehicle Type") + ylab ("Mean Agreement")
 p1_0
 
+png(file = "../plots/e2_trust.png", width = 2*900, height = 2*500, res = 200)  # width and height are in inches
+plot(p1_0)
+dev.off()
+
 ## ================================================================================================================
 ##                                            PLOTTING MAIN MEASURES                
 ## ================================================================================================================
@@ -180,17 +184,17 @@ sig_comparisons <- c("av", "hdv")
 ## Sue, at-fault (DV)
 p_val = t.test(vA_sue ~ cond_name, data = d_merged)$p.value
 p2_1 <- plot_std(d_merged, x=cond_name, y=vA_sue, p_val, 
-                 title="Veh. A Driver Sue", t_labels, sig_comparisons)
+                 title="Sue Veh. A Driver", t_labels, sig_comparisons)
 
 ## Liable, Manufacturer vs Manufacturer (DV)
 p_val = t.test(vB_m_v_m_sue ~ cond_name, data = d_merged)$p.value
 p2_2 <- plot_std(d_merged, x=cond_name, y=vB_m_v_m_sue, p_val, 
-                 title="Veh. B Manufacturer Sue", t_labels, sig_comparisons)
+                 title="Sue Veh. B Manufacturer", t_labels, sig_comparisons)
 
 ## Liable, Manufacturer vs Driver (DV)
 p_val = t.test(vB_m_v_d_sue ~ cond_name, data = d_merged)$p.value
 p2_3 <- plot_std(d_merged, x=cond_name, y=vB_m_v_d_sue, p_val, 
-                 title="Veh. B Manufacturer\nor Human Driver Sue", t_labels, sig_comparisons)
+                 title="Sue Veh. B Manufacturer\nor Human Driver", t_labels, sig_comparisons)
 
 ## Vehicle A Counterfactual (M)
 p_val = t.test(vA_cntrfctl ~ cond_name, data = d_merged)$p.value
@@ -205,13 +209,13 @@ p2_5 <- plot_std(d_merged, x=cond_name, y=vB_cntrfctl, p_val,
 ## Could have done more to avoid (M)
 p_val = t.test(avoid ~ cond_name, data = d_merged)$p.value
 p2_6 <- plot_std(d_merged, x=cond_name, y=avoid, p_val, 
-                 title="Could have done more", t_labels, sig_comparisons)
+                 title="Could Have Done More", t_labels, sig_comparisons)
 
 figure2 <- ggarrange(p2_1, p2_2, p2_3, p2_4, p2_5, p2_6, nrow=2,ncol=3,common.legend = TRUE, legend="top", vjust = 1.0, hjust=0.5) 
 figure2 <- annotate_figure(figure2,left = text_grob("Mean Agreement", color="black", face ="plain",size=16, rot=90),
                            bottom = text_grob("Vehicle Type", color="black", face ="plain",size=16)) 
 
-pdf(file = "figure2.pdf", width = 9, height = 7)  # width and height are in inches
+png(file = "../plots/e2_plot.png", width = 2*900, height = 2*700, res = 200)  # width and height are in inches
 plot(figure2)
 dev.off()
 

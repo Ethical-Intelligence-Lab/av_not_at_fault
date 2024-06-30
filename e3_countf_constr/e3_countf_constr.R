@@ -120,7 +120,6 @@ t.test(vB_m_v_m_liable ~ agent_name, data = d_merged[d_merged$scen_name=="uncnst
 cohen.d(d_merged[d_merged$scen_name=="cnstr", ]$vB_m_v_m_liable, d_merged[d_merged$scen_name=="cnstr", ]$agent_name)
 cohen.d(d_merged[d_merged$scen_name=="uncnstr", ]$vB_m_v_m_liable, d_merged[d_merged$scen_name=="uncnstr", ]$agent_name)
 
-
 ## Liable, Manufacturer vs Driver (DV)
 t.test(vB_m_v_d_liable ~ agent_name, data = d_merged[d_merged$scen_name=="cnstr", ])
 t.test(vB_m_v_d_liable ~ agent_name, data = d_merged[d_merged$scen_name=="uncnstr", ])
@@ -191,7 +190,10 @@ p1_2 <- plot_2x2(d_merged, x=scen_name, y=vB_m_v_d_liable, fill=agent_name, p_va
 figure1 <- ggarrange(p1_1, p1_2, nrow=1, ncol=2,common.legend = TRUE, legend="top", vjust = 1.0, hjust=0.5) 
 figure1 <- annotate_figure(figure1, left = text_grob("Mean Agreement", color="black", face ="plain",size=16, rot=90),
                            bottom = text_grob("Scenario Type", color="black", face ="plain",size=18)) 
+
+png(file = "../plots/e3_constraints.png", width = 2*900, height = 2*500, res = 200)  # width and height are in inches
 plot(figure1)
+dev.off()
 
 ## ================================================================================================================
 ##                                              PLOTTING BY AGENT               
@@ -213,7 +215,7 @@ p2_2 <- plot_std(d_merged, x=agent_name, y=vB_m_v_m_liable, p_val,
 ## Liable, Manufacturer vs Driver (DV)
 p_val = t.test(vB_m_v_d_liable ~ agent_name, data = d_merged, paired = FALSE)$p.value
 p2_3 <- plot_std(d_merged, x=agent_name, y=vB_m_v_d_liable, p_val, 
-             title="Veh. B Manufacturer\nor Driver Liability", t_labels, sig_comparisons)
+             title="Veh. B Manufacturer\nor Human Driver Liability", t_labels, sig_comparisons)
 
 ## Vehicle A Counterfactual (M)
 p_val = t.test(vA_cntrfctl ~ agent_name, data = d_merged, paired = FALSE)$p.value
@@ -228,14 +230,15 @@ p2_5 <- plot_std(d_merged, x=agent_name, y=vB_cntrfctl, p_val,
 ## Could have done more to avoid (M)
 p_val = t.test(avoid ~ agent_name, data = d_merged, paired = FALSE)$p.value
 p2_6 <- plot_std(d_merged, x=agent_name, y=avoid, p_val, 
-             title="Could have done more", t_labels, sig_comparisons)
+             title="Could Have Done More", t_labels, sig_comparisons)
 
 figure2 <- ggarrange(p2_1, p2_2, p2_3, p2_4, p2_5, p2_6, nrow=2,ncol=3,common.legend = TRUE, legend="top", vjust = 1.0, hjust=0.5) 
 figure2 <- annotate_figure(figure2,left = text_grob("Mean Agreement", color="black", face ="plain",size=16, rot=90),
                            bottom = text_grob("Vehicle Type", color="black", face ="plain",size=16)) 
 
+png(file = "../plots/e3_plot.png", width = 2*900, height = 2*700, res = 200)  # width and height are in inches
 plot(figure2)
-
+dev.off()
 
 ## ================================================================================================================
 ##                                                  END OF ANALYSIS                 

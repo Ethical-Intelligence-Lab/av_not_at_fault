@@ -192,13 +192,13 @@ fill_labels <- c("AV", "HDV")
 p_val_L = t.test(vB_m_v_m_sue ~ agent_name, data = d_merged[d_merged$intv_appld=="no", ])$p.value
 p_val_R = t.test(vB_m_v_m_sue ~ agent_name, data = d_merged[d_merged$intv_appld=="yes", ])$p.value
 p1_1 <- plot_2x2(d_merged, x=intv_appld, y=vB_m_v_m_sue, fill=agent_name, p_val_L, p_val_R, 
-                 title="Veh. B Manufacturer Sue", t_labels, fill_labels)
+                 title="Sue Veh. B Manufacturer", t_labels, fill_labels)
 
 ## Sue, Manufacturer vs Manufacturer (DV)
 p_val_L = t.test(vB_m_v_d_sue ~ agent_name, data = d_merged[d_merged$intv_appld=="no", ])$p.value
 p_val_R = t.test(vB_m_v_d_sue ~ agent_name, data = d_merged[d_merged$intv_appld=="yes", ])$p.value
 p1_2 <- plot_2x2(d_merged, x=intv_appld, y=vB_m_v_d_sue, fill=agent_name, p_val_L, p_val_R, 
-                 title="Veh. B Manufacturer\nor Driver Sue", t_labels, fill_labels)
+                 title="Sue Veh. B Manufacturer\nor Human Driver", t_labels, fill_labels)
 
 ## Vehicle B Counterfactual (M)
 p_val_L = t.test(vB_cntrfctl ~ agent_name, data = d_merged[d_merged$intv_appld=="no", ])$p.value
@@ -210,12 +210,15 @@ p1_3 <- plot_2x2(d_merged, x=intv_appld, y=vB_cntrfctl, fill=agent_name, p_val_L
 p_val_L = t.test(avoid ~ agent_name, data = d_merged[d_merged$intv_appld=="no", ])$p.value
 p_val_R = t.test(avoid ~ agent_name, data = d_merged[d_merged$intv_appld=="yes", ])$p.value
 p1_4 <- plot_2x2(d_merged, x=intv_appld, y=avoid, fill=agent_name, p_val_L, p_val_R, 
-                 title="Could have done more", t_labels, fill_labels)
+                 title="Could Have Done More", t_labels, fill_labels)
 
 figure1 <- ggarrange(p1_1, p1_2, p1_3, p1_4, nrow=2, ncol=2,common.legend = TRUE, legend="top", vjust = 1.0, hjust=0.5) 
 figure1 <- annotate_figure(figure1, left = text_grob("Mean Agreement", color="black", face ="plain",size=16, rot=90),
                            bottom = text_grob("Intervention Applied", color="black", face ="plain",size=18)) 
+
+png(file = "../plots/e4_intervention.png", width = 2*900, height = 2*900, res = 200)  # width and height are in inches
 plot(figure1)
+dev.off()
 
 ## ================================================================================================================
 ##                                              PLOTTING BY AGENT               
@@ -227,17 +230,17 @@ sig_comparisons <- c("av", "hdv")
 ## Sue, at-fault (DV)
 p_val = t.test(vA_sue ~ agent_name, data = d_merged)$p.value
 p2_1 <- plot_std(d_merged, x=agent_name, y=vA_sue, p_val, 
-                 title="Veh. A Driver Sue", t_labels, sig_comparisons)
+                 title="Sue Veh. A Driver", t_labels, sig_comparisons)
 
 ## Liable, Manufacturer vs Manufacturer (DV)
 p_val = t.test(vB_m_v_m_sue ~ agent_name, data = d_merged)$p.value
 p2_2 <- plot_std(d_merged, x=agent_name, y=vB_m_v_m_sue, p_val, 
-                 title="Veh. B Manufacturer Sue", t_labels, sig_comparisons)
+                 title="Sue Veh. B Manufacturer", t_labels, sig_comparisons)
 
 ## Liable, Manufacturer vs Driver (DV)
 p_val = t.test(vB_m_v_d_sue ~ agent_name, data = d_merged)$p.value
 p2_3 <- plot_std(d_merged, x=agent_name, y=vB_m_v_d_sue, p_val, 
-                 title="Veh. B Manufacturer\nor Driver Sue", t_labels, sig_comparisons)
+                 title="Sue Veh. B Manufacturer\nor Human Driver", t_labels, sig_comparisons)
 
 ## Vehicle A Counterfactual (M)
 p_val = t.test(vA_cntrfctl ~ agent_name, data = d_merged)$p.value
@@ -252,13 +255,15 @@ p2_5 <- plot_std(d_merged, x=agent_name, y=vB_cntrfctl, p_val,
 ## Could have done more to avoid (M)
 p_val = t.test(avoid ~ agent_name, data = d_merged)$p.value
 p2_6 <- plot_std(d_merged, x=agent_name, y=avoid, p_val, 
-                 title="Could have done more", t_labels, sig_comparisons)
+                 title="Could Have Done More", t_labels, sig_comparisons)
 
 figure2 <- ggarrange(p2_1, p2_2, p2_3, p2_4, p2_5, p2_6, nrow=2,ncol=3,common.legend = TRUE, legend="top", vjust = 1.0, hjust=0.5) 
 figure2 <- annotate_figure(figure2,left = text_grob("Mean Agreement", color="black", face ="plain",size=16, rot=90),
                            bottom = text_grob("Vehicle Type", color="black", face ="plain",size=16)) 
 
+png(file = "../plots/e4_plot.png", width = 2*900, height = 2*700, res = 200)  # width and height are in inches
 plot(figure2)
+dev.off()
 
 ## ================================================================================================================
 ##                                                  END OF ANALYSIS                 
