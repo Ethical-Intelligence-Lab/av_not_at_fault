@@ -122,50 +122,38 @@ aggregate(vB_cntrfctl ~ intv_appld, data = d_merged, FUN = mean)
 ## ================================================================================================================
 
 ## Sue, at-fault (DV)
-t.test(vA_sue ~ agent_name, data = d_merged, paired = FALSE)
-t.test(vA_sue ~ agent_name, data = d_merged[d_merged$intv_appld=="yes", ], paired = FALSE)
-t.test(vA_sue ~ agent_name, data = d_merged[d_merged$intv_appld=="no", ], paired = FALSE)
-cohen.d(d_merged$vA_sue, d_merged$agent_name)
+t.test(vA_sue ~ agent_name, data = d_merged[d_merged$intv_appld=="yes", ])
+t.test(vA_sue ~ agent_name, data = d_merged[d_merged$intv_appld=="no", ])
 cohen.d(d_merged[d_merged$intv_appld=="yes", ]$vA_sue, d_merged[d_merged$intv_appld=="yes", ]$agent_name)
 cohen.d(d_merged[d_merged$intv_appld=="no", ]$vA_sue, d_merged[d_merged$intv_appld=="no", ]$agent_name)
 
 ## Sue, Manufacturer vs Manufacturer (DV)
-t.test(vB_m_v_m_sue ~ agent_name, data = d_merged, paired = FALSE)
-t.test(vB_m_v_m_sue ~ agent_name, data = d_merged[d_merged$intv_appld=="yes", ], paired = FALSE)
-t.test(vB_m_v_m_sue ~ agent_name, data = d_merged[d_merged$intv_appld=="no", ], paired = FALSE)
-cohen.d(d_merged$vB_m_v_m_sue, d_merged$agent_name)
+t.test(vB_m_v_m_sue ~ agent_name, data = d_merged[d_merged$intv_appld=="yes", ])
+t.test(vB_m_v_m_sue ~ agent_name, data = d_merged[d_merged$intv_appld=="no", ])
 cohen.d(d_merged[d_merged$intv_appld=="yes", ]$vB_m_v_m_sue, d_merged[d_merged$intv_appld=="yes", ]$agent_name)
 cohen.d(d_merged[d_merged$intv_appld=="no", ]$vB_m_v_m_sue, d_merged[d_merged$intv_appld=="no", ]$agent_name)
 
 ## Sue, Manufacturer vs Driver (DV)
-t.test(vB_m_v_d_sue ~ agent_name, data = d_merged, paired = FALSE)
-t.test(vB_m_v_d_sue ~ agent_name, data = d_merged[d_merged$intv_appld=="yes", ], paired = FALSE)
-t.test(vB_m_v_d_sue ~ agent_name, data = d_merged[d_merged$intv_appld=="no", ], paired = FALSE)
-cohen.d(d_merged$vB_m_v_d_sue, d_merged$agent_name)
+t.test(vB_m_v_d_sue ~ agent_name, data = d_merged[d_merged$intv_appld=="yes", ])
+t.test(vB_m_v_d_sue ~ agent_name, data = d_merged[d_merged$intv_appld=="no", ])
 cohen.d(d_merged[d_merged$intv_appld=="yes", ]$vB_m_v_d_sue, d_merged[d_merged$intv_appld=="yes", ]$agent_name)
 cohen.d(d_merged[d_merged$intv_appld=="no", ]$vB_m_v_d_sue, d_merged[d_merged$intv_appld=="no", ]$agent_name)
 
 ## Vehicle A Counterfactual (M)
-t.test(vA_cntrfctl ~ agent_name, data = d_merged, paired = FALSE)
-t.test(vA_cntrfctl ~ agent_name, data = d_merged[d_merged$intv_appld=="yes", ], paired = FALSE)
-t.test(vA_cntrfctl ~ agent_name, data = d_merged[d_merged$intv_appld=="no", ], paired = FALSE)
-cohen.d(d_merged$vA_cntrfctl, d_merged$agent_name)
+t.test(vA_cntrfctl ~ agent_name, data = d_merged[d_merged$intv_appld=="yes", ])
+t.test(vA_cntrfctl ~ agent_name, data = d_merged[d_merged$intv_appld=="no", ])
 cohen.d(d_merged[d_merged$intv_appld=="yes", ]$vA_cntrfctl, d_merged[d_merged$intv_appld=="yes", ]$agent_name)
 cohen.d(d_merged[d_merged$intv_appld=="no", ]$vA_cntrfctl, d_merged[d_merged$intv_appld=="no", ]$agent_name)
 
 ## Vehicle B Counterfactual (M)
-t.test(vB_cntrfctl ~ agent_name, data = d_merged, paired = FALSE)
-t.test(vB_cntrfctl ~ agent_name, data = d_merged[d_merged$intv_appld=="yes", ], paired = FALSE)
-t.test(vB_cntrfctl ~ agent_name, data = d_merged[d_merged$intv_appld=="no", ], paired = FALSE)
-cohen.d(d_merged$vB_cntrfctl, d_merged$agent_name)
+t.test(vB_cntrfctl ~ agent_name, data = d_merged[d_merged$intv_appld=="yes", ])
+t.test(vB_cntrfctl ~ agent_name, data = d_merged[d_merged$intv_appld=="no", ])
 cohen.d(d_merged[d_merged$intv_appld=="yes", ]$vB_cntrfctl, d_merged[d_merged$intv_appld=="yes", ]$agent_name)
 cohen.d(d_merged[d_merged$intv_appld=="no", ]$vB_cntrfctl, d_merged[d_merged$intv_appld=="no", ]$agent_name)
 
 # Could have done more to avoid (M)
-t.test(avoid ~ agent_name, data = d_merged, paired = FALSE)
-t.test(avoid ~ agent_name, data = d_merged[d_merged$intv_appld=="yes", ], paired = FALSE)
-t.test(avoid ~ agent_name, data = d_merged[d_merged$intv_appld=="no", ], paired = FALSE)
-cohen.d(d_merged$avoid, d_merged$agent_name)
+t.test(avoid ~ agent_name, data = d_merged[d_merged$intv_appld=="yes", ])
+t.test(avoid ~ agent_name, data = d_merged[d_merged$intv_appld=="no", ])
 cohen.d(d_merged[d_merged$intv_appld=="yes", ]$avoid, d_merged[d_merged$intv_appld=="yes", ]$agent_name)
 cohen.d(d_merged[d_merged$intv_appld=="no", ]$avoid, d_merged[d_merged$intv_appld=="no", ]$agent_name)
 
@@ -173,28 +161,25 @@ cohen.d(d_merged[d_merged$intv_appld=="no", ]$avoid, d_merged[d_merged$intv_appl
 ##                                             MEDIATION ANALYSIS              
 ## ================================================================================================================
 
-source("../process.R")
+mediation <- FALSE #change to true if you want to run this code
 
-# test age as moderator
-summary(lm(vB_m_v_m_sue ~ agent_n*age, data=d_merged))
-summary(lm(vB_m_v_d_sue ~ agent_n*age, data=d_merged))
-
-# SERIAL MEDIATION
-process(data = d_merged, y = "vB_m_v_m_sue", x = "agent_n",
-        m =c("vB_cntrfctl", "avoid"), model = 6, effsize =1, total =1, stand =1,
-        contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
-process(data = d_merged, y = "vB_m_v_d_sue", x = "agent_n",
-        m =c("vB_cntrfctl", "avoid"), model = 6, effsize =1, total =1, stand =1,
-        contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
-
-# MODERATED SERIAL MEDIATION
-# the effect of intervention on A path (83)
-process(data = d_merged, y = "vB_m_v_m_sue", x = "agent_n",
-        m =c("vB_cntrfctl", "avoid"), w = "intv_n", model = 83, effsize =1, total =1, stand =1,
-        contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
-process(data = d_merged, y = "vB_m_v_d_sue", x = "agent_n",
-        m =c("vB_cntrfctl", "avoid"), w = "intv_n", model = 83, effsize =1, total =1, stand =1,
-        contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
+if(mediation) {
+    source("../process.R")
+    
+    # test age as moderator
+    summary(lm(vB_m_v_m_sue ~ agent_n*age, data=d_merged))
+    
+    # SERIAL MEDIATION
+    process(data = d_merged, y = "vB_m_v_m_sue", x = "agent_n",
+            m =c("vB_cntrfctl", "avoid"), model = 6, effsize =1, total =1, stand =1,
+            contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
+    
+    # MODERATED SERIAL MEDIATION
+    # the effect of intervention on A path (83)
+    process(data = d_merged, y = "vB_m_v_m_sue", x = "agent_n",
+            m =c("vB_cntrfctl", "avoid"), w = "intv_n", model = 83, effsize =1, total =1, stand =1,
+            contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
+}
 
 ## ================================================================================================================
 ##                                              PLOTTING 2X2 FIGURE                 
@@ -204,26 +189,26 @@ t_labels <- c("No Intervention", "Intervention")
 fill_labels <- c("AV", "HDV")
 
 ## Sue, Manufacturer vs Manufacturer (DV)
-p_val_L = t.test(vB_m_v_m_sue ~ agent_name, data = d_merged[d_merged$intv_appld=="no", ], paired = FALSE)$p.value
-p_val_R = t.test(vB_m_v_m_sue ~ agent_name, data = d_merged[d_merged$intv_appld=="yes", ], paired = FALSE)$p.value
+p_val_L = t.test(vB_m_v_m_sue ~ agent_name, data = d_merged[d_merged$intv_appld=="no", ])$p.value
+p_val_R = t.test(vB_m_v_m_sue ~ agent_name, data = d_merged[d_merged$intv_appld=="yes", ])$p.value
 p1_1 <- plot_2x2(d_merged, x=intv_appld, y=vB_m_v_m_sue, fill=agent_name, p_val_L, p_val_R, 
                  title="Veh. B Manufacturer Sue", t_labels, fill_labels)
 
 ## Sue, Manufacturer vs Manufacturer (DV)
-p_val_L = t.test(vB_m_v_d_sue ~ agent_name, data = d_merged[d_merged$intv_appld=="no", ], paired = FALSE)$p.value
-p_val_R = t.test(vB_m_v_d_sue ~ agent_name, data = d_merged[d_merged$intv_appld=="yes", ], paired = FALSE)$p.value
+p_val_L = t.test(vB_m_v_d_sue ~ agent_name, data = d_merged[d_merged$intv_appld=="no", ])$p.value
+p_val_R = t.test(vB_m_v_d_sue ~ agent_name, data = d_merged[d_merged$intv_appld=="yes", ])$p.value
 p1_2 <- plot_2x2(d_merged, x=intv_appld, y=vB_m_v_d_sue, fill=agent_name, p_val_L, p_val_R, 
                  title="Veh. B Manufacturer\nor Driver Sue", t_labels, fill_labels)
 
 ## Vehicle B Counterfactual (M)
-p_val_L = t.test(vB_cntrfctl ~ agent_name, data = d_merged[d_merged$intv_appld=="no", ], paired = FALSE)$p.value
-p_val_R = t.test(vB_cntrfctl ~ agent_name, data = d_merged[d_merged$intv_appld=="yes", ], paired = FALSE)$p.value
+p_val_L = t.test(vB_cntrfctl ~ agent_name, data = d_merged[d_merged$intv_appld=="no", ])$p.value
+p_val_R = t.test(vB_cntrfctl ~ agent_name, data = d_merged[d_merged$intv_appld=="yes", ])$p.value
 p1_3 <- plot_2x2(d_merged, x=intv_appld, y=vB_cntrfctl, fill=agent_name, p_val_L, p_val_R, 
                  title="Consider Veh. B Counterfactual", t_labels, fill_labels)
 
 ## Could have done more to avoid (M)
-p_val_L = t.test(avoid ~ agent_name, data = d_merged[d_merged$intv_appld=="no", ], paired = FALSE)$p.value
-p_val_R = t.test(avoid ~ agent_name, data = d_merged[d_merged$intv_appld=="yes", ], paired = FALSE)$p.value
+p_val_L = t.test(avoid ~ agent_name, data = d_merged[d_merged$intv_appld=="no", ])$p.value
+p_val_R = t.test(avoid ~ agent_name, data = d_merged[d_merged$intv_appld=="yes", ])$p.value
 p1_4 <- plot_2x2(d_merged, x=intv_appld, y=avoid, fill=agent_name, p_val_L, p_val_R, 
                  title="Could have done more", t_labels, fill_labels)
 
@@ -240,41 +225,40 @@ t_labels <- c("AV", "HDV")
 sig_comparisons <- c("av", "hdv")
 
 ## Sue, at-fault (DV)
-p_val = t.test(vA_sue ~ agent_name, data = d_merged, paired = FALSE)$p.value
+p_val = t.test(vA_sue ~ agent_name, data = d_merged)$p.value
 p2_1 <- plot_std(d_merged, x=agent_name, y=vA_sue, p_val, 
                  title="Veh. A Driver Sue", t_labels, sig_comparisons)
 
 ## Liable, Manufacturer vs Manufacturer (DV)
-p_val = t.test(vB_m_v_m_sue ~ agent_name, data = d_merged, paired = FALSE)$p.value
+p_val = t.test(vB_m_v_m_sue ~ agent_name, data = d_merged)$p.value
 p2_2 <- plot_std(d_merged, x=agent_name, y=vB_m_v_m_sue, p_val, 
                  title="Veh. B Manufacturer Sue", t_labels, sig_comparisons)
 
 ## Liable, Manufacturer vs Driver (DV)
-p_val = t.test(vB_m_v_d_sue ~ agent_name, data = d_merged, paired = FALSE)$p.value
+p_val = t.test(vB_m_v_d_sue ~ agent_name, data = d_merged)$p.value
 p2_3 <- plot_std(d_merged, x=agent_name, y=vB_m_v_d_sue, p_val, 
                  title="Veh. B Manufacturer\nor Driver Sue", t_labels, sig_comparisons)
 
 ## Vehicle A Counterfactual (M)
-p_val = t.test(vA_cntrfctl ~ agent_name, data = d_merged, paired = FALSE)$p.value
+p_val = t.test(vA_cntrfctl ~ agent_name, data = d_merged)$p.value
 p2_4 <- plot_std(d_merged, x=agent_name, y=vA_cntrfctl, p_val, 
                  title="Consider Veh. A Counterfactual", t_labels, sig_comparisons)
 
 ## Vehicle B Counterfactual (M)
-p_val = t.test(vB_cntrfctl ~ agent_name, data = d_merged, paired = FALSE)$p.value
+p_val = t.test(vB_cntrfctl ~ agent_name, data = d_merged)$p.value
 p2_5 <- plot_std(d_merged, x=agent_name, y=vB_cntrfctl, p_val, 
                  title="Consider Veh. B Counterfactual", t_labels, sig_comparisons)
 
 ## Could have done more to avoid (M)
-p_val = t.test(avoid ~ agent_name, data = d_merged, paired = FALSE)$p.value
+p_val = t.test(avoid ~ agent_name, data = d_merged)$p.value
 p2_6 <- plot_std(d_merged, x=agent_name, y=avoid, p_val, 
                  title="Could have done more", t_labels, sig_comparisons)
 
 figure2 <- ggarrange(p2_1, p2_2, p2_3, p2_4, p2_5, p2_6, nrow=2,ncol=3,common.legend = TRUE, legend="top", vjust = 1.0, hjust=0.5) 
 figure2 <- annotate_figure(figure2,left = text_grob("Mean Agreement", color="black", face ="plain",size=16, rot=90),
                            bottom = text_grob("Vehicle Type", color="black", face ="plain",size=16)) 
-plot(figure2)
 
-write.csv(d_merged, 'd_spss.csv')
+plot(figure2)
 
 ## ================================================================================================================
 ##                                                  END OF ANALYSIS                 

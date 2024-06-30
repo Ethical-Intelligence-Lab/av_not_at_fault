@@ -109,50 +109,39 @@ aggregate(vB_m_v_d_liable ~ scen_name, data = d_merged, FUN = mean)
 ## ================================================================================================================
 
 ## Liable, at-fault (DV)
-t.test(vA_liable ~ agent_name, data = d_merged, paired = FALSE)
-t.test(vA_liable ~ agent_name, data = d_merged[d_merged$scen_name=="cnstr", ], paired = FALSE)
-t.test(vA_liable ~ agent_name, data = d_merged[d_merged$scen_name=="uncnstr", ], paired = FALSE)
-cohen.d(d_merged$vA_liable, d_merged$agent_name)
+t.test(vA_liable ~ agent_name, data = d_merged[d_merged$scen_name=="cnstr", ])
+t.test(vA_liable ~ agent_name, data = d_merged[d_merged$scen_name=="uncnstr", ])
 cohen.d(d_merged[d_merged$scen_name=="cnstr", ]$vA_liable, d_merged[d_merged$scen_name=="cnstr", ]$agent_name)
 cohen.d(d_merged[d_merged$scen_name=="uncnstr", ]$vA_liable, d_merged[d_merged$scen_name=="uncnstr", ]$agent_name)
 
 ## Liable, Manufacturer vs Manufacturer (DV)
-t.test(vB_m_v_m_liable ~ agent_name, data = d_merged, paired = FALSE)
-t.test(vB_m_v_m_liable ~ agent_name, data = d_merged[d_merged$scen_name=="cnstr", ], paired = FALSE)
-t.test(vB_m_v_m_liable ~ agent_name, data = d_merged[d_merged$scen_name=="uncnstr", ], paired = FALSE)
-cohen.d(d_merged$vB_m_v_m_liable, d_merged$agent_name)
+t.test(vB_m_v_m_liable ~ agent_name, data = d_merged[d_merged$scen_name=="cnstr", ])
+t.test(vB_m_v_m_liable ~ agent_name, data = d_merged[d_merged$scen_name=="uncnstr", ])
 cohen.d(d_merged[d_merged$scen_name=="cnstr", ]$vB_m_v_m_liable, d_merged[d_merged$scen_name=="cnstr", ]$agent_name)
 cohen.d(d_merged[d_merged$scen_name=="uncnstr", ]$vB_m_v_m_liable, d_merged[d_merged$scen_name=="uncnstr", ]$agent_name)
 
+
 ## Liable, Manufacturer vs Driver (DV)
-t.test(vB_m_v_d_liable ~ agent_name, data = d_merged, paired = FALSE)
-t.test(vB_m_v_d_liable ~ agent_name, data = d_merged[d_merged$scen_name=="cnstr", ], paired = FALSE)
-t.test(vB_m_v_d_liable ~ agent_name, data = d_merged[d_merged$scen_name=="uncnstr", ], paired = FALSE)
-cohen.d(d_merged$vB_m_v_d_liable, d_merged$agent_name)
+t.test(vB_m_v_d_liable ~ agent_name, data = d_merged[d_merged$scen_name=="cnstr", ])
+t.test(vB_m_v_d_liable ~ agent_name, data = d_merged[d_merged$scen_name=="uncnstr", ])
 cohen.d(d_merged[d_merged$scen_name=="cnstr", ]$vB_m_v_d_liable, d_merged[d_merged$scen_name=="cnstr", ]$agent_name)
 cohen.d(d_merged[d_merged$scen_name=="uncnstr", ]$vB_m_v_d_liable, d_merged[d_merged$scen_name=="uncnstr", ]$agent_name)
 
 ## Vehicle A Counterfactual (M)
-t.test(vA_cntrfctl ~ agent_name, data = d_merged, paired = FALSE)
-t.test(vA_cntrfctl ~ agent_name, data = d_merged[d_merged$scen_name=="cnstr", ], paired = FALSE)
-t.test(vA_cntrfctl ~ agent_name, data = d_merged[d_merged$scen_name=="uncnstr", ], paired = FALSE)
-cohen.d(d_merged$vA_cntrfctl, d_merged$agent_name)
+t.test(vA_cntrfctl ~ agent_name, data = d_merged[d_merged$scen_name=="cnstr", ])
+t.test(vA_cntrfctl ~ agent_name, data = d_merged[d_merged$scen_name=="uncnstr", ])
 cohen.d(d_merged[d_merged$scen_name=="cnstr", ]$vA_cntrfctl, d_merged[d_merged$scen_name=="cnstr", ]$agent_name)
 cohen.d(d_merged[d_merged$scen_name=="uncnstr", ]$vA_cntrfctl, d_merged[d_merged$scen_name=="uncnstr", ]$agent_name)
 
 ## Vehicle B Counterfactual (M)
-t.test(vB_cntrfctl ~ agent_name, data = d_merged, paired = FALSE)
-t.test(vB_cntrfctl ~ agent_name, data = d_merged[d_merged$scen_name=="cnstr", ], paired = FALSE)
-t.test(vB_cntrfctl ~ agent_name, data = d_merged[d_merged$scen_name=="uncnstr", ], paired = FALSE)
-cohen.d(d_merged$vB_cntrfctl, d_merged$agent_name)
+t.test(vB_cntrfctl ~ agent_name, data = d_merged[d_merged$scen_name=="cnstr", ])
+t.test(vB_cntrfctl ~ agent_name, data = d_merged[d_merged$scen_name=="uncnstr", ])
 cohen.d(d_merged[d_merged$scen_name=="cnstr", ]$vB_cntrfctl, d_merged[d_merged$scen_name=="cnstr", ]$agent_name)
 cohen.d(d_merged[d_merged$scen_name=="uncnstr", ]$vB_cntrfctl, d_merged[d_merged$scen_name=="uncnstr", ]$agent_name)
 
 # Could have done more to avoid (M)
-t.test(avoid ~ agent_name, data = d_merged, paired = FALSE)
-t.test(avoid ~ agent_name, data = d_merged[d_merged$scen_name=="cnstr", ], paired = FALSE)
-t.test(avoid ~ agent_name, data = d_merged[d_merged$scen_name=="uncnstr", ], paired = FALSE)
-cohen.d(d_merged$avoid, d_merged$agent_name)
+t.test(avoid ~ agent_name, data = d_merged[d_merged$scen_name=="cnstr", ])
+t.test(avoid ~ agent_name, data = d_merged[d_merged$scen_name=="uncnstr", ])
 cohen.d(d_merged[d_merged$scen_name=="cnstr", ]$avoid, d_merged[d_merged$scen_name=="cnstr", ]$agent_name)
 cohen.d(d_merged[d_merged$scen_name=="uncnstr", ]$avoid, d_merged[d_merged$scen_name=="uncnstr", ]$agent_name)
 
@@ -160,28 +149,25 @@ cohen.d(d_merged[d_merged$scen_name=="uncnstr", ]$avoid, d_merged[d_merged$scen_
 ##                                             MEDIATION ANALYSIS              
 ## ================================================================================================================
 
-source("../process.R")
+mediation <- FALSE #change to true if you want to run this code
 
-# test age as moderator
-summary(lm(vB_m_v_m_liable ~ agent_n*age, data=d_merged))
-summary(lm(vB_m_v_d_liable ~ agent_n*age, data=d_merged))
-
-# SERIAL MEDIATION
-process(data = d_merged, y = "vB_m_v_m_liable", x = "agent_n", 
-        m =c("vB_cntrfctl", "avoid"), model = 6, effsize =1, total =1, stand =1, 
-        contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
-process(data = d_merged, y = "vB_m_v_d_liable", x = "agent_n", 
-        m =c("vB_cntrfctl", "avoid"), model = 6, effsize =1, total =1, stand =1, 
-        contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
-
-# MODERATED SERIAL MEDIATION
-# the effect of scenario on center path (91)
-process(data = d_merged, y = "vB_m_v_m_liable", x = "agent_n", 
-        m =c("vB_cntrfctl", "avoid"), w = "scen_n", model = 91, effsize =1, total =1, stand =1, 
-        contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
-process(data = d_merged, y = "vB_m_v_d_liable", x = "agent_n", 
-        m =c("vB_cntrfctl", "avoid"), w = "scen_n", model = 91, effsize =1, total =1, stand =1, 
-        contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
+if(mediation) {
+    source("../process.R")
+  
+    # test age as moderator
+    summary(lm(vB_m_v_m_liable ~ agent_n*age, data=d_merged))
+    
+    # SERIAL MEDIATION
+    process(data = d_merged, y = "vB_m_v_m_liable", x = "agent_n", 
+            m =c("vB_cntrfctl", "avoid"), model = 6, effsize =1, total =1, stand =1, 
+            contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
+    
+    # MODERATED SERIAL MEDIATION
+    # the effect of scenario on center path (91)
+    process(data = d_merged, y = "vB_m_v_m_liable", x = "agent_n", 
+            m =c("vB_cntrfctl", "avoid"), w = "scen_n", model = 91, effsize =1, total =1, stand =1, 
+            contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
+}
 
 ## ================================================================================================================
 ##                                              PLOTTING 2X2 FIGURE                 
@@ -247,9 +233,9 @@ p2_6 <- plot_std(d_merged, x=agent_name, y=avoid, p_val,
 figure2 <- ggarrange(p2_1, p2_2, p2_3, p2_4, p2_5, p2_6, nrow=2,ncol=3,common.legend = TRUE, legend="top", vjust = 1.0, hjust=0.5) 
 figure2 <- annotate_figure(figure2,left = text_grob("Mean Agreement", color="black", face ="plain",size=16, rot=90),
                            bottom = text_grob("Vehicle Type", color="black", face ="plain",size=16)) 
+
 plot(figure2)
 
-write.csv(d_merged, 'd_spss.csv')
 
 ## ================================================================================================================
 ##                                                  END OF ANALYSIS                 

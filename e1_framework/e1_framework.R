@@ -70,7 +70,7 @@ cb_alpha = cronbach.alpha(moderator_mat) # calculate cronbach alpha
 d_clean$moderator <- rowMeans(moderator_mat) # averaged moderator measure
 d_clean <- d_clean %>% relocate(moderator, .after=comp_accident) # move moderator measure
 
-## select only the used columns
+## extract only columns containing measures and other relevant info for analysis
 fixed_cols = c(49:51,60,69) # fixed columns - comp checks + mod, age, conditions
 d_merged[(dim(d_merged)[1]+1):(dim(d_merged)[1]+n_final$av), ] <- subset(d_clean, cond == "av")[c(29:34,fixed_cols)]
 d_merged[(dim(d_merged)[1]+1):(dim(d_merged)[1]+n_final$hdv), ] <- subset(d_clean, cond == "hdv")[c(43:48,fixed_cols)]
@@ -92,79 +92,74 @@ d_merged$cond_n <- ifelse(d_merged$cond_name=="av", 1, 2)
 cor(d_merged[,c(1:6,9)]) # check correlations between measures
 
 ## Liable, at-fault (DV)
-t.test(vA_liable ~ cond_name, data = d_merged, paired = FALSE)
+t.test(vA_liable ~ cond_name, data = d_merged)
 aggregate(vA_liable ~ cond_name, data = d_merged, FUN = sd)
 cohen.d(d_merged$vA_liable, d_merged$cond_name)
 
 ## Liable, Manufacturer vs Manufacturer (DV)
-t.test(vB_m_v_m_liable ~ cond_name, data = d_merged, paired = FALSE)
+t.test(vB_m_v_m_liable ~ cond_name, data = d_merged)
 aggregate(vB_m_v_m_liable ~ cond_name, data = d_merged, FUN = sd)
 cohen.d(d_merged$vB_m_v_m_liable, d_merged$cond_name)
 
 ## Liable, Manufacturer vs Driver (DV)
-t.test(vB_m_v_d_liable ~ cond_name, data = d_merged, paired = FALSE)
+t.test(vB_m_v_d_liable ~ cond_name, data = d_merged)
 aggregate(vB_m_v_d_liable ~ cond_name, data = d_merged, FUN = sd)
 cohen.d(d_merged$vB_m_v_d_liable, d_merged$cond_name)
 
 ## Vehicle A Counterfactual (M)
-t.test(vA_cntrfctl ~ cond_name, data = d_merged, paired = FALSE)
+t.test(vA_cntrfctl ~ cond_name, data = d_merged)
 aggregate(vA_cntrfctl ~ cond_name, data = d_merged, FUN = sd)
 cohen.d(d_merged$vA_cntrfctl, d_merged$cond_name)
 
 ## Vehicle B Counterfactual (M)
-t.test(vB_cntrfctl ~ cond_name, data = d_merged, paired = FALSE)
+t.test(vB_cntrfctl ~ cond_name, data = d_merged)
 aggregate(vB_cntrfctl ~ cond_name, data = d_merged, FUN = sd)
 cohen.d(d_merged$vB_cntrfctl, d_merged$cond_name)
 
 # Could have done more to avoid (M)
-t.test(avoid ~ cond_name, data = d_merged, paired = FALSE)
+t.test(avoid ~ cond_name, data = d_merged)
 aggregate(avoid ~ cond_name, data = d_merged, FUN = sd)
 cohen.d(d_merged$avoid, d_merged$cond_name)
 
 # Trust (MOD)
-t.test(mod ~ cond_name, data = d_merged, paired = FALSE)
+t.test(mod ~ cond_name, data = d_merged)
 aggregate(mod ~ cond_name, data = d_merged, FUN = sd)
 cohen.d(d_merged$mod, d_merged$cond_name)
 
 ## trust agreement with counterfactual
-t.test(vB_cntrfctl ~ trust_level_n, data = d_merged[d_merged$cond_name=="av", ], paired=FALSE)
-t.test(vB_cntrfctl ~ trust_level_n, data = d_merged[d_merged$cond_name=="hdv", ], paired=FALSE)
+t.test(vB_cntrfctl ~ trust_level_n, data = d_merged[d_merged$cond_name=="av", ])
+t.test(vB_cntrfctl ~ trust_level_n, data = d_merged[d_merged$cond_name=="hdv", ])
 
 ## ================================================================================================================
 ##                                             MEDIATION ANALYSIS              
 ## ================================================================================================================
 
-source("../process.R")
+mediation <- FALSE #change to true if you want to run this code
 
-# test age as moderator
-summary(lm(vB_m_v_m_liable ~ cond_n*age, data=d_merged))
-summary(lm(vB_m_v_d_liable ~ cond_n*age, data=d_merged))
-
-# SERIAL MEDIATION
-process(data = d_merged, y = "vB_m_v_m_liable", x = "cond_n", 
-        m =c("vB_cntrfctl", "avoid"), model = 6, effsize =1, total =1, stand =1, 
-        contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
-process(data = d_merged, y = "vB_m_v_d_liable", x = "cond_n", 
-        m =c("vB_cntrfctl", "avoid"), model = 6, effsize =1, total =1, stand =1, 
-        contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
-
-# MODERATED SERIAL MEDIATION
-# the effect of trust on A path (83)
-process(data = d_merged, y = "vB_m_v_m_liable", x = "cond_n", 
-        m =c("vB_cntrfctl", "avoid"), w = "mod", model = 83, effsize =1, total =1, stand =1, 
-        contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
-process(data = d_merged, y = "vB_m_v_d_liable", x = "cond_n", 
-        m =c("vB_cntrfctl", "avoid"), w = "mod", model = 83, effsize =1, total =1, stand =1, 
-        contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
-
-# PARALLEL MEDIATION
-# investigate alternative mediation
-process(data = d_merged, y = "vB_m_v_m_liable", x = "cond_n",
-        m =c("mod"), model = 4, effsize =1, total =1, stand =1,
-        contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
-process(data = d_merged, y = "vB_m_v_d_liable", x = "cond_n",
-        m =c("mod"), model = 4, effsize =1, total =1, stand =1,
-        contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
+if(mediation) {
+    source("../process.R")
+  
+    # test age as moderator
+    summary(lm(vB_m_v_m_liable ~ cond_n*age, data=d_merged))
+    summary(lm(vB_m_v_d_liable ~ cond_n*age, data=d_merged))
+    
+    # SERIAL MEDIATION
+    process(data = d_merged, y = "vB_m_v_m_liable", x = "cond_n", 
+            m =c("vB_cntrfctl", "avoid"), model = 6, effsize =1, total =1, stand =1, 
+            contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
+    
+    # MODERATED SERIAL MEDIATION
+    # the effect of trust on A path (83)
+    process(data = d_merged, y = "vB_m_v_m_liable", x = "cond_n", 
+            m =c("vB_cntrfctl", "avoid"), w = "mod", model = 83, effsize =1, total =1, stand =1, 
+            contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
+    
+    # PARALLEL MEDIATION
+    # investigate alternative mediation
+    process(data = d_merged, y = "vB_m_v_m_liable", x = "cond_n",
+            m =c("mod"), model = 4, effsize =1, total =1, stand =1,
+            contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
+}
 
 ## ================================================================================================================
 ##                                            PLOTTING COUNTF AGREEMENT                
@@ -174,8 +169,8 @@ t_labels <- c("AV", "HDV")
 fill_labels <- c("High trust in AVs", "Low trust in AVs")
 
 ## trust v. counterfactual relationship
-p_val_L <- t.test(vB_cntrfctl ~ trust_level_n, data = d_merged[d_merged$cond_name=="av", ], paired=FALSE)$p.value
-p_val_R <- t.test(vB_cntrfctl ~ trust_level_n, data = d_merged[d_merged$cond_name=="hdv", ], paired=FALSE)$p.value
+p_val_L <- t.test(vB_cntrfctl ~ trust_level_n, data = d_merged[d_merged$cond_name=="av", ])$p.value
+p_val_R <- t.test(vB_cntrfctl ~ trust_level_n, data = d_merged[d_merged$cond_name=="hdv", ])$p.value
 p1_0 <- plot_2x2(d_merged, x=cond_name, y=vB_cntrfctl, fill=trust_level, p_val_L, p_val_R, 
                  title="Agreement Wt. Counterfactual", t_labels, fill_labels)
 p1_0 <- p1_0 + xlab ("Vehicle Type") + ylab ("Mean Agreement")
@@ -189,41 +184,42 @@ t_labels <- c("AV", "HDV")
 sig_comparisons <- c("av", "hdv")
 
 ## Liable, at-fault (DV)
-p_val = t.test(vA_liable ~ cond_name, data = d_merged, paired = FALSE)$p.value
+p_val = t.test(vA_liable ~ cond_name, data = d_merged)$p.value
 p2_1 <- plot_std(d_merged, x=cond_name, y=vA_liable, p_val, 
                  title="Veh. A Driver Liability", t_labels, sig_comparisons)
 
 ## Liable, Manufacturer vs Manufacturer (DV)
-p_val = t.test(vB_m_v_m_liable ~ cond_name, data = d_merged, paired = FALSE)$p.value
+p_val = t.test(vB_m_v_m_liable ~ cond_name, data = d_merged)$p.value
 p2_2 <- plot_std(d_merged, x=cond_name, y=vB_m_v_m_liable, p_val, 
                  title="Veh. B Manufacturer Liability", t_labels, sig_comparisons)
 
 ## Liable, Manufacturer vs Driver (DV)
-p_val = t.test(vB_m_v_d_liable ~ cond_name, data = d_merged, paired = FALSE)$p.value
+p_val = t.test(vB_m_v_d_liable ~ cond_name, data = d_merged)$p.value
 p2_3 <- plot_std(d_merged, x=cond_name, y=vB_m_v_d_liable, p_val, 
-                 title="Veh. B Manufacturer\nor Driver Liability", t_labels, sig_comparisons)
+                 title="Veh. B Manufacturer\nor Human Driver Liability", t_labels, sig_comparisons)
 
 ## Vehicle A Counterfactual (M)
-p_val = t.test(vA_cntrfctl ~ cond_name, data = d_merged, paired = FALSE)$p.value
+p_val = t.test(vA_cntrfctl ~ cond_name, data = d_merged)$p.value
 p2_4 <- plot_std(d_merged, x=cond_name, y=vA_cntrfctl, p_val, 
                  title="Consider Veh. A Counterfactual", t_labels, sig_comparisons)
 
 ## Vehicle B Counterfactual (M)
-p_val = t.test(vB_cntrfctl ~ cond_name, data = d_merged, paired = FALSE)$p.value
+p_val = t.test(vB_cntrfctl ~ cond_name, data = d_merged)$p.value
 p2_5 <- plot_std(d_merged, x=cond_name, y=vB_cntrfctl, p_val, 
                  title="Consider Veh. B Counterfactual", t_labels, sig_comparisons)
 
 ## Could have done more to avoid (M)
-p_val = t.test(avoid ~ cond_name, data = d_merged, paired = FALSE)$p.value
+p_val = t.test(avoid ~ cond_name, data = d_merged)$p.value
 p2_6 <- plot_std(d_merged, x=cond_name, y=avoid, p_val, 
                  title="Could have done more", t_labels, sig_comparisons)
 
 figure2 <- ggarrange(p2_1, p2_2, p2_3, p2_4, p2_5, p2_6, nrow=2,ncol=3,common.legend = TRUE, legend="top", vjust = 1.0, hjust=0.5) 
 figure2 <- annotate_figure(figure2,left = text_grob("Mean Agreement", color="black", face ="plain",size=16, rot=90),
                            bottom = text_grob("Vehicle Type", color="black", face ="plain",size=16)) 
-plot(figure2)
 
-write.csv(d_merged, 'd_spss.csv')
+pdf(file = "figure1.pdf", width = 9, height = 7)  # width and height are in inches
+plot(figure2)
+dev.off()
 
 ## ================================================================================================================
 ##                                                  END OF ANALYSIS                 
