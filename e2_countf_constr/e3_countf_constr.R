@@ -159,7 +159,7 @@ if(mediation) {
     # SERIAL MEDIATION
     process(data = d_merged, y = "vB_m_v_m_liable", x = "agent_n", 
             m =c("vB_cntrfctl", "avoid"), model = 6, effsize =1, total =1, stand =1, 
-            contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
+            contrast =1, boot = 10000 , modelbt = 1, seed = 654322)
     
     # MODERATED SERIAL MEDIATION
     # the effect of scenario on center path (91)
