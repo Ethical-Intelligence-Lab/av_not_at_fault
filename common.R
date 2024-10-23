@@ -22,7 +22,10 @@ pacman::p_load('ggplot2',         # plotting
                'DescTools',       # get Cramer's V
                'dplyr',           # package to move columns around
                'Hmisc',           # confidence intervals
-               'sjstats'          # anova stats
+               'sjstats',         # anova stats
+               'lavaan',          # cfa tests for discriminant validity
+               'semTools'         # discriminant validity tests       
+               
 )
 
 ## function for getting the correct sig annotation

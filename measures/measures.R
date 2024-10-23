@@ -7,58 +7,57 @@ setwd(dirname(rstudioapi::getActiveDocumentContext()$path)) # set working direct
 
 source("../common.R") # install packages; import common plotting functions
 
+install.packages("reshape2")
+library(reshape2)
+
 ## ================================================================================================================
 ##                                                  PRE-PROCESSING                 
 ## ================================================================================================================
 
 ## read in data: 
-d <- read.csv('e4_intervention.csv')
+d <- read.csv('LLM_measures_300_4o_constr.csv')
 
 ## explore dataframe: 
 dim(d) # will provide dimensions of the dataframe by row [1] and column [2]
 colnames(d)
 summary(d)
 
-## perform attention exclusions: 
-# this will remove responses from the dataframe that failed attention checks (i.e., "1" or "2")
-d <- subset(d, (d$att1 == 2 & d$att2 == 2))
-dim(d) # number of participants should decrease after attention exclusions
+cor(d[,3:4]) # check correlations between measures
 
-## new columns to label agent (av/hdv), scenario (cnstr/uncnstr), and condition (combination of the 2)
-d$agent <- ifelse(d$FL_92_DO %in% c("FL_94", "FL_93"), "av", "hdv") #if FL_92 is empty = hdv
-d$intv <- ifelse(d$FL_92_DO == "FL_94" | d$FL_98_DO == "FL_100", "yes", "no") #FL_93/99 -> no intv
-d$cond <- paste(d$agent, d$intv, sep="_")
+d_long <- reshape2::melt(d[, 3:4])
 
-## get number of participants before comp exclusions
-n_orig_all <- dim(d)[1]
-n_orig <- as.list(table(d$cond))
+ggplot(d_long, aes(x = variable, y = value)) +
+  geom_boxplot() +
+  labs(title = "Boxplots for two columns", x = "Columns", y = "Values")
 
-## perform comp exclusions
-d_clean <- d
-d_clean <- subset(d_clean, comp_accident == 1) # include only comp check 2 passes
-d_clean <- subset(d_clean, !(agent == "av" & comp1 != 1)) # remove comp check 1 fails for av
-d_clean <- subset(d_clean, !(agent == "hdv" & comp1 != 2)) # remove comp check 1 fails for hdv
+## ================================================================================================================
+##                                                  PRE-PROCESSING                 
+## ================================================================================================================
 
-## perform additional exclusions for intervention
-d_clean <- subset(d_clean, !(agent == "av" & intv == "yes" & intv_check_AV != "1,2"))
-d_clean <- subset(d_clean, !(agent == "hdv" & intv == "yes" & intv_check != "1,2"))
+## read in data: 
+d <- read.csv('LLM_measures_300_4o_julia.csv')
 
-## get number of participants AFTER exclusions: 
-n_final_all <- dim(d_clean)[1]
-percent_excl_all <- (n_orig_all - n_final_all)/n_orig_all
-n_excl_all <- n_orig_all - n_final_all
-n_final <- as.list(table(d_clean$cond))
-percent_excl <- as.list((table(d$cond) - table(d_clean$cond))/table(d$cond))
+## explore dataframe: 
+dim(d) # will provide dimensions of the dataframe by row [1] and column [2]
+colnames(d)
+summary(d)
 
-## duplicate AV condition vB liability column to match with HDV condition driver liability col
-d_clean$vB_mf_sue_AV_intv_2 <- d_clean$vB_mf_sue_AV_intv_1 # duplicate
-d_clean <- d_clean %>% relocate(vB_mf_sue_AV_intv_2, .after=vB_mf_sue_AV_intv_1) # move new column
-d_clean$vB_mf_sue_AV_2 <- d_clean$vB_mf_sue_AV_1 # duplicate
-d_clean <- d_clean %>% relocate(vB_mf_sue_AV_2, .after=vB_mf_sue_AV_1) # move new column
+d_0 <- d[d$scenario == 0, ]
+d_1 <- d[d$scenario == 1, ]
 
-## get mean age and gender:
-mean_age = mean(as.numeric(d$age), na.rm = TRUE) # removing NAs from the dataframe before computing mean 
-gender_f = table(d$gender)["2"]/sum(table(d$gender))
+cor(d_0[,4:5]) # check correlations between measures
+cor(d_1[,4:5]) # check correlations between measures
+
+d0_long <- reshape2::melt(d_0[, 3:4])
+d1_long <- reshape2::melt(d_1[, 3:4])
+
+ggplot(d0_long, aes(x = variable, y = value)) +
+  geom_boxplot() +
+  labs(title = "Boxplots for two columns", x = "Columns", y = "Values")
+
+ggplot(d1_long, aes(x = variable, y = value)) +
+  geom_boxplot() +
+  labs(title = "Boxplots for two columns", x = "Columns", y = "Values")
 
 ## ================================================================================================================
 ##                                                    SUBSETTING                 
@@ -80,6 +79,10 @@ d_merged[(dim(d_merged)[1]+1):(dim(d_merged)[1]+n_final$hdv_no), ] <- subset(d_c
 # make columns numeric
 d_merged[,1:9] <- lapply(d_merged[,1:9], as.numeric)
 
+# average Veh. B counterfactual, and Veh. B could have avoided
+d_merged$med <- (d_merged$vB_cntrfctl + d_merged$avoid) / 2
+d_merged <- d_merged %>% relocate(med, .after=avoid)
+
 # agent_n where av=1, human=2; intv_n where yes=1, no=2
 d_merged$agent_n <- ifelse(d_merged$agent_name=="av", 1, 2)
 d_merged$intv_n <- ifelse(d_merged$intv_appld=="yes", 1, 2)
@@ -88,7 +91,15 @@ d_merged$intv_n <- ifelse(d_merged$intv_appld=="yes", 1, 2)
 ##                                         DATA ANALYSIS - ANOVA              
 ## ================================================================================================================
 
-cor(d_merged[,1:6]) # check correlations between measures
+cor(d_merged[,1:7]) # check correlations between measures
+
+## Check for discriminant validity
+fit.model <- ' M1 =~ vB_cntrfctl
+              M2 =~ avoid '
+fit <- cfa(fit.model, data = d_merged)
+discriminantValidity(fit)
+
+reliability(fit)
 
 ## Sue, Manufacturer vs Manufacturer (DV)
 m_v_m_mod <- aov(vB_m_v_m_sue ~ as.factor(agent_n) * as.factor(intv_n), data = d_merged)
@@ -157,6 +168,12 @@ t.test(avoid ~ agent_name, data = d_merged[d_merged$intv_appld=="no", ])
 cohen.d(d_merged[d_merged$intv_appld=="yes", ]$avoid, d_merged[d_merged$intv_appld=="yes", ]$agent_name)
 cohen.d(d_merged[d_merged$intv_appld=="no", ]$avoid, d_merged[d_merged$intv_appld=="no", ]$agent_name)
 
+# Averaged mediator (M)
+t.test(med ~ agent_name, data = d_merged[d_merged$intv_appld=="yes", ])
+t.test(med ~ agent_name, data = d_merged[d_merged$intv_appld=="no", ])
+cohen.d(d_merged[d_merged$intv_appld=="yes", ]$med, d_merged[d_merged$intv_appld=="yes", ]$agent_name)
+cohen.d(d_merged[d_merged$intv_appld=="no", ]$med, d_merged[d_merged$intv_appld=="no", ]$agent_name)
+
 ## ================================================================================================================
 ##                                             MEDIATION ANALYSIS              
 ## ================================================================================================================
@@ -174,10 +191,32 @@ if(mediation) {
             m =c("vB_cntrfctl", "avoid"), model = 6, effsize =1, total =1, stand =1,
             contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
     
+    # SERIAL MEDIATION (flipped)
+    process(data = d_merged, y = "vB_m_v_m_sue", x = "agent_n", 
+            m =c("avoid", "vB_cntrfctl"), model = 6, effsize =1, total =1, stand =1, 
+            contrast =1, boot = 10000 , modelbt = 1, seed = 654322)
+    
     # MODERATED SERIAL MEDIATION
     # the effect of intervention on A path (83)
     process(data = d_merged, y = "vB_m_v_m_sue", x = "agent_n",
             m =c("vB_cntrfctl", "avoid"), w = "intv_n", model = 83, effsize =1, total =1, stand =1,
+            contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
+    
+    # MODERATED SERIAL MEDIATION
+    # the effect of intervention on center path (91)
+    process(data = d_merged, y = "vB_m_v_m_sue", x = "agent_n",
+            m =c("vB_cntrfctl", "avoid"), w = "intv_n", model = 91, effsize =1, total =1, stand =1,
+            contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
+    
+    # PARALLEL MEDIATION (averaged mediators)
+    process(data = d_merged, y = "vB_m_v_m_sue", x = "agent_n", 
+            m =c("med"), model = 4, effsize =1, total =1, stand =1, 
+            contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
+    
+    # MODERATED MEDIATION (averaged mediators)
+    # the effect of intervention on A path (7)
+    process(data = d_merged, y = "vB_m_v_m_sue", x = "agent_n", 
+            m =c("med"), w = "intv_n", model = 7, effsize =1, total =1, stand =1, 
             contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
 }
 

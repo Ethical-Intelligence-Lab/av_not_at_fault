@@ -12,7 +12,7 @@ source("../common.R") # install packages; import common plotting functions
 ## ================================================================================================================
 
 ## read in data: 
-d <- read.csv('e2_realistic.csv')
+d <- read.csv('e1_effect.csv')
 
 ## explore dataframe: 
 dim(d) # will provide dimensions of the dataframe by row [1] and column [2]
@@ -79,6 +79,10 @@ d_merged[(dim(d_merged)[1]+1):(dim(d_merged)[1]+n_final$hdv), ] <- subset(d_clea
 # make columns numeric
 d_merged[,1:10] <- lapply(d_merged[,1:10], as.numeric)
 
+# average Veh. B counterfactual, and Veh. B could have avoided
+d_merged$med <- (d_merged$vB_cntrfctl + d_merged$avoid) / 2
+d_merged <- d_merged %>% relocate(med, .after=avoid)
+
 ## assign trust levels where low trust=1, high trust=2
 d_merged$trust_level <- ifelse(d_merged$mod>50, "high", "low")
 d_merged$trust_level_n <- ifelse(d_merged$trust_level=="high",2,1)
@@ -90,7 +94,13 @@ d_merged$cond_n <- ifelse(d_merged$cond_name=="av", 1, 2)
 ##                                             DATA ANALYSIS - T-TESTS               
 ## ================================================================================================================
 
-cor(d_merged[,c(1:6,9)]) # check correlations between measures
+cor(d_merged[,c(1:7,10)]) # check correlations between measures
+
+## Additional check for discriminant validity
+fit.model <- ' M1 =~ vB_cntrfctl
+              M2 =~ avoid '
+fit <- cfa(fit.model, data = d_merged)
+discriminantValidity(fit)
 
 ## Sue, at-fault (DV)
 t.test(vA_sue ~ cond_name, data = d_merged)
@@ -122,6 +132,11 @@ t.test(avoid ~ cond_name, data = d_merged)
 aggregate(avoid ~ cond_name, data = d_merged, FUN = sd)
 cohen.d(d_merged$avoid, d_merged$cond_name)
 
+# Averaged mediator (M)
+t.test(med ~ cond_name, data = d_merged)
+aggregate(med ~ cond_name, data = d_merged, FUN = sd)
+cohen.d(d_merged$med, d_merged$cond_name)
+
 # Trust (MOD)
 t.test(mod ~ cond_name, data = d_merged)
 aggregate(mod ~ cond_name, data = d_merged, FUN = sd)
@@ -148,10 +163,26 @@ if(mediation) {
             m =c("vB_cntrfctl", "avoid"), model = 6, effsize =1, total =1, stand =1, 
             contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
     
+    # SERIAL MEDIATION (flipped)
+    process(data = d_merged, y = "vB_m_v_m_sue", x = "cond_n", 
+            m =c("avoid", "vB_cntrfctl"), model = 6, effsize =1, total =1, stand =1, 
+            contrast =1, boot = 10000 , modelbt = 1, seed = 654322)
+    
     # MODERATED SERIAL MEDIATION
     # the effect of trust on A path (83)
     process(data = d_merged, y = "vB_m_v_m_sue", x = "cond_n", 
             m =c("vB_cntrfctl", "avoid"), w = "mod", model = 83, effsize =1, total =1, stand =1, 
+            contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
+    
+    # PARALLEL MEDIATION (averaged mediators)
+    process(data = d_merged, y = "vB_m_v_m_sue", x = "cond_n", 
+            m =c("med"), model = 4, effsize =1, total =1, stand =1, 
+            contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
+    
+    # MODERATED MEDIATION (averaged mediators)
+    # the effect of intervention on A path (7)
+    process(data = d_merged, y = "vB_m_v_m_sue", x = "cond_n", 
+            m =c("med"), w = "mod", model = 7, effsize =1, total =1, stand =1, 
             contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
 }
 

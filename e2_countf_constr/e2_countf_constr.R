@@ -12,7 +12,7 @@ source("../common.R") # install packages; import common plotting functions
 ## ================================================================================================================
 
 ## read in data: 
-d <- read.csv('e3_countf_constr.csv')
+d <- read.csv('e2_countf_constr.csv')
 
 ## explore dataframe: 
 dim(d) # provide dimensions of the dataframe by row [1] and column [2]
@@ -76,6 +76,10 @@ d_merged[(dim(d_merged)[1]+1):(dim(d_merged)[1]+n_final$hdv_uncnstr), ] <- subse
 # make columns numeric
 d_merged[,1:9] <- lapply(d_merged[,1:9], as.numeric)
 
+# average Veh. B counterfactual, and Veh. B could have avoided
+d_merged$med <- (d_merged$vB_cntrfctl + d_merged$avoid) / 2
+d_merged <- d_merged %>% relocate(med, .after=avoid)
+
 # agent_n where av=1, human=2; scen_n where cnstr=1, uncnstr=2
 d_merged$agent_n <- ifelse(d_merged$agent_name=="av", 1, 2)
 d_merged$scen_n <- ifelse(d_merged$scen_name=="cnstr", 1, 2)
@@ -84,7 +88,16 @@ d_merged$scen_n <- ifelse(d_merged$scen_name=="cnstr", 1, 2)
 ##                                              DATA ANALYSIS - ANOVA              
 ## ================================================================================================================
 
-cor(d_merged[,1:6]) # check correlations between measures
+cor(d_merged[,1:7]) # check correlations between measures
+
+cor(subset(d_merged, scen_name=="cnstr")[,1:7]) # check correlations between measures
+cor(subset(d_merged, scen_name=="uncnstr")[,1:7]) # check correlations between measures
+
+## Additional check for discriminant validity
+fit.model <- ' M1 =~ vB_cntrfctl
+              M2 =~ avoid '
+fit <- cfa(fit.model, data = d_merged)
+discriminantValidity(fit)
 
 ## Liable, Manufacturer vs Manufacturer (DV)
 m_v_m_mod <- aov(vB_m_v_m_liable ~ as.factor(agent_n) * as.factor(scen_n), data = d_merged)
@@ -144,6 +157,13 @@ t.test(avoid ~ agent_name, data = d_merged[d_merged$scen_name=="uncnstr", ])
 cohen.d(d_merged[d_merged$scen_name=="cnstr", ]$avoid, d_merged[d_merged$scen_name=="cnstr", ]$agent_name)
 cohen.d(d_merged[d_merged$scen_name=="uncnstr", ]$avoid, d_merged[d_merged$scen_name=="uncnstr", ]$agent_name)
 
+# Averaged mediator (M)
+t.test(med ~ agent_name, data = d_merged[d_merged$scen_name=="cnstr", ])
+t.test(med ~ agent_name, data = d_merged[d_merged$scen_name=="uncnstr", ])
+cohen.d(d_merged[d_merged$scen_name=="cnstr", ]$med, d_merged[d_merged$scen_name=="cnstr", ]$agent_name)
+cohen.d(d_merged[d_merged$scen_name=="uncnstr", ]$med, d_merged[d_merged$scen_name=="uncnstr", ]$agent_name)
+
+
 ## ================================================================================================================
 ##                                             MEDIATION ANALYSIS              
 ## ================================================================================================================
@@ -156,15 +176,34 @@ if(mediation) {
     # test age as moderator
     summary(lm(vB_m_v_m_liable ~ agent_n*age, data=d_merged))
     
+    # test age as moderator
+    summary(lm(vB_m_v_m_liable ~ agent_n*med, data=d_merged))
+    
     # SERIAL MEDIATION
     process(data = d_merged, y = "vB_m_v_m_liable", x = "agent_n", 
             m =c("vB_cntrfctl", "avoid"), model = 6, effsize =1, total =1, stand =1, 
+            contrast =1, boot = 10000 , modelbt = 1, seed = 654322)
+     
+    # SERIAL MEDIATION (flipped)
+    process(data = d_merged, y = "vB_m_v_m_liable", x = "agent_n", 
+            m =c("avoid", "vB_cntrfctl"), model = 6, effsize =1, total =1, stand =1, 
             contrast =1, boot = 10000 , modelbt = 1, seed = 654322)
     
     # MODERATED SERIAL MEDIATION
     # the effect of scenario on center path (91)
     process(data = d_merged, y = "vB_m_v_m_liable", x = "agent_n", 
             m =c("vB_cntrfctl", "avoid"), w = "scen_n", model = 91, effsize =1, total =1, stand =1, 
+            contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
+    
+    # PARALLEL MEDIATION (averaged mediators)
+    process(data = d_merged, y = "vB_m_v_m_liable", x = "agent_n", 
+            m =c("med"), model = 4, effsize =1, total =1, stand =1, 
+            contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
+    
+    # MODERATED MEDIATION (averaged mediators)
+    # the effect of intervention on B path (14) (A path = 7)
+    process(data = d_merged, y = "vB_m_v_m_liable", x = "agent_n", 
+            m =c("avoid"), w = "scen_n", model = 14, effsize =1, total =1, stand =1, 
             contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
 }
 
@@ -187,6 +226,9 @@ p_val_R = t.test(vB_m_v_d_liable ~ agent_name, data = d_merged[d_merged$scen_nam
 p1_2 <- plot_2x2(d_merged, x=scen_name, y=vB_m_v_d_liable, fill=agent_name, p_val_L, p_val_R, 
                  title="Veh. B Manufacturer\nor Driver Liability", t_labels, fill_labels)
 
+plot_std(d_merged, x=vB_cntrfctl, y=vA_liable, p_val, 
+                 title="Veh. A Driver Liability", t_labels, sig_comparisons)
+
 figure1 <- ggarrange(p1_1, p1_2, nrow=1, ncol=2,common.legend = TRUE, legend="top", vjust = 1.0, hjust=0.5) 
 figure1 <- annotate_figure(figure1, left = text_grob("Mean Agreement", color="black", face ="plain",size=16, rot=90),
                            bottom = text_grob("Scenario Type", color="black", face ="plain",size=18)) 
@@ -201,6 +243,52 @@ dev.off()
 
 t_labels <- c("AV", "HDV")
 sig_comparisons <- c("av", "hdv")
+
+
+## Vehicle B Counterfactual (M) -- would expect higher
+p_val = t.test(vB_cntrfctl ~ agent_name, data = d_merged, paired = FALSE)$p.value
+pA <- plot_std(d_merged, x=agent_name, y=vB_cntrfctl, p_val, 
+                 title="Consider Veh. B Counterfactual", t_labels, sig_comparisons)
+pA
+
+## Avoid (M) -- would expect lower
+p_val = t.test(avoid ~ agent_name, data = d_merged, paired = FALSE)$p.value
+pB <- plot_std(d_merged, x=agent_name, y=avoid, p_val, 
+                 title="Avoid", t_labels, sig_comparisons)
+pB
+
+figure1 <- ggarrange(pA, pB, nrow=1, ncol=2,common.legend = TRUE, legend="top", vjust = 1.0, hjust=0.5) 
+figure1 <- annotate_figure(figure1, left = text_grob("Mean Agreement", color="black", face ="plain",size=16, rot=90),
+                           bottom = text_grob("Scenario Type", color="black", face ="plain",size=18)) 
+figure1
+
+
+
+t_labels <- c("Constrained", "Unconstrained")
+## Vehicle B Counterfactual (M) -- would expect higher
+p_val = t.test(vB_cntrfctl ~ agent_name, data = d_merged, paired = FALSE)$p.value
+pC <- plot_std(d_merged, x=scen_name, y=vB_cntrfctl, p_val, 
+               title="Consider Veh. B Counterfactual", t_labels, sig_comparisons)
+pC
+
+## Avoid (M) -- would expect lower
+p_val = t.test(avoid ~ agent_name, data = d_merged, paired = FALSE)$p.value
+pD <- plot_std(d_merged, x=scen_name, y=avoid, p_val, 
+               title="Avoid", t_labels, sig_comparisons)
+pD
+
+figure1 <- ggarrange(pA, pB, nrow=1, ncol=2,common.legend = TRUE, legend="top", vjust = 1.0, hjust=0.5) 
+figure1 <- annotate_figure(figure1, left = text_grob("Mean Agreement", color="black", face ="plain",size=16, rot=90),
+                           bottom = text_grob("Scenario Type", color="black", face ="plain",size=18)) 
+figure1
+
+figure2 <- ggarrange(pC, pD, nrow=1, ncol=2,common.legend = TRUE, legend="top", vjust = 1.0, hjust=0.5) 
+figure2 <- annotate_figure(figure1, left = text_grob("Mean Agreement", color="black", face ="plain",size=16, rot=90),
+                           bottom = text_grob("Scenario Type", color="black", face ="plain",size=18)) 
+figure2
+
+
+
 
 ## Liable, at-fault (DV)
 p_val = t.test(vA_liable ~ agent_name, data = d_merged, paired = FALSE)$p.value
