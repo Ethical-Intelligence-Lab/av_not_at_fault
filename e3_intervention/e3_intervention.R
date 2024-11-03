@@ -89,16 +89,102 @@ d_merged$agent_n <- ifelse(d_merged$agent_name=="av", 1, 2)
 d_merged$intv_n <- ifelse(d_merged$intv_appld=="yes", 1, 2)
 
 ## ================================================================================================================
+##                                              PLOTTING 2X2 FIGURE                 
+## ================================================================================================================
+
+t_labels <- c("No Intervention", "Intervention")
+fill_labels <- c("AV", "HDV")
+
+## Sue, Manufacturer vs Manufacturer (DV)
+p_val_L = t.test(vB_m_v_m_sue ~ agent_name, data = d_merged[d_merged$intv_appld=="no", ])$p.value
+p_val_R = t.test(vB_m_v_m_sue ~ agent_name, data = d_merged[d_merged$intv_appld=="yes", ])$p.value
+p1_1 <- plot_2x2(d_merged, x=intv_appld, y=vB_m_v_m_sue, fill=agent_name, p_val_L, p_val_R, 
+                 title="Sue Veh. B Manufacturer", t_labels, fill_labels)
+
+## Sue, Manufacturer vs Manufacturer (DV)
+p_val_L = t.test(vB_m_v_d_sue ~ agent_name, data = d_merged[d_merged$intv_appld=="no", ])$p.value
+p_val_R = t.test(vB_m_v_d_sue ~ agent_name, data = d_merged[d_merged$intv_appld=="yes", ])$p.value
+p1_2 <- plot_2x2(d_merged, x=intv_appld, y=vB_m_v_d_sue, fill=agent_name, p_val_L, p_val_R, 
+                 title="Sue Veh. B Manufacturer\nor Human Driver", t_labels, fill_labels)
+
+## Vehicle B Counterfactual (M)
+p_val_L = t.test(vB_cntrfctl ~ agent_name, data = d_merged[d_merged$intv_appld=="no", ])$p.value
+p_val_R = t.test(vB_cntrfctl ~ agent_name, data = d_merged[d_merged$intv_appld=="yes", ])$p.value
+p1_3 <- plot_2x2(d_merged, x=intv_appld, y=vB_cntrfctl, fill=agent_name, p_val_L, p_val_R, 
+                 title="Consider Veh. B Counterfactual", t_labels, fill_labels)
+p1_3
+
+## Could have done more to avoid (M)
+p_val_L = t.test(avoid ~ agent_name, data = d_merged[d_merged$intv_appld=="no", ])$p.value
+p_val_R = t.test(avoid ~ agent_name, data = d_merged[d_merged$intv_appld=="yes", ])$p.value
+p1_4 <- plot_2x2(d_merged, x=intv_appld, y=avoid, fill=agent_name, p_val_L, p_val_R, 
+                 title="Could Have Done More", t_labels, fill_labels)
+p1_4
+
+figure1 <- ggarrange(p1_1, p1_2, p1_3, p1_4, nrow=2, ncol=2,common.legend = TRUE, legend="top", vjust = 1.0, hjust=0.5) 
+figure1 <- annotate_figure(figure1, left = text_grob("Mean Agreement", color="black", face ="plain",size=16, rot=90),
+                           bottom = text_grob("Intervention Applied", color="black", face ="plain",size=18)) 
+
+png(file = "../plots/e4_intervention.png", width = 2*900, height = 2*900, res = 200)  # width and height are in inches
+plot(figure1)
+dev.off()
+
+## ================================================================================================================
+##                                              PLOTTING BY AGENT               
+## ================================================================================================================
+
+t_labels <- c("AV", "HDV")
+sig_comparisons <- c("av", "hdv")
+
+## Sue, at-fault (DV)
+p_val = t.test(vA_sue ~ agent_name, data = d_merged)$p.value
+p2_1 <- plot_std(d_merged, x=agent_name, y=vA_sue, p_val, 
+                 title="Sue Veh. A Driver", t_labels, sig_comparisons)
+
+## Liable, Manufacturer vs Manufacturer (DV)
+p_val = t.test(vB_m_v_m_sue ~ agent_name, data = d_merged)$p.value
+p2_2 <- plot_std(d_merged, x=agent_name, y=vB_m_v_m_sue, p_val, 
+                 title="Sue Veh. B Manufacturer", t_labels, sig_comparisons)
+
+## Liable, Manufacturer vs Driver (DV)
+p_val = t.test(vB_m_v_d_sue ~ agent_name, data = d_merged)$p.value
+p2_3 <- plot_std(d_merged, x=agent_name, y=vB_m_v_d_sue, p_val, 
+                 title="Sue Veh. B Manufacturer\nor Human Driver", t_labels, sig_comparisons)
+
+## Vehicle A Counterfactual (M)
+p_val = t.test(vA_cntrfctl ~ agent_name, data = d_merged)$p.value
+p2_4 <- plot_std(d_merged, x=agent_name, y=vA_cntrfctl, p_val, 
+                 title="Consider Veh. A Counterfactual", t_labels, sig_comparisons)
+
+## Vehicle B Counterfactual (M)
+p_val = t.test(vB_cntrfctl ~ agent_name, data = d_merged)$p.value
+p2_5 <- plot_std(d_merged, x=agent_name, y=vB_cntrfctl, p_val, 
+                 title="Consider Veh. B Counterfactual", t_labels, sig_comparisons)
+
+## Could have done more to avoid (M)
+p_val = t.test(avoid ~ agent_name, data = d_merged)$p.value
+p2_6 <- plot_std(d_merged, x=agent_name, y=avoid, p_val, 
+                 title="Could Have Done More", t_labels, sig_comparisons)
+
+figure2 <- ggarrange(p2_1, p2_2, p2_3, p2_4, p2_5, p2_6, nrow=2,ncol=3,common.legend = TRUE, legend="top", vjust = 1.0, hjust=0.5) 
+figure2 <- annotate_figure(figure2,left = text_grob("Mean Agreement", color="black", face ="plain",size=16, rot=90),
+                           bottom = text_grob("Vehicle Type", color="black", face ="plain",size=16)) 
+
+png(file = "../plots/e4_plot.png", width = 2*900, height = 2*700, res = 200)  # width and height are in inches
+plot(figure2)
+dev.off()
+
+## ================================================================================================================
 ##                                         DATA ANALYSIS - ANOVA              
 ## ================================================================================================================
 
 cor(d_merged[,1:7]) # check correlations between measures
 
+cor(subset(d_merged, intv_appld=="yes")[,1:7]) # check correlations between measures
+cor(subset(d_merged, intv_appld=="no")[,1:7]) # check correlations between measures
+
 ## Additional check for discriminant validity
-fit.model <- ' M1 =~ vB_cntrfctl
-              M2 =~ avoid '
-fit <- cfa(fit.model, data = d_merged)
-discriminantValidity(fit)
+cor.test(d_merged$vB_cntrfctl, d_merged$avoid)
 
 ## Sue, Manufacturer vs Manufacturer (DV)
 m_v_m_mod <- aov(vB_m_v_m_sue ~ as.factor(agent_n) * as.factor(intv_n), data = d_merged)
@@ -186,19 +272,26 @@ if(mediation) {
     summary(lm(vB_m_v_m_sue ~ agent_n*age, data=d_merged))
     
     # SERIAL MEDIATION
+    # process(data = d_merged, y = "vB_m_v_m_sue", x = "agent_n",
+    #         m =c("vB_cntrfctl", "avoid"), model = 6, effsize =1, total =1, stand =1,
+    #         contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
+
+    # SIMPLE MEDIATION
     process(data = d_merged, y = "vB_m_v_m_sue", x = "agent_n",
-            m =c("vB_cntrfctl", "avoid"), model = 6, effsize =1, total =1, stand =1,
+            m =c("vB_cntrfctl"), model = 4, effsize =1, total =1, stand =1,
             contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
     
-    # SERIAL MEDIATION (flipped)
-    process(data = d_merged, y = "vB_m_v_m_sue", x = "agent_n", 
-            m =c("avoid", "vB_cntrfctl"), model = 6, effsize =1, total =1, stand =1, 
-            contrast =1, boot = 10000 , modelbt = 1, seed = 654322)
+    # MODERATED MEDIATION
+    # the effect of intervention on A path (7)
+    process(data = d_merged, y = "vB_m_v_m_sue", x = "agent_n",
+            m =c("vB_cntrfctl"), w = "intv_n", model = 7, effsize =1, total =1, stand =1,
+            contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
     
     # MODERATED SERIAL MEDIATION
+    #flipped mediators
     # the effect of intervention on A path (83)
     process(data = d_merged, y = "vB_m_v_m_sue", x = "agent_n",
-            m =c("vB_cntrfctl", "avoid"), w = "intv_n", model = 83, effsize =1, total =1, stand =1,
+            m =c("avoid", "vB_cntrfctl"), w = "intv_n", model = 83, effsize =1, total =1, stand =1,
             contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
     
     # MODERATED SERIAL MEDIATION
@@ -207,101 +300,13 @@ if(mediation) {
             m =c("vB_cntrfctl", "avoid"), w = "intv_n", model = 91, effsize =1, total =1, stand =1,
             contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
     
-    # PARALLEL MEDIATION (averaged mediators)
-    process(data = d_merged, y = "vB_m_v_m_sue", x = "agent_n", 
-            m =c("med"), model = 4, effsize =1, total =1, stand =1, 
-            contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
-    
     # MODERATED MEDIATION (averaged mediators)
     # the effect of intervention on A path (7)
     process(data = d_merged, y = "vB_m_v_m_sue", x = "agent_n", 
             m =c("vB_cntrfctl"), w = "intv_n", model = 7, effsize =1, total =1, stand =1, 
             contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
+    
 }
-
-## ================================================================================================================
-##                                              PLOTTING 2X2 FIGURE                 
-## ================================================================================================================
-
-t_labels <- c("No Intervention", "Intervention")
-fill_labels <- c("AV", "HDV")
-
-## Sue, Manufacturer vs Manufacturer (DV)
-p_val_L = t.test(vB_m_v_m_sue ~ agent_name, data = d_merged[d_merged$intv_appld=="no", ])$p.value
-p_val_R = t.test(vB_m_v_m_sue ~ agent_name, data = d_merged[d_merged$intv_appld=="yes", ])$p.value
-p1_1 <- plot_2x2(d_merged, x=intv_appld, y=vB_m_v_m_sue, fill=agent_name, p_val_L, p_val_R, 
-                 title="Sue Veh. B Manufacturer", t_labels, fill_labels)
-
-## Sue, Manufacturer vs Manufacturer (DV)
-p_val_L = t.test(vB_m_v_d_sue ~ agent_name, data = d_merged[d_merged$intv_appld=="no", ])$p.value
-p_val_R = t.test(vB_m_v_d_sue ~ agent_name, data = d_merged[d_merged$intv_appld=="yes", ])$p.value
-p1_2 <- plot_2x2(d_merged, x=intv_appld, y=vB_m_v_d_sue, fill=agent_name, p_val_L, p_val_R, 
-                 title="Sue Veh. B Manufacturer\nor Human Driver", t_labels, fill_labels)
-
-## Vehicle B Counterfactual (M)
-p_val_L = t.test(vB_cntrfctl ~ agent_name, data = d_merged[d_merged$intv_appld=="no", ])$p.value
-p_val_R = t.test(vB_cntrfctl ~ agent_name, data = d_merged[d_merged$intv_appld=="yes", ])$p.value
-p1_3 <- plot_2x2(d_merged, x=intv_appld, y=vB_cntrfctl, fill=agent_name, p_val_L, p_val_R, 
-                 title="Consider Veh. B Counterfactual", t_labels, fill_labels)
-
-## Could have done more to avoid (M)
-p_val_L = t.test(avoid ~ agent_name, data = d_merged[d_merged$intv_appld=="no", ])$p.value
-p_val_R = t.test(avoid ~ agent_name, data = d_merged[d_merged$intv_appld=="yes", ])$p.value
-p1_4 <- plot_2x2(d_merged, x=intv_appld, y=avoid, fill=agent_name, p_val_L, p_val_R, 
-                 title="Could Have Done More", t_labels, fill_labels)
-
-figure1 <- ggarrange(p1_1, p1_2, p1_3, p1_4, nrow=2, ncol=2,common.legend = TRUE, legend="top", vjust = 1.0, hjust=0.5) 
-figure1 <- annotate_figure(figure1, left = text_grob("Mean Agreement", color="black", face ="plain",size=16, rot=90),
-                           bottom = text_grob("Intervention Applied", color="black", face ="plain",size=18)) 
-
-png(file = "../plots/e4_intervention.png", width = 2*900, height = 2*900, res = 200)  # width and height are in inches
-plot(figure1)
-dev.off()
-
-## ================================================================================================================
-##                                              PLOTTING BY AGENT               
-## ================================================================================================================
-
-t_labels <- c("AV", "HDV")
-sig_comparisons <- c("av", "hdv")
-
-## Sue, at-fault (DV)
-p_val = t.test(vA_sue ~ agent_name, data = d_merged)$p.value
-p2_1 <- plot_std(d_merged, x=agent_name, y=vA_sue, p_val, 
-                 title="Sue Veh. A Driver", t_labels, sig_comparisons)
-
-## Liable, Manufacturer vs Manufacturer (DV)
-p_val = t.test(vB_m_v_m_sue ~ agent_name, data = d_merged)$p.value
-p2_2 <- plot_std(d_merged, x=agent_name, y=vB_m_v_m_sue, p_val, 
-                 title="Sue Veh. B Manufacturer", t_labels, sig_comparisons)
-
-## Liable, Manufacturer vs Driver (DV)
-p_val = t.test(vB_m_v_d_sue ~ agent_name, data = d_merged)$p.value
-p2_3 <- plot_std(d_merged, x=agent_name, y=vB_m_v_d_sue, p_val, 
-                 title="Sue Veh. B Manufacturer\nor Human Driver", t_labels, sig_comparisons)
-
-## Vehicle A Counterfactual (M)
-p_val = t.test(vA_cntrfctl ~ agent_name, data = d_merged)$p.value
-p2_4 <- plot_std(d_merged, x=agent_name, y=vA_cntrfctl, p_val, 
-                 title="Consider Veh. A Counterfactual", t_labels, sig_comparisons)
-
-## Vehicle B Counterfactual (M)
-p_val = t.test(vB_cntrfctl ~ agent_name, data = d_merged)$p.value
-p2_5 <- plot_std(d_merged, x=agent_name, y=vB_cntrfctl, p_val, 
-                 title="Consider Veh. B Counterfactual", t_labels, sig_comparisons)
-
-## Could have done more to avoid (M)
-p_val = t.test(avoid ~ agent_name, data = d_merged)$p.value
-p2_6 <- plot_std(d_merged, x=agent_name, y=avoid, p_val, 
-                 title="Could Have Done More", t_labels, sig_comparisons)
-
-figure2 <- ggarrange(p2_1, p2_2, p2_3, p2_4, p2_5, p2_6, nrow=2,ncol=3,common.legend = TRUE, legend="top", vjust = 1.0, hjust=0.5) 
-figure2 <- annotate_figure(figure2,left = text_grob("Mean Agreement", color="black", face ="plain",size=16, rot=90),
-                           bottom = text_grob("Vehicle Type", color="black", face ="plain",size=16)) 
-
-png(file = "../plots/e4_plot.png", width = 2*900, height = 2*700, res = 200)  # width and height are in inches
-plot(figure2)
-dev.off()
 
 ## ================================================================================================================
 ##                                                  END OF ANALYSIS                 
