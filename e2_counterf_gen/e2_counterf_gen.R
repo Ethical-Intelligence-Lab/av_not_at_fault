@@ -107,14 +107,44 @@ htmt(countf.model, sample.cov = countf.cov, htmt2 = FALSE)
 ## ================================================================================================================
 
 fill_labels <- c("AV", "HDV")
+sig_comparisons <- c("av", "hdv")
 d$code <- d$coder_1
+
+#basic liability effect
+p_val = t.test(vB_liability ~ agent_cond, data = d)$p.value
+p0_1 <- plot_std(d, x=agent_cond, y=vB_liability, p_val, 
+                 title="Firm Liability", fill_labels, sig_comparisons)
+
+#basic counterfactual effect
+p_val = t.test(counterf_med ~ agent_cond, data = d)$p.value
+p0_2 <- plot_std(d, x=agent_cond, y=counterf_med, p_val, 
+                 title="Counterfactual Relevance", fill_labels, sig_comparisons)
+
+## Understanding why counterfactual means are flat
+p_val_L = t.test(counterf_med ~ code, data = d[d$agent_cond == "av", ])$p.value
+p_val_R = t.test(counterf_med ~ code, data = d[d$agent_cond == "hdv", ])$p.value
+
+code_labels <- c("1", "2")
+
+p0_3 <- plot_2x2(d, x=agent_cond, y=counterf_med, fill=as.factor(code), p_val_L, p_val_R, 
+                 title="Counterfactual Relevance", c("AV", "HDV"), code_labels)
+p0_3
+
+figure0 <- ggarrange(p0_1, p0_2, p0_3, nrow=1,ncol=3,common.legend = TRUE, legend="top", vjust = 1.0, hjust=0.5) 
+figure0 <- annotate_figure(figure2,left = text_grob("Mean Agreement", color="black", face ="plain",size=16, rot=90),
+                           bottom = text_grob("Vehicle Type", color="black", face ="plain",size=16)) 
+figure0
+
+
+
+#---
 
 ## 2x2 liability based on coutnerfactual codes
 p_val_L = t.test(vB_liability ~ agent_cond, data = d[d$code == 1, ])$p.value
 p_val_R = t.test(vB_liability ~ agent_cond, data = d[d$code == 2, ])$p.value
 
 p1_1 <- plot_2x2(d, x=code, y=vB_liability, fill=agent_cond, p_val_L, p_val_R, 
-                 title="Liability", c("No", "Yes"), fill_labels)
+                 title="Firm Liability", c("No", "Yes"), fill_labels)
 p1_1
 
 
@@ -187,12 +217,11 @@ aggregate(counterf_med ~ agent_cond, data = d, FUN = mean)
 aggregate(counterf_med ~ code, data = d, FUN = mean)
 
 #t-tests
-t.test(counterf_med ~ agent_cond, data = d, subset = code == 2)
-cohen.d(d$counterf_med[d$code==2], d$agent_cond[d$code==2])
+t.test(counterf_med ~ code, data = d, subset = agent_cond == "hdv")
+cohen.d(d$counterf_med[d$agent_cond=="hdv"], d$code[d$agent_cond=="hdv"])
 
-t.test(counterf_med ~ agent_cond, data = d, subset = code == 1)
-cohen.d(d$counterf_med[d$code==1], d$agent_cond[d$code==1])
-
+t.test(counterf_med ~ code, data = d, subset = agent_cond == "av")
+cohen.d(d$counterf_med[d$agent_cond=="av"], d$code[d$agent_cond=="av"])
 
 ## Coding of exploratory analysis
 table(d$category_coder1)
@@ -217,6 +246,11 @@ if(mediation) {
   
   # test age as moderator
   summary(lm(vB_liability ~ agent_n*age, data=d))
+  
+  # Simple mediation
+  process(data = d, y = "vB_liability", x = "agent_n",
+          m =c("counterf_med"), model = 4, effsize =1, total =1, stand =1,
+          contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
   
   # MODERATED MEDIATION
   # the effect of intervention on A path (7)
