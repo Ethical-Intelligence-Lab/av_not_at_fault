@@ -236,31 +236,6 @@ if(mediation) {
             m =c("mod"), model = 4, effsize =1, total =1, stand =1,
             contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
     
-    
-    # # SERIAL MEDIATION
-    # process(data = d_merged, y = "vB_m_v_m_sue", x = "cond_n", 
-    #         m =c("vB_cntrfctl", "avoid"), model = 6, effsize =1, total =1, stand =1, 
-    #         contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
-
-    # # MODERATED SERIAL MEDIATION
-    # # the effect of trust on A path (83)
-    # process(data = d_merged, y = "vB_m_v_m_sue", x = "cond_n", 
-    #         m =c("vB_cntrfctl", "avoid"), w = "mod", model = 83, effsize =1, total =1, stand =1, 
-    #         contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
-    
-    # MODERATED SERIAL MEDIATION
-    # flipped mediators
-    # the effect of trust on A path (83)
-    # process(data = d_merged, y = "vB_m_v_m_sue", x = "cond_n", 
-    #         m =c("avoid", "vB_cntrfctl"), w = "mod", model = 83, effsize =1, total =1, stand =1, 
-    #         contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
-    
-    # # MODERATED MEDIATION (averaged mediators)
-    # # the effect of intervention on A path (7)
-    # process(data = d_merged, y = "vB_m_v_m_sue", x = "cond_n", 
-    #         m =c("med"), w = "mod", model = 7, effsize =1, total =1, stand =1, 
-    #         contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
-    
 }
 
 ## ================================================================================================================

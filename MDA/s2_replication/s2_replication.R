@@ -13,16 +13,12 @@ source("../../common.R") # install packages; import common plotting functions
 
 ## read in data: 
 d <- read.csv('s2_replication.csv')
-
-## explore dataframe: 
-dim(d) # will provide dimensions of the dataframe by row [1] and column [2]
-colnames(d) # will provide all column names
-summary(d)
+dim(d) 
 
 ## perform attention exclusions: 
 # this will remove responses from the dataframe that failed attention checks (i.e., "1" or "2")
 d <- subset(d, (d$att1 == 2 & d$att2 == 2))
-dim(d) # number of participants should decrease after attention exclusions
+dim(d) 
 
 ## new column to label agent (av/hdv) condition
 d$cond <- ifelse(d$FL_4_DO == "FL_39", "av", "hdv") #if FL_40 -> HDV
@@ -38,15 +34,15 @@ d_clean <- subset(d_clean, !(cond == "av" & comp1 != 1)) # remove comp check 1 f
 d_clean <- subset(d_clean, !(cond == "hdv" & comp1 != "")) # remove comp check 1 fails for hdv
 
 ## get number of participants AFTER exclusions: 
-n_final_all <- dim(d_clean)[1]
+n_final_all <- dim(d_clean)[1]; n_final_all
 percent_excl_all <- (n_orig_all - n_final_all)/n_orig_all
 n_excl_all <- n_orig_all - n_final_all
 n_final <- as.list(table(d_clean$cond))
 percent_excl <- as.list((table(d$cond) - table(d_clean$cond))/table(d$cond))
 
 ## get mean age and gender:
-mean_age = mean(as.numeric(d$age), na.rm = TRUE) # removing NAs from the dataframe before computing mean 
-gender_f = table(d$gender)[2]/sum(table(d$gender))
+mean_age = mean(as.numeric(d$age), na.rm = TRUE); mean_age
+gender_f = table(d$gender)[2]/sum(table(d$gender)); gender_f
 
 ## ================================================================================================================
 ##                                                    SUBSETTING                 
@@ -130,7 +126,7 @@ t.test(countf ~ trust_level_n, data = d_merged[d_merged$cond_name=="hdv", ])
 ##                                             MEDIATION ANALYSIS              
 ## ================================================================================================================
 
-mediation <- FALSE # change to true if you want to run this code
+mediation <- FALSE 
 
 if(mediation) {
   
@@ -144,18 +140,11 @@ if(mediation) {
           m =c("countf"), model = 4, effsize =1, total =1, stand =1, 
           contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
   
-  # MODERATED SERIAL MEDIATION
+  # MODERATED MEDIATION
   # the effect of trust on A path (7)
   process(data = d_merged, y = "vB_sue", x = "cond_n", 
           m =c("countf"), w = "mod", model = 7, effsize =1, total =1, stand =1, 
           contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
-  
-  # SERIAL MEDIATION
-  # process(data = d_merged, y = "vB_sue", x = "cond_n", 
-  #         m =c("countf", "avoid"), model = 6, effsize =1, total =1, stand =1, 
-  #         contrast =1, boot = 10000 , modelbt = 1, seed = 654321)
-  # 
-
   
   # PARALLEL MEDIATION
   # investigate alternative mediations: (i) trust; (ii) av expectations

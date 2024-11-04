@@ -87,7 +87,6 @@ cor(d$vB_cntrfctl_1, d$vB_cntrfctl_2)
 d$counterf_med <- (d$vB_cntrfctl_1 + d$vB_cntrfctl_2)/2 ###
 
 #discriminant validity
-
 library(lavaan)
 library(semTools)
 
@@ -131,11 +130,9 @@ p0_3 <- plot_2x2(d, x=agent_cond, y=counterf_med, fill=as.factor(code), p_val_L,
 p0_3
 
 figure0 <- ggarrange(p0_1, p0_2, p0_3, nrow=1,ncol=3,common.legend = TRUE, legend="top", vjust = 1.0, hjust=0.5) 
-figure0 <- annotate_figure(figure2,left = text_grob("Mean Agreement", color="black", face ="plain",size=16, rot=90),
+figure0 <- annotate_figure(figure0,left = text_grob("Mean Agreement", color="black", face ="plain",size=16, rot=90),
                            bottom = text_grob("Vehicle Type", color="black", face ="plain",size=16)) 
 figure0
-
-
 
 #---
 
@@ -163,7 +160,6 @@ figure2 <- annotate_figure(figure2,left = text_grob("Mean Agreement", color="bla
 #png(file = "../plots/e2_plot.png", width = 2*900, height = 2*700, res = 200)  # width and height are in inches
 plot(figure2)
 #dev.off()
-
 
 ## ================================================================================================================
 ##                                         DATA ANALYSIS - ANOVA              
@@ -222,6 +218,7 @@ cohen.d(d$counterf_med[d$agent_cond=="hdv"], d$code[d$agent_cond=="hdv"])
 
 t.test(counterf_med ~ code, data = d, subset = agent_cond == "av")
 cohen.d(d$counterf_med[d$agent_cond=="av"], d$code[d$agent_cond=="av"])
+
 
 ## Coding of exploratory analysis
 table(d$category_coder1)
