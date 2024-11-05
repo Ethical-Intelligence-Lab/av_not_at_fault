@@ -12,7 +12,7 @@ source("../common.R") # install packages; import common plotting functions
 ## ================================================================================================================
 
 ## read in data: 
-d_raw <- read.csv('data.csv')
+d_raw <- read.csv('e2_counterf_gen.csv')
 
 ## explore dataframe: 
 dim(d_raw) 
