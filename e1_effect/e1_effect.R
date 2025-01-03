@@ -131,7 +131,8 @@ figure2 <- ggarrange(p2_1, p2_2, p2_3, p2_4, p2_5, p2_6, nrow=2,ncol=3,common.le
 figure2 <- annotate_figure(figure2,left = text_grob("Mean Agreement", color="black", face ="plain",size=16, rot=90),
                            bottom = text_grob("Vehicle Type", color="black", face ="plain",size=16)) 
 
-png(file = "../plots/e2_plot.png", width = 2*900, height = 2*700, res = 200)  # width and height are in inches
+# Set up the PDF output device
+pdf(file = "../plots/e1_plot.pdf", width = 9, height = 6)  # Adjust width and height as needed
 plot(figure2)
 dev.off()
 
@@ -150,7 +151,8 @@ p1_0 <- plot_2x2(d_merged, x=cond_name, y=vB_cntrfctl, fill=trust_level, p_val_L
 p1_0 <- p1_0 + xlab ("Vehicle Type") + ylab ("Mean Agreement")
 p1_0
 
-png(file = "../plots/e2_trust.png", width = 2*900, height = 2*500, res = 200)  # width and height are in inches
+# Set up the PDF output device
+pdf(file = "../plots/e2_plot.pdf", width = 9, height = 6)  # Adjust width and height as needed
 plot(p1_0)
 dev.off()
 
